@@ -12,8 +12,9 @@ from .config import load_config
 from .models import JSONRPCError
 from .security import create_security_manager
 
-from a2a.server.request_handlers import DefaultRequestHandler
-from a2a.server.tasks import InMemoryPushNotifier, InMemoryTaskStore
+from a2a.server.tasks import InMemoryTaskStore
+from .push_notifier import EnhancedPushNotifier, RedisPushNotifier
+from .custom_request_handler import CustomRequestHandler
 
 # Optional imports; fall back to None if the module isn't present
 try:
@@ -63,16 +64,19 @@ async def lifespan(app: FastAPI):
         # Continue without security for now, but log the error
         app.state.security_manager = None
 
-    # — Initialize services if available & enabled —
+    # Initialize services if available & enabled
     svc_cfg = config.get("services", {})
+    
     if initialize_services_from_config and svc_cfg.get("enabled", True):
         try:
             await initialize_services_from_config(config)
             logger.info("Services initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize services: {e}")
+    else:
+        logger.warning("Services initialization skipped")
 
-    # — Load registry skills if available —
+    # Load registry skills if available
     try:
         from .registry_skill_loader import load_all_registry_skills
         load_all_registry_skills()
@@ -82,7 +86,7 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Failed to load registry skills: {e}")
 
-    # — Register AI functions if available & requested —
+    # Register AI functions if available & requested
     routing_cfg = config.get("routing", {})
     default_mode = routing_cfg.get("default_mode", "ai")
     logger.info(f"Routing default mode set to: {default_mode}")
@@ -101,7 +105,7 @@ async def lifespan(app: FastAPI):
     elif not needs_ai:
         logger.info("No AI routing skills found - skipping AI function registration")
 
-    # — Initialize state management if configured —
+    # Initialize state management if configured
     state_cfg = config.get("state", {})
     if state_cfg:
         try:
@@ -129,7 +133,7 @@ async def lifespan(app: FastAPI):
             # Continue without state management
             app.state.context_manager = None
 
-    # — Initialize MCP integration if available & enabled —
+    # Initialize MCP integration if available & enabled
     mcp_cfg = config.get("mcp", {})
     if initialize_mcp_integration and mcp_cfg.get("enabled", False):
         try:
@@ -162,6 +166,59 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Failed to initialize MCP integration: {e}")
 
+    # Initialize push notifier with Redis if configured
+    push_config = config.get('push_notifications', {})
+    if push_config.get('backend') == 'redis' and push_config.get('enabled', True):
+        try:
+            from .services import get_services
+            services = get_services()
+            
+            # Find the cache service name from config
+            cache_service_name = None
+            services_config = config.get('services', {})
+            for service_name, service_config in services_config.items():
+                if service_config.get('type') == 'cache':
+                    cache_service_name = service_name
+                    break
+            
+            if cache_service_name:
+                redis_service = services.get_cache(cache_service_name)
+            else:
+                redis_service = None
+                logger.warning("No cache service found in configuration")
+            
+            # Create Redis client from service URL
+            if redis_service and hasattr(redis_service, 'url'):
+                import redis.asyncio as redis
+                redis_url = redis_service.url
+                redis_client = redis.from_url(redis_url)
+            else:
+                redis_client = None
+                logger.warning("Cannot create Redis client - no URL available")
+            
+            if redis_client:
+                # Create new Redis push notifier
+                client = httpx.AsyncClient()
+                redis_push_notifier = RedisPushNotifier(
+                    client=client,
+                    redis_client=redis_client,
+                    key_prefix=push_config.get('key_prefix', 'agentup:push:'),
+                    validate_urls=push_config.get('validate_urls', True)
+                )
+                
+                # Update the request handler to use Redis push notifier
+                from .api import get_request_handler
+                handler = get_request_handler()
+                handler._push_notifier = redis_push_notifier
+                
+                logger.info("Updated to Redis-backed push notifier")
+            else:
+                logger.warning("Redis service available but no client found, using memory push notifier")
+                
+        except Exception as e:
+            logger.error(f"Failed to initialize Redis push notifier: {e}")
+            logger.info("Using memory push notifier")
+
     yield
 
     # Shutdown hooks
@@ -189,12 +246,14 @@ def create_app() -> FastAPI:
     """Create and configure the FastAPI application."""
     agent_card = create_agent_card()
 
-    # Create and register the request handler
+    # Create basic request handler with memory push notifier
     client = httpx.AsyncClient()
-    request_handler = DefaultRequestHandler(
+    push_notifier = EnhancedPushNotifier(client=client)
+    
+    request_handler = CustomRequestHandler(
         agent_executor=AgentExecutorImpl(agent=create_agent_card()),
         task_store=InMemoryTaskStore(),
-        push_notifier=InMemoryPushNotifier(client),
+        push_notifier=push_notifier,
     )
     set_request_handler_instance(request_handler)
 

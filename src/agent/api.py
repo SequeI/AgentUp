@@ -1,20 +1,10 @@
+import logging
 from datetime import datetime
 from typing import Any, Dict, AsyncGenerator, Union
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from .config import load_config
-from .models import (
-    AgentCapabilities,
-    AgentCard,
-    AgentExtension,
-    AgentSkill,
-    APIKeySecurityScheme,
-    HTTPAuthSecurityScheme,
-    JSONRPCError,
-)
-from .security import protected
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.request_handlers.jsonrpc_handler import JSONRPCHandler
 from a2a.types import (
@@ -29,13 +19,34 @@ from a2a.types import (
     InternalError,
 )
 
+from .config import load_config
+from .models import (
+    AgentCapabilities,
+    AgentCard,
+    AgentExtension,
+    AgentSkill,
+    APIKeySecurityScheme,
+    HTTPAuthSecurityScheme,
+    JSONRPCError,
+)
+from .push_types import (
+    ListTaskPushNotificationConfigRequest,
+    ListTaskPushNotificationConfigResponse,
+    DeleteTaskPushNotificationConfigRequest,
+    DeleteTaskPushNotificationConfigResponse,
+)
+from .security import protected
+
+# Setup logger
+logger = logging.getLogger(__name__)
+
 # Create router
 router = APIRouter()
 
 # Load configuration
 config = load_config()
 
-# Task storage (in production, use persistent storage)
+# Task storage
 task_storage: Dict[str, Dict[str, Any]] = {}
 
 # Request handler instance management
@@ -398,50 +409,87 @@ async def jsonrpc_endpoint(
             )
 
         elif method == "tasks/pushNotificationConfig/get":
-            # Non-streaming method
-            rpc_request = GetTaskPushNotificationConfigRequest(
-                jsonrpc="2.0",
-                id=request_id,
-                method=method,
-                params=params
-            )
-            response = await jsonrpc_handler.get_push_notification(rpc_request)
-            return JSONResponse(
-                status_code=200,
-                content=response.model_dump(by_alias=True)
-            )
+            # Get push notification configuration for a task
+            try:
+                rpc_request = GetTaskPushNotificationConfigRequest(
+                    jsonrpc="2.0",
+                    id=request_id,
+                    method=method,
+                    params=params
+                )
+                response = await handle_get_push_notification_config(rpc_request)
+                return JSONResponse(
+                    status_code=200,
+                    content=response.model_dump(by_alias=True)
+                )
+            except Exception as e:
+                logger.error(f"Error in get push notification config: {e}")
+                error_response = JSONRPCErrorResponse(
+                    id=request_id,
+                    error=InternalError(message=str(e))
+                )
+                return JSONResponse(
+                    status_code=200,
+                    content=error_response.model_dump(by_alias=True)
+                )
 
         elif method == "tasks/pushNotificationConfig/list":
-            # Non-streaming method - need to handle this separately as it's not in JSONRPCHandler
-            # For now, return unsupported operation
-            return JSONResponse(
-                status_code=200,
-                content={
-                    "jsonrpc": "2.0",
-                    "error": {
-                        "code": -32601,
-                        "message": "Method not found",
-                        "data": "tasks/pushNotificationConfig/list is not yet implemented"
-                    },
-                    "id": request_id
-                }
-            )
+            # List push notification configurations for a task
+            try:
+                rpc_request = ListTaskPushNotificationConfigRequest(
+                    jsonrpc="2.0",
+                    id=request_id,
+                    method=method,
+                    params=params
+                )
+                response = await handle_list_push_notification_configs(rpc_request)
+                return JSONResponse(
+                    status_code=200,
+                    content=response.model_dump(by_alias=True)
+                )
+            except Exception as e:
+                logger.error(f"Error handling list push notification configs: {e}")
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "jsonrpc": "2.0",
+                        "error": {
+                            "code": -32603,
+                            "message": "Internal error",
+                            "data": str(e)
+                        },
+                        "id": request_id
+                    }
+                )
 
         elif method == "tasks/pushNotificationConfig/delete":
-            # Non-streaming method - need to handle this separately as it's not in JSONRPCHandler
-            # For now, return unsupported operation
-            return JSONResponse(
-                status_code=200,
-                content={
-                    "jsonrpc": "2.0",
-                    "error": {
-                        "code": -32601,
-                        "message": "Method not found",
-                        "data": "tasks/pushNotificationConfig/delete is not yet implemented"
-                    },
-                    "id": request_id
-                }
-            )
+            # Delete push notification configuration for a task
+            try:
+                rpc_request = DeleteTaskPushNotificationConfigRequest(
+                    jsonrpc="2.0",
+                    id=request_id,
+                    method=method,
+                    params=params
+                )
+                response = await handle_delete_push_notification_config(rpc_request)
+                return JSONResponse(
+                    status_code=200,
+                    content=response.model_dump(by_alias=True)
+                )
+            except Exception as e:
+                logger.error(f"Error handling delete push notification config: {e}")
+                return JSONResponse(
+                    status_code=200,
+                    content={
+                        "jsonrpc": "2.0",
+                        "error": {
+                            "code": -32603,
+                            "message": "Internal error",
+                            "data": str(e)
+                        },
+                        "id": request_id
+                    }
+                )
 
         else:
             # Method not found
@@ -487,5 +535,129 @@ async def jsonrpc_error_handler(request: Request, exc: JSONRPCError):
         }
     )
 
+# Handler functions for new push notification methods
+async def handle_get_push_notification_config(request: GetTaskPushNotificationConfigRequest):
+    """
+    Handle getting push notification configuration for a task.
+    
+    Args:
+        request: Get push notification config request
+        
+    Returns:
+        Push notification configuration or None
+    """
+    try:
+        # Get the request handler instance
+        handler = get_request_handler()
+        if not handler or not hasattr(handler, '_push_notifier'):
+            raise ValueError("Push notifier not available")
+        
+        # Get configuration using the enhanced push notifier
+        config = await handler._push_notifier.get_info(request.params.id)
+        
+        # Create response - handle None result properly
+        from a2a.types import GetTaskPushNotificationConfigResponse
+        
+        if config is None:
+            return GetTaskPushNotificationConfigResponse(
+                jsonrpc="2.0",
+                id=request.id,
+                result=None
+            )
+        else:
+            return GetTaskPushNotificationConfigResponse(
+                jsonrpc="2.0",
+                id=request.id,
+                result=config
+            )
+        
+    except Exception as e:
+        logger.error(f"Error getting push notification config: {e}")
+        raise
+
+
+async def handle_list_push_notification_configs(request: ListTaskPushNotificationConfigRequest) -> ListTaskPushNotificationConfigResponse:
+    """
+    Handle listing push notification configurations for a task.
+    
+    Args:
+        request: List push notification config request
+        
+    Returns:
+        List of push notification configurations
+    """
+    try:
+        # Get the request handler instance
+        handler = get_request_handler()
+        if not handler or not hasattr(handler, '_push_notifier'):
+            raise ValueError("Push notifier not available")
+        
+        # List configurations using the enhanced push notifier
+        configs = await handler._push_notifier.list_info(request.params.id)
+        
+        return ListTaskPushNotificationConfigResponse(
+            jsonrpc="2.0",
+            id=request.id,
+            result=configs
+        )
+        
+    except Exception as e:
+        logger.error(f"Error listing push notification configs: {e}")
+        raise
+
+
+async def handle_delete_push_notification_config(request: DeleteTaskPushNotificationConfigRequest) -> DeleteTaskPushNotificationConfigResponse:
+    """
+    Handle deleting a push notification configuration.
+    
+    Args:
+        request: Delete push notification config request
+        
+    Returns:
+        Success response
+    """
+    try:
+        # Get the request handler instance  
+        handler = get_request_handler()
+        if not handler or not hasattr(handler, '_push_notifier'):
+            raise ValueError("Push notifier not available")
+        
+        # Delete configuration using the enhanced push notifier
+        success = await handler._push_notifier.delete_info(
+            request.params.id, 
+            request.params.pushNotificationConfigId
+        )
+        
+        if not success:
+            # Return JSON-RPC error for not found
+            from .push_types import JSONRPCErrorResponse
+            return JSONRPCErrorResponse(
+                jsonrpc="2.0",
+                id=request.id,
+                error=JSONRPCError(
+                    code=-32001,  # TaskNotFoundError
+                    message="Push notification configuration not found",
+                    data=f"No configuration found with ID {request.params.pushNotificationConfigId} for task {request.params.id}"
+                )
+            )
+        
+        return DeleteTaskPushNotificationConfigResponse(
+            jsonrpc="2.0",
+            id=request.id,
+            result=None
+        )
+        
+    except Exception as e:
+        logger.error(f"Error deleting push notification config: {e}")
+        raise
+
+
 # Export router and handlers
-__all__ = ['router', 'jsonrpc_error_handler', 'set_request_handler_instance', 'get_request_handler']
+__all__ = [
+    'router', 
+    'jsonrpc_error_handler', 
+    'set_request_handler_instance', 
+    'get_request_handler',
+    'handle_list_push_notification_configs',
+    'handle_delete_push_notification_config'
+]

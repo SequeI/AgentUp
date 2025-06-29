@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Dict, Any, Optional, Callable
 import yaml
 
-from a2a.types import Task
 
 logger = logging.getLogger(__name__)
 

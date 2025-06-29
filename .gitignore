@@ -52,15 +52,5 @@ ehthumbs.db
 Thumbs.db
 
 # AgentUp
-test_create/
-test_output/
-test-create/
-final-test/
 agent_config.yaml
-
-# Template rendering test output
-rendered/
-rendered-*/
-*_rendered/
-custom-render/
-test-render/
+dump.rdb

@@ -46,9 +46,11 @@ middleware:
   - name: timed
     params: {}
 
-# Push notifications
+# Push notifications configuration
 push_notifications:
   enabled: true
+  backend: memory             # Simple memory backend for minimal template
+  validate_urls: false        # Disable validation for minimal setup
 
 # Cache management - Not needed for minimal template (no external APIs)
 # Add cache configuration if you integrate external services
