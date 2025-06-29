@@ -104,6 +104,12 @@ services:
     config:
       api_key: ${OPENAI_API_KEY}
       model: gpt-4o-mini
+  redis:
+    type: cache
+    config:
+      url: '${REDIS_URL:redis://localhost:6379}'
+      db: 1                    # Use DB 1 for cache
+      max_connections: 10
 
 # Model Context Protocol configuration - Demo setup
 mcp:
@@ -150,7 +156,16 @@ middleware:
 push_notifications:
   enabled: true
 
+# Cache management
+cache:
+  backend: redis
+  default_ttl: 900            # 15 minutes for demo
+  key_prefix: "demo:cache:"
+  enabled: true
+
 # State management
 state:
-  backend: memory
+  backend: redis
+  url: '${REDIS_URL:redis://localhost:6379}'
+  key_prefix: "demo:state:"
   ttl: 3600  # 1 hour

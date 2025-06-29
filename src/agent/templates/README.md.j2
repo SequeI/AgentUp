@@ -10,17 +10,11 @@
    ```
 
 2. Configure your agent:
-   - Copy `.env.example` to `.env` (if using services)
    - Edit `agent_config.yaml` to customize skills
 
 3. Start the development server:
    ```bash
    uv run uvicorn src.agent.main:app --reload --port 8000
-   ```
-
-4. Test your agent:
-   ```bash
-   uv run python example_client.py
    ```
 
 ## A2A Compliance Features
@@ -52,7 +46,7 @@ This agent is **fully A2A-specification compliant** and includes:
 - ✅ **State History** - Complete audit trail of all operations
 
 ### **Testing & Monitoring**
-- ✅ **A2A Test Client** - Full protocol testing with streaming support
+- ✅ **AgentUp Test Client** - Full protocol testing with streaming support
 - ✅ **Error Testing** - Comprehensive JSON-RPC error scenario validation
 - ✅ **Task Monitoring** - Real-time task status and history tracking
 - ✅ **Health Endpoints** - Agent health and capability reporting
@@ -84,27 +78,27 @@ This agent was created with the **{{ template_name }}** template and includes:
 
 ## Development
 
-### A2A Development Workflow
+### AgentUp Development Workflow
 
 #### 1. Adding New Skills
 
 **Using AgentUp CLI (Recommended):**
 ```bash
 # Interactive skill generator with A2A compliance checks
-agentup add-skill
+agentup skill create
 
 # Generate with specific template
 agentup add-skill --skill-id my_skill --template conversational
 ```
 
-**Manual A2A-Compliant Skill Development:**
+**Manual AgentUp Skill Development:**
 
 1. **Define Skill in Configuration** (`agent_config.yaml`):
 ```yaml
 skills:
   - skill_id: my_new_skill
     name: My New Skill
-    description: A2A-compliant skill that processes user requests
+    description: AgentUp skill that processes user requests
     input_mode: text
     output_mode: text
     config:
@@ -137,16 +131,8 @@ async def handle_my_new_skill(task: Task) -> str:
     return f"Processed: {processed_content}"
 ```
 
-3. **Test A2A Compliance:**
-```bash
-# Test individual skill
-uv run python example_client.py --test-skill my_new_skill
 
-# Full A2A protocol test
-uv run python example_client.py --comprehensive
-```
-
-#### 2. A2A Message Processing Patterns
+#### 2. AgentUp Message Processing Patterns
 
 **Basic Message Extraction:**
 ```python
@@ -190,21 +176,7 @@ if images:
 {% endif %}
 ```
 
-#### 3. A2A Testing & Validation
-
-**Comprehensive A2A Testing:**
-```bash
-# Run full A2A compliance test suite
-uv run python run_tests.py --a2a-compliance
-
-# Test specific A2A scenarios
-uv run pytest tests/test_a2a_protocol.py -v
-
-# Test error handling compliance
-uv run pytest tests/test_jsonrpc_errors.py -v
-```
-
-**Manual A2A Testing:**
+**Manual AgentUp Testing:**
 ```bash
 # Test JSON-RPC protocol
 curl -X POST http://localhost:8000/ \\
@@ -225,7 +197,7 @@ curl http://localhost:8000/.well-known/agent.json
 curl -N -H "Accept: text/event-stream" http://localhost:8000/stream
 ```
 
-**A2A Error Testing:**
+** AgentUp Error Testing:**
 ```python
 # Test JSON-RPC error scenarios
 test_cases = [
@@ -239,7 +211,7 @@ for case in test_cases:
     assert "error" in result
 ```
 
-#### 4. A2A Performance & Monitoring
+#### 4. AgentUp Performance & Monitoring
 
 **Task Lifecycle Monitoring:**
 ```python
@@ -254,71 +226,42 @@ processing_time = calculate_processing_time(history)
 context_size = len(ConversationContext.get_context(task_id))
 ```
 
-**A2A Metrics Collection:**
+**AgentUp Metrics Collection:**
 ```bash
 # Enable detailed A2A metrics
-export A2A_METRICS=true
-export A2A_TRACE_LEVEL=debug
+export AGENTUP_METRICS=true
+export AGENTUP_TRACE_LEVEL=debug
 
 # Monitor JSON-RPC performance
 uv run python -m src.agent.main --enable-metrics
-```
-
-### Running Tests
-
-**Standard Testing:**
-```bash
-# Run all tests
-uv run python run_tests.py
-
-# With coverage reporting
-uv run python run_tests.py --coverage
-
-# Watch mode for development
-uv run python run_tests.py --watch
-```
-
-**A2A-Specific Testing:**
-```bash
-# A2A protocol compliance
-uv run pytest tests/test_a2a_protocol.py
-
-# JSON-RPC error handling
-uv run pytest tests/test_jsonrpc_errors.py
-
-# Message processing validation
-uv run pytest tests/test_message_processing.py
-
-# Task state management
-uv run pytest tests/test_task_lifecycle.py
 ```
 
 ### Deployment
 
 **Development Deployment:**
 ```bash
-# Start development server with A2A debugging
+# Start development server with AgentUp debugging
 uv run uvicorn src.agent.main:app --reload --port 8000 --log-level debug
 
-# Enable A2A protocol tracing
+# Enable AgentUp protocol tracing
 A2A_DEBUG=true uv run uvicorn src.agent.main:app --reload --port 8000
 ```
 
 **Production Deployment:**
 ```bash
-# Generate Docker files with A2A optimization
+# Generate Docker files with AgentUp optimization
 uv run python deploy.py --type docker --a2a-optimized
 
 # Build and run
 docker build -t {{ project_name_snake }} .
-docker run -p 8000:8000 -e A2A_METRICS=true {{ project_name_snake }}
+docker run -p 8000:8000 -e AGENTUP_METRICS=true {{ project_name_snake }}
 
-# Kubernetes deployment with A2A monitoring
+# Kubernetes deployment with AgentUp monitoring
 uv run python deploy.py --type k8s --enable-monitoring
 kubectl apply -f k8s-manifests/
 ```
 
-**A2A Production Checklist:**
+**AgentUp Production Checklist:**
 - [ ] Agent card (`/.well-known/agent.json`) returns valid JSON
 - [ ] All skills properly registered and tested
 - [ ] JSON-RPC error handling covers all edge cases
@@ -335,7 +278,8 @@ kubectl apply -f k8s-manifests/
 
 ## License
 
-MIT
+Apache 2.0
 
 ---
-Created with [AgentUp](https://github.com/your-org/agentup)
+Created with [AgentUp](https://github.com/RedDotRocket/AgentUp)
+

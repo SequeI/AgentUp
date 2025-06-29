@@ -117,7 +117,10 @@ services:
   redis:
     type: cache
     config:
-      url: '${REDIS_URL:redis://localhost:6379}'
+      url: '${REDIS_CACHE_URL:redis://localhost:6379}'
+      db: 1                    # Use DB 1 for cache (DB 0 for state)
+      max_connections: 20
+      retry_on_timeout: true
 
 # Model Context Protocol configuration - Full enterprise setup
 mcp:
@@ -169,7 +172,16 @@ middleware:
 push_notifications:
   enabled: true
 
-# state management
+# Cache management
+cache:
+  backend: redis
+  default_ttl: 1800           # 30 minutes
+  key_prefix: "agentup:cache:"
+  enabled: true
+
+# State management
 state:
-  backend: memory
-  ttl: 3600  # 1 hour
+  backend: redis
+  url: '${REDIS_STATE_URL:redis://localhost:6379}'
+  key_prefix: "agentup:state:"
+  ttl: 7200  # 2 hours

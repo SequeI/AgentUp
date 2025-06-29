@@ -101,6 +101,34 @@ async def lifespan(app: FastAPI):
     elif not needs_ai:
         logger.info("No AI routing skills found - skipping AI function registration")
 
+    # — Initialize state management if configured —
+    state_cfg = config.get("state", {})
+    if state_cfg:
+        try:
+            from .context import get_context_manager
+            
+            backend = state_cfg.get("backend", "memory")
+            backend_config = {}
+            
+            if backend == "redis":
+                # Get Redis URL from services configuration or state config
+                redis_service = config.get("services", {}).get("redis", {}).get("config", {})
+                backend_config["url"] = redis_service.get("url", "redis://localhost:6379")
+                backend_config["ttl"] = state_cfg.get("ttl", 3600)
+            elif backend == "file":
+                backend_config["storage_dir"] = state_cfg.get("storage_dir", "./conversation_states")
+            
+            # Initialize global state manager
+            context_manager = get_context_manager(backend, **backend_config)
+            app.state.context_manager = context_manager
+            
+            logger.info(f"State management initialized with {backend} backend")
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize state management: {e}")
+            # Continue without state management
+            app.state.context_manager = None
+
     # — Initialize MCP integration if available & enabled —
     mcp_cfg = config.get("mcp", {})
     if initialize_mcp_integration and mcp_cfg.get("enabled", False):
@@ -138,6 +166,17 @@ async def lifespan(app: FastAPI):
 
     # Shutdown hooks
     logger.info("Shutting down...")
+    
+    # State management cleanup
+    if hasattr(app.state, 'context_manager') and app.state.context_manager:
+        try:
+            # Cleanup old contexts (optional)
+            cleaned = await app.state.context_manager.cleanup_old_contexts(max_age_hours=24)
+            if cleaned > 0:
+                logger.info(f"Cleaned up {cleaned} old conversation contexts")
+        except Exception as e:
+            logger.error(f"Error during state cleanup: {e}")
+    
     if shutdown_mcp_integration and mcp_cfg.get("enabled", False):
         try:
             await shutdown_mcp_integration()
