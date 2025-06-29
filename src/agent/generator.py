@@ -114,8 +114,8 @@ class ProjectGenerator:
             'function_executor.py',      # Function execution logic
             'conversation_manager.py',   # Conversation state
             'streaming_handler.py',      # Streaming operations
-            'agent_executor.py',         # New A2A executor
-            'dependencies.py',           # A2A dependencies
+            'agent_executor.py',         # New AgentUp executor
+            'dependencies.py',           # AgentUp dependencies
         ]
 
         # Copy core files with import updates
@@ -243,7 +243,7 @@ class ProjectGenerator:
     def _build_agent_config(self) -> Dict[str, Any]:
         """Build agent_config.yaml content."""
         config = {
-            # A2A Agent Information
+            # Agent Information
             'agent': {
                 'name': self.project_name,
                 'description': self.config.get('description', ''),
@@ -263,7 +263,7 @@ class ProjectGenerator:
             'registry_skills': [],
         }
 
-        # Add A2A security configuration
+        # Add AgentUp security configuration
         config['security'] = {
             'enabled': False,  # Set to True to enable authentication
             'type': 'api_key',  # Options: 'api_key', 'bearer', 'oauth2'
@@ -335,15 +335,15 @@ Always be helpful, accurate, and maintain a friendly tone. You are designed to a
         if 'mcp' in self.features:
             config['mcp'] = self._build_mcp_config()
 
-        # Add A2A middleware configuration
+        # Add AgentUp middleware configuration
         config['middleware'] = self._build_middleware_config()
 
-        # Add A2A push notifications
+        # Add AgentUp push notifications
         config['push_notifications'] = {
             'enabled': True
         }
 
-        # Add A2A state management
+        # Add AgentUp state management
         config['state'] = {
             'backend': 'memory',
             'ttl': 3600  # 1 hour

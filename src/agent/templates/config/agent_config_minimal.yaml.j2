@@ -50,7 +50,10 @@ middleware:
 push_notifications:
   enabled: true
 
+# Cache management - Not needed for minimal template (no external APIs)
+# Add cache configuration if you integrate external services
+
 # State management
 state:
-  backend: memory
+  backend: memory           # Simple memory state for minimal template
   ttl: 3600  # 1 hour

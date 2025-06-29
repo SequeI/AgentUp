@@ -168,6 +168,126 @@ class FileStorage(StateStorage):
             return contexts
 
 
+class RedisStorage(StateStorage):
+    """Redis-based state storage for distributed deployments."""
+
+    def __init__(self, url: str = "redis://localhost:6379", key_prefix: str = "agentup:state:", ttl: int = 3600):
+        self.url = url
+        self.key_prefix = key_prefix
+        self.ttl = ttl
+        self.client = None
+        self._lock = asyncio.Lock()
+
+    async def _get_client(self):
+        """Get Redis client, create if needed."""
+        if self.client is None:
+            try:
+                # Try to import redis
+                import redis.asyncio as redis
+                self.client = redis.from_url(self.url)
+                # Test connection
+                await self.client.ping()
+                logger.info(f"Redis storage connected to {self.url}")
+            except ImportError:
+                logger.warning("redis package not available, falling back to file storage")
+                # Fallback to file storage
+                return None
+            except Exception as e:
+                logger.error(f"Failed to connect to Redis at {self.url}: {e}")
+                # Fallback to file storage
+                return None
+        return self.client
+
+    def _get_key(self, context_id: str) -> str:
+        """Get Redis key for context."""
+        return f"{self.key_prefix}{context_id}"
+
+    async def get(self, context_id: str) -> Optional[ConversationState]:
+        """Get conversation state from Redis."""
+        async with self._lock:
+            client = await self._get_client()
+            if client is None:
+                # Fallback to file storage
+                fallback = FileStorage()
+                return await fallback.get(context_id)
+
+            try:
+                key = self._get_key(context_id)
+                data = await client.get(key)
+                if data:
+                    import json
+                    data_dict = json.loads(data)
+                    return ConversationState.from_dict(data_dict)
+                return None
+            except Exception as e:
+                logger.error(f"Error getting state {context_id} from Redis: {e}")
+                return None
+
+    async def set(self, state: ConversationState) -> None:
+        """Save conversation state to Redis."""
+        async with self._lock:
+            client = await self._get_client()
+            if client is None:
+                # Fallback to file storage
+                fallback = FileStorage()
+                return await fallback.set(state)
+
+            try:
+                key = self._get_key(state.context_id)
+                import json
+                data = json.dumps(state.to_dict())
+                await client.setex(key, self.ttl, data)
+            except Exception as e:
+                logger.error(f"Error saving state {state.context_id} to Redis: {e}")
+
+    async def delete(self, context_id: str) -> None:
+        """Delete conversation state from Redis."""
+        async with self._lock:
+            client = await self._get_client()
+            if client is None:
+                # Fallback to file storage
+                fallback = FileStorage()
+                return await fallback.delete(context_id)
+
+            try:
+                key = self._get_key(context_id)
+                await client.delete(key)
+            except Exception as e:
+                logger.error(f"Error deleting state {context_id} from Redis: {e}")
+
+    async def list_contexts(self, user_id: Optional[str] = None) -> List[str]:
+        """List context IDs from Redis."""
+        async with self._lock:
+            client = await self._get_client()
+            if client is None:
+                # Fallback to file storage
+                fallback = FileStorage()
+                return await fallback.list_contexts(user_id)
+
+            try:
+                pattern = f"{self.key_prefix}*"
+                keys = await client.keys(pattern)
+                contexts = []
+                
+                for key in keys:
+                    if isinstance(key, bytes):
+                        key = key.decode('utf-8')
+                    context_id = key.replace(self.key_prefix, '')
+                    
+                    if user_id:
+                        # Load state to check user_id
+                        state = await self.get(context_id)
+                        if state and state.user_id == user_id:
+                            contexts.append(context_id)
+                    else:
+                        contexts.append(context_id)
+                        
+                return contexts
+            except Exception as e:
+                logger.error(f"Error listing contexts from Redis: {e}")
+                return []
+
+
 class ConversationContext:
     """Manage conversation context and state."""
 
@@ -296,6 +416,8 @@ def get_context_manager(storage_type: str = 'memory', **kwargs) -> ConversationC
             storage = InMemoryStorage()
         elif storage_type == 'file':
             storage = FileStorage(**kwargs)
+        elif storage_type == 'redis':
+            storage = RedisStorage(**kwargs)
         else:
             raise ValueError(f"Unknown storage type: {storage_type}")
 
@@ -328,6 +450,6 @@ def stateful(storage: str = 'memory', **storage_kwargs):
 
 # Export classes and functions
 __all__ = [
-    'ConversationState', 'StateStorage', 'InMemoryStorage', 'FileStorage',
+    'ConversationState', 'StateStorage', 'InMemoryStorage', 'FileStorage', 'RedisStorage',
     'ConversationContext', 'get_context_manager', 'stateful'
 ]

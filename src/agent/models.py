@@ -70,7 +70,7 @@ class SkillConfig(BaseModel):
 class AgentConfig(BaseModel):
     """Configuration for the agent."""
     project_name: str = "MyAgent"
-    description: str = "An A2A-compliant AI agent"
+    description: str = "An AgentUp A2A-compliant AI agent"
     version: str = "1.0.0"
     dispatcher_path: Optional[str] = None  # e.g. "src.agent.function_dispatcher:get_function_dispatcher"
     # Services

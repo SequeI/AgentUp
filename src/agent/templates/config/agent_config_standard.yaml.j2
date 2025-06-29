@@ -64,8 +64,15 @@ services:
   openai:
     type: llm
     provider: openai
-    api_key: ${OPENAI_API_KEY}
-    model: gpt-4o-mini
+    config:
+      api_key: ${OPENAI_API_KEY}
+      model: gpt-4o-mini
+  redis:
+    type: cache
+    config:
+      url: '${REDIS_URL:redis://localhost:6379}'
+      db: 1                    # Use DB 1 for cache
+      max_connections: 10
 
 # Model Context Protocol configuration
 mcp:
@@ -111,7 +118,15 @@ middleware:
 push_notifications:
   enabled: true
 
-# state management
+# Cache management
+cache:
+  backend: memory          # Simple memory cache for standard template
+  default_ttl: 1800        # 30 minutes
+  max_size: 1000
+  enabled: true
+
+# State management
 state:
-  backend: memory
+  backend: file            # File-based state for standard template
+  storage_dir: "./conversation_states"
   ttl: 3600  # 1 hour
