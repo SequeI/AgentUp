@@ -1,0 +1,175 @@
+# AgentUp Configuration - Full Template
+# Enterprise-ready agent with all features including multiple MCP servers
+
+# Agent Information
+agent:
+  name: {{ project_name }}
+  description: {{ description }}
+  version: 0.1.0
+
+# Routing configuration
+routing:
+  default_mode: ai
+  fallback_skill: ai_assistant
+  fallback_enabled: true
+
+# Core skills configuration
+skills:
+  - skill_id: ai_assistant
+    name: AI Assistant
+    description: General purpose AI assistant
+    input_mode: text
+    output_mode: text
+    routing_mode: ai
+  - skill_id: document_processor
+    name: Document Processor
+    description: Process and analyze documents
+    input_mode: multimodal
+    output_mode: text
+    routing_mode: ai
+  - skill_id: data_analyzer
+    name: Data Analyzer
+    description: Analyze and visualize data
+    input_mode: text
+    output_mode: multimodal
+    routing_mode: ai
+  - skill_id: hello_world
+    name: Hello World
+    description: Simple greeting handler
+    input_mode: text
+    output_mode: text
+    routing_mode: direct
+    keywords: [hello, hi, hey, greetings]
+    patterns: ['hello.*', 'hi\\s+.*', 'greet.*']
+  - skill_id: conversation
+    name: Conversation
+    description: Basic conversation handler
+    input_mode: text
+    output_mode: text
+    routing_mode: direct
+    keywords: [chat, talk, conversation]
+    patterns: ['chat.*', 'talk.*', 'conversation.*']
+
+# Registry skills section - for skills installed from AgentUp Skills Registry
+registry_skills: []
+
+# security configuration
+security:
+  enabled: true   # Authentication enabled for full template
+  type: api_key   # Options: 'api_key', 'bearer', 'oauth2'
+  api_key:
+    header_name: X-API-Key
+    location: header  # Options: 'header', 'query', 'cookie'
+    keys:
+      # Generated API keys - replace with your own
+      - "{{ generate_api_key() }}"
+      - "{{ generate_api_key() }}"
+  bearer:
+    jwt_secret: '{{ generate_jwt_secret() }}'
+    algorithm: HS256
+    issuer: your-agent
+    audience: a2a-clients
+  oauth2:
+    token_url: '${OAUTH_TOKEN_URL:/oauth/token}'
+    client_id: '${OAUTH_CLIENT_ID:your-client-id}'
+    client_secret: '{{ generate_client_secret() }}'
+    scopes:
+      read: Read access to agent capabilities
+      write: Write access to send messages
+      admin: Administrative access
+
+# AI configuration for LLM-powered agents
+ai:
+  enabled: true
+  llm_service: openai
+  model: gpt-4o-mini
+  system_prompt: |
+    You are {{ project_name }}, an AI agent with access to specific functions/skills.
+
+    Your role:
+    - Understand user requests naturally and conversationally
+    - Use the appropriate functions when needed to help users
+    - Provide helpful, accurate, and friendly responses
+    - Maintain context across conversations
+
+    When users ask for something:
+    1. If you have a relevant function, call it with appropriate parameters
+    2. If multiple functions are needed, call them in logical order
+    3. Synthesize the results into a natural, helpful response
+    4. If no function is needed, respond conversationally
+
+    Always be helpful, accurate, and maintain a friendly tone. You are designed to assist users effectively while being natural and conversational.
+  max_context_turns: 10
+  fallback_to_routing: true  # Fall back to keyword routing if LLM fails
+
+# External services configuration - Full enterprise setup
+services:
+  openai:
+    type: llm
+    provider: openai
+    config:
+      api_key: ${OPENAI_API_KEY}
+      model: gpt-4o-mini
+  postgres:
+    type: database
+    config:
+      connection_url: '${DATABASE_URL:postgresql://user:pass@localhost/db}'
+  redis:
+    type: cache
+    config:
+      url: '${REDIS_URL:redis://localhost:6379}'
+
+# Model Context Protocol configuration - Full enterprise setup
+mcp:
+  enabled: true
+  client:
+    enabled: true
+    servers:
+      - name: filesystem
+        command: npx
+        args: ['-y', '@modelcontextprotocol/server-filesystem', '/']
+        env: {}
+      - name: github
+        command: npx
+        args: ['-y', '@modelcontextprotocol/server-github']
+        env:
+          GITHUB_PERSONAL_ACCESS_TOKEN: '${GITHUB_TOKEN}'
+  server:
+    enabled: true
+    name: {{ project_name }}-mcp-server
+    expose_handlers: true
+    expose_resources: [agent_status, agent_capabilities]
+    port: 8001
+
+# middleware configuration - Full enterprise setup
+middleware:
+  - name: logged
+    params:
+      log_level: 20  # INFO level
+  - name: timed
+    params: {}
+{% if has_middleware and 'cache' in feature_config.get('middleware', []) %}
+  - name: cached
+    params:
+      ttl: 300  # 5 minutes
+{% endif %}
+{% if has_middleware and 'rate_limit' in feature_config.get('middleware', []) %}
+  - name: rate_limited
+    params:
+      requests_per_minute: 60
+{% endif %}
+{% if has_middleware and 'retry' in feature_config.get('middleware', []) %}
+  - name: retryable
+    params:
+      max_retries: 3
+      backoff_factor: 2
+{% endif %}
+
+# push notifications
+push_notifications:
+  enabled: true
+
+# state management
+state:
+  backend: memory
+  ttl: 3600  # 1 hour

@@ -1,0 +1,47 @@
+agent:
+  name: myagent
+  description: AI Agent myagent Project.
+  version: 0.1.0
+
+# New routing configuration
+routing:
+  default_mode: direct
+  fallback_skill: echo
+  fallback_enabled: true
+
+# Updated skills with integrated routing
+skills:
+  - skill_id: echo
+    name: Echo
+    description: Echo back the input text
+    input_mode: text
+    output_mode: text
+    routing_mode: direct
+    keywords:
+      - echo
+      - repeat
+      - say
+    patterns:
+      - .*
+
+# Registry skills section
+registry_skills: []
+
+# Security configuration
+security:
+  enabled: true
+  type: "api_key"
+  api_key:
+    header_name: "X-API-Key"
+    location: "header"  # Options: header, query, cookie
+    keys:
+      - "sk-strong-key-1-abcd1234xyz"
+
+# Push notifications
+push_notifications:
+  enabled: true
+
+# State management
+state:
+  backend: memory
+  ttl: 3600

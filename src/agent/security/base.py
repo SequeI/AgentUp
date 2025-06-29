@@ -1,0 +1,103 @@
+"""Base classes and interfaces for AgentUp security components."""
+
+from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional, Set
+from fastapi import Request
+
+
+class AuthenticationResult:
+    """Result of an authentication attempt."""
+
+    def __init__(
+        self,
+        success: bool,
+        user_id: Optional[str] = None,
+        credentials: Optional[str] = None,
+        scopes: Optional[Set[str]] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ):
+        self.success = success
+        self.user_id = user_id
+        self.credentials = credentials  # Never log this
+        self.scopes = scopes or set()
+        self.metadata = metadata or {}
+
+
+class BaseAuthenticator(ABC):
+    """Abstract base class for all authenticators."""
+
+    def __init__(self, config: Dict[str, Any]):
+        self.config = config
+        self.auth_type = self.__class__.__name__.lower().replace('authenticator', '')
+        self._validate_config()
+
+    @abstractmethod
+    def _validate_config(self) -> None:
+        """Validate the authenticator configuration.
+
+        Raises:
+            SecurityConfigurationException: If configuration is invalid
+        """
+        pass
+
+    @abstractmethod
+    async def authenticate(self, request: Request) -> AuthenticationResult:
+        """Authenticate a request.
+
+        Args:
+            request: The FastAPI request object
+
+        Returns:
+            AuthenticationResult: Result of authentication attempt
+
+        Raises:
+            AuthenticationFailedException: If authentication fails
+            InvalidCredentialsException: If credentials are invalid
+            MissingCredentialsException: If required credentials are missing
+        """
+        pass
+
+    @abstractmethod
+    def get_auth_type(self) -> str:
+        """Get the authentication type identifier."""
+        pass
+
+    def supports_scopes(self) -> bool:
+        """Return True if this authenticator supports scope-based authorization."""
+        return False
+
+    def get_required_headers(self) -> Set[str]:
+        """Get the set of required headers for this authenticator."""
+        return set()
+
+    def get_optional_headers(self) -> Set[str]:
+        """Get the set of optional headers for this authenticator."""
+        return set()
+
+
+class SecurityPolicy:
+    """Security policy configuration."""
+
+    def __init__(
+        self,
+        require_authentication: bool = True,
+        allowed_auth_types: Optional[Set[str]] = None,
+        required_scopes: Optional[Set[str]] = None,
+        allow_anonymous: bool = False
+    ):
+        self.require_authentication = require_authentication
+        self.allowed_auth_types = allowed_auth_types or set()
+        self.required_scopes = required_scopes or set()
+        self.allow_anonymous = allow_anonymous
+
+    def is_auth_type_allowed(self, auth_type: str) -> bool:
+        """Check if an authentication type is allowed by this policy."""
+        if not self.allowed_auth_types:
+            return True  # No restrictions
+        return auth_type in self.allowed_auth_types
+
+    def has_required_scopes(self, user_scopes: Set[str]) -> bool:
+        """Check if user has all required scopes."""
+        if not self.required_scopes:
+            return True  # No scope requirements
+        return self.required_scopes.issubset(user_scopes)

@@ -1,0 +1,70 @@
+"""Conversation Management for Function Dispatcher."""
+
+import logging
+from datetime import datetime, timezone
+from typing import Any, Dict, List
+
+logger = logging.getLogger(__name__)
+
+
+class ConversationManager:
+    """Manages conversation history and context."""
+
+    def __init__(self):
+        self.conversation_history: Dict[str, List[Dict[str, Any]]] = {}
+
+    async def prepare_llm_conversation(self, user_input: str, conversation: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+        """Prepare conversation for LLM with system prompt and history."""
+
+        # Get system prompt from config
+        from .config import load_config
+        config = load_config()
+        ai_config = config.get('ai', {})
+        
+        # Use configured system prompt or fallback to default
+        system_prompt = ai_config.get('system_prompt', """You are an AI agent with access to specific functions/skills.
+
+Your role:
+- Understand user requests naturally
+- Use the appropriate functions when needed
+- Provide helpful, conversational responses
+- Maintain context across the conversation
+
+When users ask for something:
+1. If you have a relevant function, call it with appropriate parameters
+2. If multiple functions are needed, call them in logical order
+3. Synthesize the results into a natural, helpful response
+4. If no function is needed, respond conversationally
+
+Always be helpful, accurate, and maintain a friendly tone.""")
+
+        messages = [{"role": "system", "content": system_prompt}]
+
+        # Add conversation history (last 10 turns to manage context length)
+        for turn in conversation[-10:]:
+            messages.append({"role": "user", "content": turn["user"]})
+            messages.append({"role": "assistant", "content": turn["assistant"]})
+
+        # Add current user input
+        messages.append({"role": "user", "content": user_input})
+
+        return messages
+
+    def get_conversation_history(self, context_id: str) -> List[Dict[str, Any]]:
+        """Get conversation history for context."""
+        return self.conversation_history.get(context_id, [])
+
+    def update_conversation_history(self, context_id: str, user_input: str, response: str):
+        """Update conversation history."""
+        if context_id not in self.conversation_history:
+            self.conversation_history[context_id] = []
+
+        self.conversation_history[context_id].append({
+            "user": user_input,
+            "assistant": response,
+            "timestamp": datetime.now(timezone.utc).isoformat()
+        })
+
+        # Keep last 20 turns to manage memory
+        if len(self.conversation_history[context_id]) > 20:
+            self.conversation_history[context_id] = self.conversation_history[context_id][-20:]

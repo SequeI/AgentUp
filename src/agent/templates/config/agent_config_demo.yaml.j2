@@ -1,0 +1,156 @@
+# AgentUp Agent Configuration - Demo Template
+# Example agent showcasing various capabilities with pre-built skills
+
+# Agent Information
+agent:
+  name: {{ project_name }}
+  description: {{ description }}
+  version: 0.1.0
+
+# Routing configuration - Mixed routing demonstration
+routing:
+  default_mode: ai
+  fallback_skill: file_assistant
+  fallback_enabled: true
+
+# Core skills configuration - Demo skills showcase mixed routing
+skills:
+  - skill_id: file_assistant
+    name: File Assistant
+    description: Read and write files using MCP
+    input_mode: text
+    output_mode: text
+    routing_mode: ai  # AI routing for natural file operations
+  - skill_id: weather_bot
+    name: Weather Bot
+    description: Get weather information using function calling
+    input_mode: text
+    output_mode: text
+    routing_mode: ai  # AI routing for natural weather queries
+  - skill_id: code_analyzer
+    name: Code Analyzer
+    description: Analyze code repositories
+    input_mode: text
+    output_mode: text
+    routing_mode: ai  # AI routing for complex analysis
+  - skill_id: joke_teller
+    name: Joke Teller
+    description: Tell jokes on demand
+    input_mode: text
+    output_mode: text
+    routing_mode: direct  # Direct routing for quick jokes
+    keywords: [joke, funny, humor, laugh]
+    patterns: ['joke.*', 'tell.*joke.*', 'funny.*', 'laugh.*']
+  - skill_id: hello_world
+    name: Hello World
+    description: Simple greeting handler
+    input_mode: text
+    output_mode: text
+    routing_mode: direct  # Direct routing for quick greetings
+    keywords: [hello, hi, hey, greetings]
+    patterns: ['hello.*', 'hi\\s+.*', 'greet.*']
+  - skill_id: system_status
+    name: System Status
+    description: Check system health and status
+    input_mode: text
+    output_mode: text
+    routing_mode: direct  # Direct routing for system commands
+    keywords: [status, health, system, ping]
+    patterns: ['system.*status', 'health.*check', 'ping']
+
+# Registry skills section - for skills installed from AgentUp Skills Registry
+registry_skills: []
+
+# Security configuration
+security:
+  enabled: true   # Authentication enabled for demo template
+  type: api_key   # Options: 'api_key', 'bearer', 'oauth2'
+  api_key:
+    header_name: X-API-Key
+    location: header  # Options: 'header', 'query', 'cookie'
+    keys:
+      # Generated API keys - replace with your own
+      - "{{ generate_api_key() }}"
+
+# AI configuration for LLM-powered agents
+ai:
+  enabled: true
+  llm_service: openai
+  model: gpt-4o-mini
+  system_prompt: |
+    You are {{ project_name }}, an AI agent with access to specific functions/skills.
+
+    Your role:
+    - Understand user requests naturally and conversationally
+    - Use the appropriate functions when needed to help users
+    - Provide helpful, accurate, and friendly responses
+    - Maintain context across conversations
+
+    When users ask for something:
+    1. If you have a relevant function, call it with appropriate parameters
+    2. If multiple functions are needed, call them in logical order
+    3. Synthesize the results into a natural, helpful response
+    4. If no function is needed, respond conversationally
+
+    Always be helpful, accurate, and maintain a friendly tone. You are designed to assist users effectively while being natural and conversational.
+  max_context_turns: 10
+  fallback_to_routing: true  # Fall back to keyword routing if LLM fails
+
+# External services configuration
+services:
+  openai:
+    type: llm
+    provider: openai
+    config:
+      api_key: ${OPENAI_API_KEY}
+      model: gpt-4o-mini
+
+# Model Context Protocol configuration - Demo setup
+mcp:
+  enabled: true
+  client:
+    enabled: true
+    servers:
+      - name: demo-filesystem
+        command: npx
+        args: ['-y', '@modelcontextprotocol/server-filesystem', './demo-files']
+        env: {}
+  server:
+    enabled: true
+    name: {{ project_name }}-mcp-server
+    expose_handlers: true
+    expose_resources: [agent_status, agent_capabilities]
+    port: 8001
+
+# Middleware configuration
+middleware:
+  - name: logged
+    params:
+      log_level: 20  # INFO level
+  - name: timed
+    params: {}
+{% if has_middleware and 'cache' in feature_config.get('middleware', []) %}
+  - name: cached
+    params:
+      ttl: 300  # 5 minutes
+{% endif %}
+{% if has_middleware and 'rate_limit' in feature_config.get('middleware', []) %}
+  - name: rate_limited
+    params:
+      requests_per_minute: 60
+{% endif %}
+{% if has_middleware and 'retry' in feature_config.get('middleware', []) %}
+  - name: retryable
+    params:
+      max_retries: 3
+      backoff_factor: 2
+{% endif %}
+
+# Push notifications
+push_notifications:
+  enabled: true
+
+# State management
+state:
+  backend: memory
+  ttl: 3600  # 1 hour

@@ -1,0 +1,117 @@
+# AgentUp Configuration - Standard Template
+# AI-powered agent with MCP integration - recommended for most users
+
+# Agent Information
+agent:
+  name: {{ project_name }}
+  description: {{ description }}
+  version: 0.1.0
+
+# Routing configuration
+routing:
+  default_mode: ai
+  fallback_skill: ai_assistant
+  fallback_enabled: true
+
+# Core skills configuration
+skills:
+  - skill_id: ai_assistant
+    name: AI Assistant
+    description: General purpose AI assistant
+    input_mode: text
+    output_mode: text
+    routing_mode: ai
+
+# Registry skills section - for skills installed from AgentUp Skills Registry
+registry_skills: []
+
+# security configuration
+security:
+  enabled: true   # Authentication enabled for standard template
+  type: bearer
+  bearer:
+    jwt_secret: '{{ generate_jwt_secret() }}'
+    algorithm: HS256
+    issuer: your-agent
+    audience: agentup-client
+
+# AI configuration for LLM-powered agents
+ai:
+  enabled: true
+  llm_service: openai
+  model: gpt-4o-mini
+  system_prompt: |
+    You are {{ project_name }}, an AI agent with access to specific functions/skills.
+
+    Your role:
+    - Understand user requests naturally and conversationally
+    - Use the appropriate functions when needed to help users
+    - Provide helpful, accurate, and friendly responses
+    - Maintain context across conversations
+
+    When users ask for something:
+    1. If you have a relevant function, call it with appropriate parameters
+    2. If multiple functions are needed, call them in logical order
+    3. Synthesize the results into a natural, helpful response
+    4. If no function is needed, respond conversationally
+
+    Always be helpful, accurate, and maintain a friendly tone. You are designed to assist users effectively while being natural and conversational.
+  max_context_turns: 10
+  fallback_to_routing: true  # Fall back to keyword routing if LLM fails
+
+# External services configuration
+services:
+  openai:
+    type: llm
+    provider: openai
+    api_key: ${OPENAI_API_KEY}
+    model: gpt-4o-mini
+
+# Model Context Protocol configuration
+mcp:
+  enabled: true
+  client:
+    enabled: true
+    servers:
+      - name: filesystem
+        command: npx
+        args: ['-y', '@modelcontextprotocol/server-filesystem', '/tmp']
+        env: {}
+  server:
+    enabled: true
+    name: {{ project_name }}-mcp-server
+    expose_handlers: true
+    expose_resources: [agent_status, agent_capabilities]
+
+# middleware configuration
+middleware:
+  - name: logged
+    params:
+      log_level: 20  # INFO level
+  - name: timed
+    params: {}
+{% if has_middleware and 'cache' in feature_config.get('middleware', []) %}
+  - name: cached
+    params:
+      ttl: 300  # 5 minutes
+{% endif %}
+{% if has_middleware and 'rate_limit' in feature_config.get('middleware', []) %}
+  - name: rate_limited
+    params:
+      requests_per_minute: 60
+{% endif %}
+{% if has_middleware and 'retry' in feature_config.get('middleware', []) %}
+  - name: retryable
+    params:
+      max_retries: 3
+      backoff_factor: 2
+{% endif %}
+
+# push notifications
+push_notifications:
+  enabled: true
+
+# state management
+state:
+  backend: memory
+  ttl: 3600  # 1 hour
