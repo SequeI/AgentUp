@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 
 from .config import load_config
-from .dependencies import get_request_handler
 from .models import (
     AgentCapabilities,
     AgentCard,
@@ -13,8 +12,6 @@ from .models import (
     AgentSkill,
     APIKeySecurityScheme,
     HTTPAuthSecurityScheme,
-    SecurityScheme,
-    In,
     JSONRPCError,
 )
 from .security import protected
@@ -40,6 +37,22 @@ config = load_config()
 
 # Task storage (in production, use persistent storage)
 task_storage: Dict[str, Dict[str, Any]] = {}
+
+# Request handler instance management
+_request_handler: DefaultRequestHandler | None = None
+
+
+def set_request_handler_instance(handler: DefaultRequestHandler):
+    """Set the global request handler instance."""
+    global _request_handler
+    _request_handler = handler
+
+
+def get_request_handler() -> DefaultRequestHandler:
+    """Get the global request handler instance."""
+    if _request_handler is None:
+        raise RuntimeError("Request handler not initialized")
+    return _request_handler
 
 def create_agent_card() -> AgentCard:
     """Create agent card with current configuration."""
@@ -145,13 +158,6 @@ def create_agent_card() -> AgentCard:
 
     return agent_card
 
-@router.get("/agent/card", response_model=AgentCard)
-@protected()
-async def get_agent_card(request: Request) -> AgentCard:
-    """Get agent card describing capabilities."""
-    print("=== get_agent_card endpoint called ===")
-    print("Security authentication passed")
-    return create_agent_card()
 
 @router.get("/task/{task_id}/status")
 @protected()
@@ -215,7 +221,7 @@ async def services_health() -> JSONResponse:
         }
     )
 
-# A2A-compliant endpoints
+# A2A AgentCard
 @router.get("/.well-known/agent.json", response_model=AgentCard)
 async def get_agent_discovery() -> AgentCard:
     """A2A agent discovery endpoint."""
@@ -242,7 +248,7 @@ async def jsonrpc_endpoint(
     request: Request,
     handler: DefaultRequestHandler = Depends(get_request_handler),
 ) -> Union[JSONResponse, StreamingResponse]:
-    """JSON-RPC 2.0 endpoint for A2A protocol with SSE support."""
+    """This is the main JSON-RPC 2.0 endpoint with SSE Streaming support."""
     try:
         # Parse JSON-RPC request
         body = await request.json()
@@ -291,9 +297,8 @@ async def jsonrpc_endpoint(
                 }
             )
 
-        # Authentication handled by @protected decorator
-
-        # Create JSONRPCHandler with the agent card
+        # Create JSONRPCHandler with the agent card, which is needed for capabilities,
+        # security schemes, and other metadata for the agent.
         agent_card = create_agent_card()
         jsonrpc_handler = JSONRPCHandler(agent_card, handler)
 
@@ -327,7 +332,7 @@ async def jsonrpc_endpoint(
                 headers={
                     "Cache-Control": "no-cache",
                     "Connection": "keep-alive",
-                    "X-Accel-Buffering": "no",  # Disable Nginx buffering
+                    "X-Accel-Buffering": "no",
                 }
             )
 
@@ -483,4 +488,4 @@ async def jsonrpc_error_handler(request: Request, exc: JSONRPCError):
     )
 
 # Export router and handlers
-__all__ = ['router', 'jsonrpc_error_handler']
+__all__ = ['router', 'jsonrpc_error_handler', 'set_request_handler_instance', 'get_request_handler']

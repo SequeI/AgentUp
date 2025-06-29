@@ -47,13 +47,13 @@ class GenericAgentExecutor(AgentExecutor):
         # Load config for new routing system
         from .config import load_config
         config = load_config()
-        
+
         # Parse routing configuration (new format)
         routing_config = config.get('routing', {})
         self.default_routing_mode = routing_config.get('default_mode', 'ai')
         self.fallback_skill = routing_config.get('fallback_skill', 'echo')
         self.fallback_enabled = routing_config.get('fallback_enabled', True)
-        
+
         # Parse skills with routing configuration
         self.skills = {}
         for skill_data in config.get('skills', []):
@@ -121,7 +121,7 @@ class GenericAgentExecutor(AgentExecutor):
             # New routing system: determine skill and routing mode
             user_input = self._extract_user_message(task)
             target_skill, routing_mode = self._determine_skill_and_routing(user_input)
-            
+
             logger.info(f"Processing task {task.id} with skill '{target_skill}' using {routing_mode} routing")
 
             # Process based on determined routing mode
@@ -137,7 +137,7 @@ class GenericAgentExecutor(AgentExecutor):
                 # Use direct routing (either skill specifies direct, or AI fallback)
                 if routing_mode == 'ai' and not self.dispatcher and self.fallback_enabled:
                     logger.warning("AI routing requested but no dispatcher available, falling back to direct routing")
-                
+
                 result = await self._process_direct_routing(task, target_skill)
                 await self._create_response_artifact(result, task, updater)
 
@@ -169,25 +169,25 @@ class GenericAgentExecutor(AgentExecutor):
     def _determine_skill_and_routing(self, user_input: str) -> tuple[str, str]:
         """Determine which skill and routing mode to use for the user input."""
         import re
-        
+
         if not user_input:
             return self.fallback_skill, self.default_routing_mode
-        
+
         # Check each skill's routing configuration
         for skill_id, skill_config in self.skills.items():
             routing_mode = skill_config['routing_mode']
-            
+
             # For direct routing skills, check keywords and patterns
             if routing_mode == 'direct':
                 keywords = skill_config.get('keywords', [])
                 patterns = skill_config.get('patterns', [])
-                
+
                 # Check keywords
                 for keyword in keywords:
                     if keyword.lower() in user_input.lower():
                         logger.debug(f"Matched keyword '{keyword}' for skill '{skill_id}'")
                         return skill_id, routing_mode
-                
+
                 # Check patterns
                 for pattern in patterns:
                     try:
@@ -196,10 +196,10 @@ class GenericAgentExecutor(AgentExecutor):
                             return skill_id, routing_mode
                     except re.error as e:
                         logger.warning(f"Invalid regex pattern '{pattern}' in skill '{skill_id}': {e}")
-        
+
         # No direct routing match found, use fallback skill with default routing mode
         return self.fallback_skill, self.default_routing_mode
-    
+
 
     async def _process_direct_routing(self, task: Task, target_skill: str = None) -> str:
         """Process task using direct handler routing (no AI)."""
@@ -229,7 +229,7 @@ class GenericAgentExecutor(AgentExecutor):
         try:
             if not (hasattr(task, 'history') and task.history):
                 return ""
-            
+
             # Get the latest user message from history
             for message in reversed(task.history):
                 if message.role == 'user' and message.parts:

@@ -1,5 +1,3 @@
-"""Conversation Management for Function Dispatcher."""
-
 import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List
@@ -8,7 +6,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConversationManager:
-    """Manages conversation history and context."""
+    """Manages Agent conversation history and context."""
 
     def __init__(self):
         self.conversation_history: Dict[str, List[Dict[str, Any]]] = {}
@@ -22,6 +20,7 @@ class ConversationManager:
         ai_config = config.get('ai', {})
         
         # Use configured system prompt or fallback to default
+        # TODO: Need to move all these prompts to config
         system_prompt = ai_config.get('system_prompt', """You are an AI agent with access to specific functions/skills.
 
 Your role:
