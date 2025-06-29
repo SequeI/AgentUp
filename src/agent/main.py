@@ -7,12 +7,10 @@ from contextlib import asynccontextmanager
 import httpx
 
 from .agent_executor import GenericAgentExecutor as AgentExecutorImpl
-from .api import router, jsonrpc_error_handler, create_agent_card
+from .api import router, jsonrpc_error_handler, create_agent_card, set_request_handler_instance
 from .config import load_config
-from .dependencies import set_request_handler_instance
 from .models import JSONRPCError
 from .security import create_security_manager
-
 
 from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryPushNotifier, InMemoryTaskStore
