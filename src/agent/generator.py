@@ -116,6 +116,8 @@ class ProjectGenerator:
             'streaming_handler.py',      # Streaming operations
             'agent_executor.py',         # New AgentUp executor
             'dependencies.py',           # AgentUp dependencies
+            'push_notifier.py',          # Enhanced push notification system
+            'push_types.py',             # Additional A2A push notification types
         ]
 
         # Copy core files with import updates

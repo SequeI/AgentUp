@@ -86,18 +86,6 @@ def get_handler(skill_id: str) -> Optional[Callable[[Task], str]]:
     if handler:
         return handler
 
-    # Check demo handlers if available
-    try:
-        from ....scrap.demo_handlers import DEMO_HANDLERS
-        demo_handler_class = DEMO_HANDLERS.get(skill_id)
-        if demo_handler_class:
-            # Instantiate and return the handle method
-            instance = demo_handler_class()
-            return instance.handle
-    except ImportError:
-        # demo_handlers.py doesn't exist
-        pass
-    
     # Finally check registry skills
     try:
         from ..registry_skill_loader import get_registry_skill_handler

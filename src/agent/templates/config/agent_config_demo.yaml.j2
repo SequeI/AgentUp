@@ -101,9 +101,8 @@ services:
   openai:
     type: llm
     provider: openai
-    config:
-      api_key: ${OPENAI_API_KEY}
-      model: gpt-4o-mini
+    api_key: ${OPENAI_API_KEY}
+    model: gpt-4o-mini
   redis:
     type: cache
     config:
@@ -152,9 +151,13 @@ middleware:
       backoff_factor: 2
 {% endif %}
 
-# Push notifications
+# Push notifications configuration
 push_notifications:
   enabled: true
+  backend: redis              # Redis backend for demo features
+  key_prefix: "demo:push:"    # Demo-specific key prefix
+  validate_urls: true         # Enable webhook URL validation
+  timeout: 15                 # Shorter timeout for demo
 
 # Cache management
 cache:
