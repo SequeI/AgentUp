@@ -1,12 +1,9 @@
-"""Handler modules for agent."""
-
 import logging
 import importlib
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# Import core handler functions
 from .handlers import (  # noqa: E402
     get_handler,
     register_handler,
@@ -42,7 +39,9 @@ def discover_and_import_handlers():
 
     logger.debug(f"Starting dynamic handler discovery in {handlers_dir}")
 
-    # Find all Python files in the handlers directory
+    # TODO: I expect there is a better way to do this,
+    # this will dynamically import all Python files in the handlers directory
+    # except __init__.py and handlers.py (core files)
     for py_file in handlers_dir.glob("*.py"):
         # Skip __init__.py and handlers.py (core files)
         if py_file.name in ["__init__.py", "handlers.py"]:

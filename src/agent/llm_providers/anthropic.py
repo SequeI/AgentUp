@@ -202,7 +202,11 @@ class AnthropicProvider(BaseLLMService):
             # Anthropic returns content in a list format
             content = ""
             if data.get('content'):
-                content = data['content'][0].get('text', '') if data['content'] else ""
+                content_list = data['content']
+                if isinstance(content_list, list) and content_list:
+                    content = content_list[0].get('text', '') if isinstance(content_list[0], dict) else ""
+                else:
+                    content = ""
 
             return LLMResponse(
                 content=content,
