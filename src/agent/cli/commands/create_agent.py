@@ -101,7 +101,9 @@ def create_agent(name: Optional[str], template: Optional[str], quick: bool, mini
 
     # Output directory
     if not output_dir:
-        output_dir = Path.cwd() / name
+        # Normalize the name for directory: lowercase and replace spaces with underscores
+        dir_name = name.lower().replace(' ', '_')
+        output_dir = Path.cwd() / dir_name
     else:
         output_dir = Path(output_dir)
 
