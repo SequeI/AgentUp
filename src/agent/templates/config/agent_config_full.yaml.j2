@@ -81,8 +81,8 @@ security:
 # AI configuration for LLM-powered agents
 ai:
   enabled: true
-  llm_service: openai
-  model: gpt-4o-mini
+  llm_service: {{ llm_service_name }}
+  model: {{ llm_model }}
   system_prompt: |
     You are {{ project_name }}, an AI agent with access to specific functions/skills.
 
@@ -104,11 +104,19 @@ ai:
 
 # External services configuration - Full enterprise setup
 services:
-  openai:
+{% if llm_provider_config %}
+  {{ llm_service_name }}:
     type: llm
-    provider: openai
+    provider: {{ llm_provider }}
+{% if llm_provider == 'openai' %}
     api_key: ${OPENAI_API_KEY}
-    model: gpt-4o-mini
+{% elif llm_provider == 'anthropic' %}
+    api_key: ${ANTHROPIC_API_KEY}
+{% elif llm_provider == 'ollama' %}
+    base_url: ${OLLAMA_BASE_URL:http://localhost:11434}
+{% endif %}
+    model: {{ llm_model }}
+{% endif %}
   postgres:
     type: database
     config:

@@ -185,6 +185,26 @@ def create_agent(name: Optional[str], template: Optional[str], quick: bool, mini
                 feature_config = configure_features(selected_features)
                 project_config['features'] = selected_features
                 project_config['feature_config'] = feature_config
+        
+    # Always configure services if 'services' is in features (even if not customizing)
+    final_features = project_config.get('features', [])
+    if 'services' in final_features:
+        service_choices = [
+            questionary.Choice("OpenAI", value="openai"),
+            questionary.Choice("Anthropic", value="anthropic"),
+            questionary.Choice("Ollama", value="ollama"),
+            questionary.Choice("PostgreSQL", value="postgres"),
+            questionary.Choice("Redis", value="redis"),
+            questionary.Choice("Custom API", value="custom"),
+        ]
+
+        selected = questionary.checkbox(
+            "Select external services:",
+            choices=service_choices,
+            style=custom_style
+        ).ask()
+
+        project_config['services'] = selected if selected else []
 
     # Use existing config if provided
     if config:
@@ -237,24 +257,6 @@ def configure_features(features: list) -> Dict[str, Any]:
         ).ask()
 
         config['middleware'] = selected if selected else []
-
-    if 'services' in features:
-        service_choices = [
-            questionary.Choice("OpenAI", value="openai"),
-            questionary.Choice("Anthropic", value="anthropic"),
-            questionary.Choice("Ollama", value="ollama"),
-            questionary.Choice("PostgreSQL", value="postgres"),
-            questionary.Choice("Redis", value="redis"),
-            questionary.Choice("Custom API", value="custom"),
-        ]
-
-        selected = questionary.checkbox(
-            "Select external services:",
-            choices=service_choices,
-            style=custom_style
-        ).ask()
-
-        config['services'] = selected if selected else []
 
     if 'auth' in features:
         auth_choice = questionary.select(

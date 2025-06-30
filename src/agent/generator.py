@@ -30,7 +30,7 @@ class ProjectGenerator:
             trim_blocks=True,
             lstrip_blocks=True
         )
-        
+
         # Add custom functions to Jinja2 environment
         self.jinja_env.globals['generate_api_key'] = self._generate_api_key
         self.jinja_env.globals['generate_jwt_secret'] = self._generate_jwt_secret
@@ -38,11 +38,66 @@ class ProjectGenerator:
 
     def _get_features(self) -> List[str]:
         """Get features based on template or custom selection."""
-        if self.template_name == 'custom':
+        # Always use config features if they exist (CLI sets this)
+        if 'features' in self.config:
             return self.config.get('features', [])
         else:
+            # Fallback to template defaults
             template_info = get_template_features()
             return template_info.get(self.template_name, {}).get('features', [])
+    
+    def _get_llm_provider_info(self, selected_services: List[str]) -> tuple:
+        """Get LLM provider info based on selected services."""
+        # Provider configuration mapping
+        providers = {
+            'ollama': {
+                'provider': 'ollama',
+                'service_name': 'ollama',
+                'model': 'qwen3:0.6b'
+            },
+            'anthropic': {
+                'provider': 'anthropic',
+                'service_name': 'anthropic',
+                'model': 'claude-3-haiku-20240307'
+            },
+            'openai': {
+                'provider': 'openai',
+                'service_name': 'openai',
+                'model': 'gpt-4o-mini'
+            }
+        }
+        
+        # Find the first LLM provider in the selected services
+        for service in ['ollama', 'anthropic', 'openai']:
+            if service in selected_services:
+                info = providers[service]
+                return info['provider'], info['service_name'], info['model']
+        
+        return None, None, None
+    
+    def _build_llm_service_config(self, service_type: str) -> Dict[str, Any]:
+        """Build LLM service configuration for a given service type."""
+        configs = {
+            'openai': {
+                'type': 'llm',
+                'provider': 'openai',
+                'api_key': '${OPENAI_API_KEY}',
+                'model': 'gpt-4o-mini'
+            },
+            'anthropic': {
+                'type': 'llm',
+                'provider': 'anthropic',
+                'api_key': '${ANTHROPIC_API_KEY}',
+                'model': 'claude-3-haiku-20240307'
+            },
+            'ollama': {
+                'type': 'llm',
+                'provider': 'ollama',
+                'base_url': '${OLLAMA_BASE_URL:http://localhost:11434}',
+                'model': 'qwen3:0.6b'
+            }
+        }
+        return configs.get(service_type, {})
 
     def _replace_template_vars(self, content: str) -> str:
         """Replace template variables in Python files."""
@@ -118,6 +173,7 @@ class ProjectGenerator:
             'dependencies.py',           # AgentUp dependencies
             'push_notifier.py',          # Enhanced push notification system
             'push_types.py',             # Additional A2A push notification types
+            'custom_request_handler.py',  # Custom request handler for push notifications
         ]
 
         # Copy core files with import updates
@@ -230,6 +286,23 @@ class ProjectGenerator:
             'template_name': self.template_name,
         }
 
+        # Add LLM provider context for templates
+        if 'services' in self.features:
+            selected_services = self.config.get('services', [])
+            llm_provider, llm_service_name, llm_model = self._get_llm_provider_info(selected_services)
+
+            if llm_provider:
+                context.update({
+                    'llm_provider': llm_provider,
+                    'llm_service_name': llm_service_name,
+                    'llm_model': llm_model,
+                    'llm_provider_config': True
+                })
+            else:
+                context['llm_provider_config'] = False
+        else:
+            context['llm_provider_config'] = False
+
         # Add feature config
         if 'feature_config' in self.config:
             context['feature_config'] = self.config['feature_config']
@@ -301,25 +374,18 @@ class ProjectGenerator:
 
         # Add AI configuration for LLM-powered agents
         if 'services' in self.features:
-            # Determine which LLM service to use based on user selection
             selected_services = self.config.get('services', [])
-            llm_service = 'openai'  # Default
-            model = 'gpt-4o-mini'   # Default
-            
-            if 'ollama' in selected_services:
-                llm_service = 'ollama'
-                model = 'llama2'
-            elif 'anthropic' in selected_services:
-                llm_service = 'anthropic'
-                model = 'claude-3-haiku-20240307'
-            elif 'openai' in selected_services:
-                llm_service = 'openai'
-                model = 'gpt-4o-mini'
-            
+            llm_provider, llm_service_name, llm_model = self._get_llm_provider_info(selected_services)
+
+            # Use defaults if no LLM provider selected
+            if not llm_provider:
+                llm_service_name = 'openai'
+                llm_model = 'gpt-4o-mini'
+
             config['ai'] = {
                 'enabled': True,
-                'llm_service': llm_service,
-                'model': model,
+                'llm_service': llm_service_name,
+                'model': llm_model,
                 'system_prompt': f'''You are {self.project_name}, an AI agent with access to specific functions/skills.
 
 Your role:
@@ -461,21 +527,11 @@ Always be helpful, accurate, and maintain a friendly tone. You are designed to a
         if not selected_services:
             # Standard and demo templates get basic OpenAI
             if self.template_name in ['standard', 'demo']:
-                services['openai'] = {
-                    'type': 'llm',
-                    'provider': 'openai',
-                    'api_key': '${OPENAI_API_KEY}',
-                    'model': 'gpt-4o-mini'
-                }
+                services['openai'] = self._build_llm_service_config('openai')
 
             # Full template gets everything
             elif self.template_name == 'full':
-                services['openai'] = {
-                    'type': 'llm',
-                    'provider': 'openai',
-                    'api_key': '${OPENAI_API_KEY}',
-                    'model': 'gpt-4o-mini'
-                }
+                services['openai'] = self._build_llm_service_config('openai')
                 services['postgres'] = {
                     'type': 'database',
                     'config': {
@@ -493,27 +549,9 @@ Always be helpful, accurate, and maintain a friendly tone. You are designed to a
         else:
             # Build services based on user selection
             for service_type in selected_services:
-                if service_type == 'openai':
-                    services['openai'] = {
-                        'type': 'llm',
-                        'provider': 'openai',
-                        'api_key': '${OPENAI_API_KEY}',
-                        'model': 'gpt-4o-mini'
-                    }
-                elif service_type == 'anthropic':
-                    services['anthropic'] = {
-                        'type': 'llm',
-                        'provider': 'anthropic',
-                        'api_key': '${ANTHROPIC_API_KEY}',
-                        'model': 'claude-3-haiku-20240307'
-                    }
-                elif service_type == 'ollama':
-                    services['ollama'] = {
-                        'type': 'llm',
-                        'provider': 'ollama',
-                        'base_url': '${OLLAMA_BASE_URL:http://localhost:11434}',
-                        'model': '${OLLAMA_MODEL:llama2}'
-                    }
+                # Handle LLM services
+                if service_type in ['openai', 'anthropic', 'ollama']:
+                    services[service_type] = self._build_llm_service_config(service_type)
                 elif service_type == 'postgres':
                     services['postgres'] = {
                         'type': 'database',
