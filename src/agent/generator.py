@@ -301,10 +301,25 @@ class ProjectGenerator:
 
         # Add AI configuration for LLM-powered agents
         if 'services' in self.features:
+            # Determine which LLM service to use based on user selection
+            selected_services = self.config.get('services', [])
+            llm_service = 'openai'  # Default
+            model = 'gpt-4o-mini'   # Default
+            
+            if 'ollama' in selected_services:
+                llm_service = 'ollama'
+                model = 'llama2'
+            elif 'anthropic' in selected_services:
+                llm_service = 'anthropic'
+                model = 'claude-3-haiku-20240307'
+            elif 'openai' in selected_services:
+                llm_service = 'openai'
+                model = 'gpt-4o-mini'
+            
             config['ai'] = {
                 'enabled': True,
-                'llm_service': 'openai',
-                'model': 'gpt-4o-mini',
+                'llm_service': llm_service,
+                'model': model,
                 'system_prompt': f'''You are {self.project_name}, an AI agent with access to specific functions/skills.
 
 Your role:
@@ -435,51 +450,95 @@ Always be helpful, accurate, and maintain a friendly tone. You are designed to a
             }]
 
     def _build_services_config(self) -> Dict[str, Any]:
-        """Build services configuration based on template."""
+        """Build services configuration based on template and selected services."""
         if 'services' not in self.features:
             return {}
 
-        services = {
-            'llm': [],
-            'database': [],
-            'cache': []
-        }
+        services = {}
+        selected_services = self.config.get('services', [])
 
-        # Standard and demo templates get basic OpenAI
-        if self.template_name in ['standard', 'demo']:
-            services['llm'] = [{
-                'name': 'openai',
-                'type': 'openai',
-                'config': {
+        # If no services selected, use template defaults
+        if not selected_services:
+            # Standard and demo templates get basic OpenAI
+            if self.template_name in ['standard', 'demo']:
+                services['openai'] = {
+                    'type': 'llm',
+                    'provider': 'openai',
                     'api_key': '${OPENAI_API_KEY}',
                     'model': 'gpt-4o-mini'
                 }
-            }]
 
-        # Full template gets everything
-        elif self.template_name == 'full':
-            services['llm'] = [{
-                'name': 'openai',
-                'type': 'openai',
-                'config': {
+            # Full template gets everything
+            elif self.template_name == 'full':
+                services['openai'] = {
+                    'type': 'llm',
+                    'provider': 'openai',
                     'api_key': '${OPENAI_API_KEY}',
                     'model': 'gpt-4o-mini'
                 }
-            }]
-            services['database'] = [{
-                'name': 'postgres',
-                'type': 'postgres',
-                'config': {
-                    'url': '${DATABASE_URL:postgresql://user:pass@localhost/db}'
+                services['postgres'] = {
+                    'type': 'database',
+                    'config': {
+                        'url': '${DATABASE_URL:postgresql://user:pass@localhost/db}'
+                    }
                 }
-            }]
-            services['cache'] = [{
-                'name': 'redis',
-                'type': 'redis',
-                'config': {
-                    'url': '${REDIS_URL:redis://localhost:6379}'
+                services['redis'] = {
+                    'type': 'cache',
+                    'config': {
+                        'url': '${REDIS_URL:redis://localhost:6379}',
+                        'db': 1,
+                        'max_connections': 10
+                    }
                 }
-            }]
+        else:
+            # Build services based on user selection
+            for service_type in selected_services:
+                if service_type == 'openai':
+                    services['openai'] = {
+                        'type': 'llm',
+                        'provider': 'openai',
+                        'api_key': '${OPENAI_API_KEY}',
+                        'model': 'gpt-4o-mini'
+                    }
+                elif service_type == 'anthropic':
+                    services['anthropic'] = {
+                        'type': 'llm',
+                        'provider': 'anthropic',
+                        'api_key': '${ANTHROPIC_API_KEY}',
+                        'model': 'claude-3-haiku-20240307'
+                    }
+                elif service_type == 'ollama':
+                    services['ollama'] = {
+                        'type': 'llm',
+                        'provider': 'ollama',
+                        'base_url': '${OLLAMA_BASE_URL:http://localhost:11434}',
+                        'model': '${OLLAMA_MODEL:llama2}'
+                    }
+                elif service_type == 'postgres':
+                    services['postgres'] = {
+                        'type': 'database',
+                        'config': {
+                            'url': '${DATABASE_URL:postgresql://user:pass@localhost/db}'
+                        }
+                    }
+                elif service_type == 'redis':
+                    services['redis'] = {
+                        'type': 'cache',
+                        'config': {
+                            'url': '${REDIS_URL:redis://localhost:6379}',
+                            'db': 1,
+                            'max_connections': 10
+                        }
+                    }
+                elif service_type == 'custom':
+                    services['custom_api'] = {
+                        'type': 'web_api',
+                        'config': {
+                            'base_url': '${CUSTOM_API_URL:http://localhost:8080}',
+                            'api_key': '${CUSTOM_API_KEY}',
+                            'timeout': 30
+                        }
+                    }
 
         return services
 

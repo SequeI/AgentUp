@@ -242,6 +242,7 @@ def configure_features(features: list) -> Dict[str, Any]:
         service_choices = [
             questionary.Choice("OpenAI", value="openai"),
             questionary.Choice("Anthropic", value="anthropic"),
+            questionary.Choice("Ollama", value="ollama"),
             questionary.Choice("PostgreSQL", value="postgres"),
             questionary.Choice("Redis", value="redis"),
             questionary.Choice("Custom API", value="custom"),

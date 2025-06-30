@@ -307,18 +307,75 @@ def register_ai_functions_from_handlers():
         try:
             from .handlers import handlers_multimodal
             handler_modules.append(handlers_multimodal)
-        except ImportError:
-            pass
+        except ImportError as e:
+            logger.debug(f"handlers_multimodal not available: {e}")
+        except Exception as e:
+            logger.error(f"Failed to import handlers_multimodal: {e}", exc_info=True)
+            
         try:
             from .handlers import handlers_with_services
             handler_modules.append(handlers_with_services)
-        except ImportError:
-            pass
+        except ImportError as e:
+            logger.debug(f"handlers_with_services not available: {e}")
+        except Exception as e:
+            logger.error(f"Failed to import handlers_with_services: {e}", exc_info=True)
+            
         try:
             from .handlers import user_handlers
             handler_modules.append(user_handlers)
-        except ImportError:
-            pass
+        except ImportError as e:
+            logger.debug(f"user_handlers not available: {e}")
+        except Exception as e:
+            logger.error(f"Failed to import user_handlers: {e}", exc_info=True)
+            
+        # Import system_tools_handler if available
+        try:
+            from .handlers import system_tools_handler
+            handler_modules.append(system_tools_handler)
+        except ImportError as e:
+            logger.debug(f"system_tools_handler not available: {e}")
+        except Exception as e:
+            logger.error(f"Failed to import system_tools_handler: {e}", exc_info=True)
+        
+        # Dynamic discovery of handler modules
+        # This will work with any handler modules that were successfully imported
+        try:
+            import sys
+            from pathlib import Path
+            
+            # Get the handlers package
+            handlers_pkg = sys.modules.get('src.agent.handlers') or sys.modules.get('.handlers', None)
+            if handlers_pkg:
+                handlers_dir = Path(handlers_pkg.__file__).parent
+                
+                # Find all potential handler modules
+                for py_file in handlers_dir.glob("*.py"):
+                    if py_file.name in ["__init__.py", "handlers.py", "handlers_multimodal.py"]:
+                        continue
+                    
+                    module_name = py_file.stem
+                    module_attr_name = module_name
+                    
+                    # Try to get the module from the handlers package
+                    if hasattr(handlers_pkg, module_attr_name):
+                        handler_module = getattr(handlers_pkg, module_attr_name)
+                        if handler_module not in handler_modules:
+                            handler_modules.append(handler_module)
+                            logger.debug(f"Added dynamically discovered handler module: {module_name}")
+                    else:
+                        # Try to import it directly
+                        try:
+                            handler_module = __import__(f'src.agent.handlers.{module_name}', fromlist=[module_name])
+                            if handler_module not in handler_modules:
+                                handler_modules.append(handler_module)
+                                logger.debug(f"Dynamically imported handler module: {module_name}")
+                        except ImportError as e:
+                            logger.debug(f"Could not dynamically import {module_name}: {e}")
+                        except Exception as e:
+                            logger.warning(f"Error dynamically importing {module_name}: {e}")
+            
+        except Exception as e:
+            logger.debug(f"Dynamic handler discovery failed: {e}")
 
         # If no specific modules, scan the main handlers module
         if not handler_modules:
