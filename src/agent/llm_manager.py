@@ -10,36 +10,48 @@ class LLMManager:
     """Manages LLM provider selection, validation, and communication."""
 
     @staticmethod
-    async def get_llm_service(services):
-        """Get the configured LLM service from user's ai configuration."""
+    async def get_llm_service(services=None):
+        """Get the configured LLM service from ai_provider configuration."""
         try:
             from .config import load_config
             config = load_config()
             
-            # Get the user-configured LLM service name
-            ai_config = config.get('ai', {})
-            if not ai_config.get('enabled', False):
-                logger.warning("AI is disabled in configuration")
+            # Get the new ai_provider configuration
+            ai_provider_config = config.get('ai_provider', {})
+            if not ai_provider_config:
+                logger.warning("ai_provider not configured in agent_config.yaml")
                 return None
                 
-            llm_service_name = ai_config.get('llm_service')
-            if not llm_service_name:
-                raise ValueError("ai.llm_service not configured in agent_config.yaml")
-                
-            llm = services.get_llm(llm_service_name)
+            provider = ai_provider_config.get('provider')
+            if not provider:
+                logger.warning("ai_provider.provider not configured")
+                return None
             
-            if llm and llm.is_initialized:
-                logger.info(f"Using configured LLM service: {llm_service_name}")
-                return llm
+            # Create LLM service directly from ai_provider config
+            from .llm_providers import create_llm_provider
+            
+            llm = create_llm_provider(provider, f"ai_provider_{provider}", ai_provider_config)
+            
+            if llm:
+                # Initialize the provider if not already initialized
+                if not llm.is_initialized:
+                    await llm.initialize()
+                
+                if llm.is_initialized:
+                    logger.info(f"Using AI provider: {provider}")
+                    return llm
+                else:
+                    logger.error(f"AI provider '{provider}' initialization failed")
+                    return None
             else:
-                logger.error(f"Configured LLM service '{llm_service_name}' not available or not initialized")
+                logger.error(f"AI provider '{provider}' could not be created")
                 return None
                 
-        except ImportError:
-            logger.error("Config module not available - cannot determine LLM service")
+        except ImportError as e:
+            logger.error(f"LLM provider modules not available: {e}")
             return None
         except Exception as e:
-            logger.error(f"Failed to get LLM service from config: {e}")
+            logger.error(f"Failed to get AI provider from config: {e}")
             raise
 
 

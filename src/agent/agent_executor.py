@@ -48,32 +48,34 @@ class GenericAgentExecutor(AgentExecutor):
         from .config import load_config
         config = load_config()
 
-        # Parse routing configuration (new format)
-        routing_config = config.get('routing', {})
-        self.default_routing_mode = routing_config.get('default_mode', 'ai')
-        self.fallback_skill = routing_config.get('fallback_skill', 'echo')
-        self.fallback_enabled = routing_config.get('fallback_enabled', True)
+        # Parse routing configuration (implicit routing based on keywords/patterns)
+        self.fallback_skill = 'echo'  # Default fallback skill
+        self.fallback_enabled = True
 
-        # Parse skills with routing configuration
+        # Parse skills with implicit routing configuration
         self.skills = {}
         for skill_data in config.get('skills', []):
             if skill_data.get('enabled', True):
                 skill_id = skill_data['skill_id']
+                keywords = skill_data.get('keywords', [])
+                patterns = skill_data.get('patterns', [])
+                
+                # Implicit routing: if keywords or patterns exist, direct routing is available
+                has_direct_routing = bool(keywords or patterns)
+                
                 self.skills[skill_id] = {
-                    'routing_mode': skill_data.get('routing_mode', self.default_routing_mode),
-                    'keywords': skill_data.get('keywords', []),
-                    'patterns': skill_data.get('patterns', []),
+                    'has_direct_routing': has_direct_routing,
+                    'keywords': keywords,
+                    'patterns': patterns,
                     'name': skill_data.get('name', skill_id),
-                    'description': skill_data.get('description', '')
+                    'description': skill_data.get('description', ''),
+                    'priority': skill_data.get('priority', 100)
                 }
 
 
-        # Initialize Function Dispatcher if any skill uses AI routing
-        self.needs_ai = any(skill['routing_mode'] == 'ai' for skill in self.skills.values())
-        if self.needs_ai:
-            self.dispatcher = get_function_dispatcher()
-        else:
-            self.dispatcher = None
+        # Initialize Function Dispatcher for AI routing (all skills are available for AI routing)
+        # AI routing is available when there are skills without direct routing or as fallback
+        self.dispatcher = get_function_dispatcher()
 
     async def execute(
         self,
@@ -125,7 +127,8 @@ class GenericAgentExecutor(AgentExecutor):
             logger.info(f"Processing task {task.id} with skill '{target_skill}' using {routing_mode} routing")
 
             # Process based on determined routing mode
-            if routing_mode == 'ai' and self.dispatcher:
+            if routing_mode == 'ai':
+                # Use AI routing - LLM selects the appropriate skill
                 if self.supports_streaming:
                     # Stream responses incrementally
                     await self._process_streaming(task, updater, event_queue)
@@ -134,10 +137,7 @@ class GenericAgentExecutor(AgentExecutor):
                     result = await self.dispatcher.process_task(task)
                     await self._create_response_artifact(result, task, updater)
             else:
-                # Use direct routing (either skill specifies direct, or AI fallback)
-                if routing_mode == 'ai' and not self.dispatcher and self.fallback_enabled:
-                    logger.warning("AI routing requested but no dispatcher available, falling back to direct routing")
-
+                # Use direct routing - invoke specific skill handler
                 result = await self._process_direct_routing(task, target_skill)
                 await self._create_response_artifact(result, task, updater)
 
@@ -167,38 +167,57 @@ class GenericAgentExecutor(AgentExecutor):
             )
 
     def _determine_skill_and_routing(self, user_input: str) -> tuple[str, str]:
-        """Determine which skill and routing mode to use for the user input."""
+        """Determine which skill and routing mode to use for the user input.
+        
+        New implicit routing logic:
+        1. Check for direct routing matches (keywords/patterns) with priority
+        2. If no direct match found, use AI routing
+        3. If multiple direct matches, use highest priority skill
+        """
         import re
 
         if not user_input:
-            return self.fallback_skill, self.default_routing_mode
+            return self.fallback_skill, 'direct'
 
-        # Check each skill's routing configuration
+        direct_matches = []
+
+        # Check each skill for direct routing matches
         for skill_id, skill_config in self.skills.items():
-            routing_mode = skill_config['routing_mode']
+            if not skill_config['has_direct_routing']:
+                continue
 
-            # For direct routing skills, check keywords and patterns
-            if routing_mode == 'direct':
-                keywords = skill_config.get('keywords', [])
-                patterns = skill_config.get('patterns', [])
+            keywords = skill_config.get('keywords', [])
+            patterns = skill_config.get('patterns', [])
 
-                # Check keywords
-                for keyword in keywords:
-                    if keyword.lower() in user_input.lower():
-                        logger.debug(f"Matched keyword '{keyword}' for skill '{skill_id}'")
-                        return skill_id, routing_mode
+            # Check keywords
+            for keyword in keywords:
+                if keyword.lower() in user_input.lower():
+                    logger.debug(f"Matched keyword '{keyword}' for skill '{skill_id}'")
+                    direct_matches.append((skill_id, skill_config['priority']))
+                    break  # Found a match for this skill, no need to check more keywords
 
-                # Check patterns
+            # Check patterns if no keyword match found for this skill
+            if not any(match[0] == skill_id for match in direct_matches):
                 for pattern in patterns:
                     try:
                         if re.search(pattern, user_input, re.IGNORECASE):
                             logger.debug(f"Matched pattern '{pattern}' for skill '{skill_id}'")
-                            return skill_id, routing_mode
+                            direct_matches.append((skill_id, skill_config['priority']))
+                            break  # Found a match for this skill
                     except re.error as e:
                         logger.warning(f"Invalid regex pattern '{pattern}' in skill '{skill_id}': {e}")
 
-        # No direct routing match found, use fallback skill with default routing mode
-        return self.fallback_skill, self.default_routing_mode
+        # If direct matches found, use the highest priority one
+        if direct_matches:
+            # Sort by priority (lower number = higher priority)
+            direct_matches.sort(key=lambda x: x[1])
+            selected_skill = direct_matches[0][0]
+            logger.info(f"Direct routing to skill '{selected_skill}' (priority: {direct_matches[0][1]})")
+            return selected_skill, 'direct'
+
+        # No direct routing match found, use AI routing
+        logger.info("No direct routing match found, using AI routing")
+        return None, 'ai'
 
 
     async def _process_direct_routing(self, task: Task, target_skill: str = None) -> str:

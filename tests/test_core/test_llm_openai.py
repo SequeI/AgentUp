@@ -1,10 +1,6 @@
-"""Comprehensive tests for OpenAI LLM provider (src/agent/llm_providers/openai.py)."""
-
-import json
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
 from pathlib import Path
-from typing import Dict, Any
 
 import httpx
 
@@ -67,7 +63,7 @@ class TestOpenAIProviderInitialization:
         provider = OpenAIProvider("default-openai", config)
         
         assert provider.api_key == ''
-        assert provider.model == 'gpt-4'
+        assert provider.model == 'gpt-4o-mini'
         assert provider.base_url == 'https://api.openai.com/v1'
         assert provider.timeout == 60.0
 

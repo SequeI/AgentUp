@@ -1,6 +1,5 @@
-"""Bearer Token authenticator implementation."""
-
-from typing import Set
+import os
+from typing import Set, Dict, Any
 from fastapi import Request
 
 from ..base import BaseAuthenticator, AuthenticationResult
@@ -16,6 +15,13 @@ from ..utils import (
     log_security_event,
     get_request_info
 )
+
+# Optional JWT support
+try:
+    import jwt
+    JWT_AVAILABLE = True
+except ImportError:
+    JWT_AVAILABLE = False
 
 
 class BearerTokenAuthenticator(BaseAuthenticator):
@@ -96,28 +102,54 @@ class BearerTokenAuthenticator(BaseAuthenticator):
             )
             raise InvalidCredentialsException("Unauthorized")
 
-        # Compare with configured token using secure comparison
+        # If JWT secret is configured and JWT is available, validate as JWT
+        if self.jwt_secret and JWT_AVAILABLE:
+            return self._validate_jwt_token(token, request_info)
+
+        # Otherwise, validate as simple bearer token
+        return self._validate_bearer_token(token, request_info)
+
+    def get_auth_type(self) -> str:
+        """Get authentication type identifier."""
+        return 'bearer'
+
+    def get_required_headers(self) -> Set[str]:
+        """Get required headers for Bearer authentication."""
+        return {'Authorization'}
+
+    def supports_scopes(self) -> bool:
+        """Bearer tokens can support scopes (especially JWT)."""
+        return True  # Could be extended to parse JWT scopes
+
+    def _validate_bearer_token(self, token: str, request_info: Dict[str, Any]) -> AuthenticationResult:
+        """Validate simple bearer token against configured token.
+        
+        Args:
+            token: The bearer token to validate
+            request_info: Request information for logging
+            
+        Returns:
+            AuthenticationResult: Authentication result
+        """
         configured_token = self.bearer_token
 
         # Handle environment variable placeholders
         if configured_token.startswith('${') and configured_token.endswith('}'):
-            # Extract default value if provided
-            if ':' in configured_token:
-                default_value = configured_token.split(':', 1)[1][:-1]  # Remove closing }
-                if secure_compare(token, default_value):
-                    log_security_event('authentication', request_info, True, "Bearer token authenticated")
-                    return AuthenticationResult(
-                        success=True,
-                        user_id=f"bearer_user_{hash(token) % 10000}",
-                        credentials=token
+            # Extract environment variable name and default value
+            env_expr = configured_token[2:-1]  # Remove ${ and }
+            if ':' in env_expr:
+                env_var, default_value = env_expr.split(':', 1)
+                configured_token = os.getenv(env_var, default_value)
+            else:
+                configured_token = os.getenv(env_expr)
+                if not configured_token:
+                    log_security_event(
+                        'authentication',
+                        request_info,
+                        False,
+                        f"Bearer token environment variable {env_expr} not set"
                     )
-            log_security_event(
-                'authentication',
-                request_info,
-                False,
-                "Bearer token environment variable not resolved"
-            )
-            raise InvalidCredentialsException("Unauthorized")
+                    raise InvalidCredentialsException("Unauthorized")
 
         if secure_compare(token, configured_token):
             log_security_event('authentication', request_info, True, "Bearer token authenticated")
@@ -135,31 +167,103 @@ class BearerTokenAuthenticator(BaseAuthenticator):
         )
         raise InvalidCredentialsException("Unauthorized")
 
-    def get_auth_type(self) -> str:
-        """Get authentication type identifier."""
-        return 'bearer'
-
-    def get_required_headers(self) -> Set[str]:
-        """Get required headers for Bearer authentication."""
-        return {'Authorization'}
-
-    def supports_scopes(self) -> bool:
-        """Bearer tokens can support scopes (especially JWT)."""
-        return True  # Could be extended to parse JWT scopes
-
-    def _validate_jwt_token(self, token: str) -> AuthenticationResult:
-        """Validate JWT token (future implementation).
+    def _validate_jwt_token(self, token: str, request_info: Dict[str, Any]) -> AuthenticationResult:
+        """Validate JWT token with proper security checks.
 
         Args:
             token: The JWT token to validate
+            request_info: Request information for logging
 
         Returns:
             AuthenticationResult: Authentication result with user info and scopes
         """
-        # TODO: Implement proper JWT validation using PyJWT
-        # This would include:
-        # - Signature verification
-        # - Expiration checking
-        # - Issuer/audience validation
-        # - Scope extraction
-        pass
+        if not JWT_AVAILABLE:
+            log_security_event(
+                'authentication',
+                request_info,
+                False,
+                "JWT validation requested but PyJWT not available"
+            )
+            raise SecurityConfigurationException("JWT validation requires PyJWT library")
+
+        try:
+            # Get JWT secret from environment if needed
+            jwt_secret = self.jwt_secret
+            if jwt_secret and jwt_secret.startswith('${') and jwt_secret.endswith('}'):
+                env_expr = jwt_secret[2:-1]  # Remove ${ and }
+                if ':' in env_expr:
+                    env_var, default_value = env_expr.split(':', 1)
+                    jwt_secret = os.getenv(env_var, default_value)
+                else:
+                    jwt_secret = os.getenv(env_expr)
+                    
+            if not jwt_secret:
+                log_security_event(
+                    'authentication',
+                    request_info,
+                    False,
+                    "JWT secret not configured"
+                )
+                raise InvalidCredentialsException("Unauthorized")
+
+            # Decode and validate JWT
+            payload = jwt.decode(
+                token,
+                jwt_secret,
+                algorithms=[self.jwt_algorithm],
+                issuer=self.jwt_issuer,
+                audience=self.jwt_audience,
+                options={
+                    "verify_signature": True,
+                    "verify_exp": True,
+                    "verify_iat": True,
+                    "verify_aud": self.jwt_audience is not None,
+                    "verify_iss": self.jwt_issuer is not None,
+                }
+            )
+
+            # Extract user information from payload
+            user_id = payload.get('sub') or payload.get('user_id') or 'jwt_user'
+            scopes = payload.get('scope', '').split() if payload.get('scope') else []
+            
+            log_security_event(
+                'authentication',
+                request_info,
+                True,
+                f"JWT token authenticated for user: {user_id}"
+            )
+            
+            return AuthenticationResult(
+                success=True,
+                user_id=user_id,
+                credentials=token,
+                scopes=set(scopes),
+                metadata=payload
+            )
+
+        except jwt.ExpiredSignatureError:
+            log_security_event(
+                'authentication',
+                request_info,
+                False,
+                "JWT token has expired"
+            )
+            raise InvalidCredentialsException("Token expired")
+            
+        except jwt.InvalidTokenError as e:
+            log_security_event(
+                'authentication',
+                request_info,
+                False,
+                f"Invalid JWT token: {str(e)}"
+            )
+            raise InvalidCredentialsException("Invalid token")
+            
+        except Exception as e:
+            log_security_event(
+                'authentication',
+                request_info,
+                False,
+                f"JWT validation error: {str(e)}"
+            )
+            raise InvalidCredentialsException("Authentication failed")

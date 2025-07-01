@@ -31,8 +31,8 @@ class TestLoadConfig:
         loaded_config = load_config(str(config_file))
 
         assert loaded_config["agent"]["name"] == "test-agent"
-        assert loaded_config["ai"]["enabled"] is True
-        assert "openai" in loaded_config["services"]
+        assert loaded_config["ai_provider"]["provider"] == "openai"
+        assert loaded_config["ai_provider"]["model"] == "gpt-4o-mini"
 
     def test_load_config_file_not_found(self):
         """Test error handling when configuration file doesn't exist."""

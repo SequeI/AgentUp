@@ -36,13 +36,13 @@ class TestTestFoundation:
         """Test the sample agent configuration fixture."""
         assert "agent" in sample_agent_config, "Should have agent section"
         assert "skills" in sample_agent_config, "Should have skills section"
-        assert "ai" in sample_agent_config, "Should have ai section"
+        assert "ai_provider" in sample_agent_config, "Should have ai_provider section"
         assert "services" in sample_agent_config, "Should have services section"
 
         # Test specific values
         assert sample_agent_config["agent"]["name"] == "test-agent"
-        assert sample_agent_config["ai"]["llm_service"] == "openai"
-        assert "openai" in sample_agent_config["services"]
+        assert sample_agent_config["ai_provider"]["provider"] == "openai"
+        assert sample_agent_config["ai_provider"]["model"] == "gpt-4o-mini"
 
     def test_minimal_agent_config_fixture(self, minimal_agent_config: Dict[str, Any]):
         """Test the minimal agent configuration fixture."""
@@ -56,16 +56,14 @@ class TestTestFoundation:
                                      anthropic_agent_config: Dict[str, Any]):
         """Test provider-specific configuration fixtures."""
         # Test Ollama config
-        assert ollama_agent_config["ai"]["llm_service"] == "ollama"
-        assert ollama_agent_config["ai"]["model"] == "qwen3:0.6b"
-        assert "ollama" in ollama_agent_config["services"]
-        assert ollama_agent_config["services"]["ollama"]["provider"] == "ollama"
+        assert ollama_agent_config["ai_provider"]["provider"] == "ollama"
+        assert ollama_agent_config["ai_provider"]["model"] == "qwen3:0.6b"
+        assert ollama_agent_config["services"] == {}
 
         # Test Anthropic config
-        assert anthropic_agent_config["ai"]["llm_service"] == "anthropic"
-        assert anthropic_agent_config["ai"]["model"] == "claude-3-haiku-20240307"
-        assert "anthropic" in anthropic_agent_config["services"]
-        assert anthropic_agent_config["services"]["anthropic"]["provider"] == "anthropic"
+        assert anthropic_agent_config["ai_provider"]["provider"] == "anthropic"
+        assert anthropic_agent_config["ai_provider"]["model"] == "claude-3-haiku-20240307"
+        assert anthropic_agent_config["services"] == {}
 
     def test_project_config_fixture(self, project_config: Dict[str, Any]):
         """Test the project configuration fixture."""
@@ -76,7 +74,8 @@ class TestTestFoundation:
 
         assert project_config["template"] == "standard"
         assert "services" in project_config["features"]
-        assert "openai" in project_config["services"]
+        assert "ai_provider" in project_config["features"]
+        assert "redis" in project_config["services"]
 
 
 class TestTestHelpers:
@@ -93,10 +92,12 @@ class TestTestHelpers:
 
     def test_assert_config_has_service(self, sample_agent_config: Dict[str, Any]):
         """Test the assert_config_has_service helper."""
-        # This should pass
-        assert_config_has_service(sample_agent_config, "openai", "llm")
+        # The sample config no longer has openai in services (it's in ai_provider)
+        # So we test that the assertion correctly fails
+        with pytest.raises(AssertionError):
+            assert_config_has_service(sample_agent_config, "openai", "llm")
 
-        # This should fail
+        # This should also fail
         with pytest.raises(AssertionError):
             assert_config_has_service(sample_agent_config, "nonexistent", "llm")
 

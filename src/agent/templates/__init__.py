@@ -36,8 +36,9 @@ def get_feature_choices() -> List[questionary.Choice]:
     return [
         questionary.Choice("Middleware System", value="middleware", checked=True),
         questionary.Choice("Multi-modal Processing", value="multimodal"),
-        questionary.Choice("External Services (LLM, Database, Cache)", value="services"),
+        questionary.Choice("External Services (Database, Cache)", value="services"),
         questionary.Choice("State Management", value="state"),
+        questionary.Choice("AI Provider", value="ai_provider"),
         questionary.Choice("Authentication", value="auth", checked=True),
         questionary.Choice("Monitoring & Observability", value="monitoring"),
         questionary.Choice("Testing Framework", value="testing", checked=True),
@@ -53,16 +54,16 @@ def get_template_features(template: str = None) -> Dict[str, Dict[str, Any]]:
             "description": "Barebone agent with text processing only - no AI, no external dependencies"
         },
         "standard": {
-            "features": ["middleware", "services", "auth", "testing", "mcp"],
+            "features": ["middleware", "services", "ai_provider", "auth", "testing", "mcp"],
             "description": "AI-powered agent with MCP integration - recommended for most users"
         },
         "full": {
-            "features": ["middleware", "multimodal", "services", "state", "auth",
+            "features": ["middleware", "multimodal", "services", "state", "ai_provider", "auth",
                         "monitoring", "testing", "deployment", "mcp"],
             "description": "Enterprise-ready agent with all features including multiple MCP servers"
         },
         "demo": {
-            "features": ["middleware", "services", "auth", "testing", "mcp"],
+            "features": ["middleware", "services", "ai_provider", "auth", "testing", "mcp"],
             "description": "Example agent showcasing various capabilities with pre-built skills"
         }
     }
