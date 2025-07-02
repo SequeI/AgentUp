@@ -18,7 +18,7 @@ DEFAULT_API_ENDPOINTS = {
 
 # Database configurations
 DEFAULT_DATABASE_URL = 'sqlite:///./agent.db'
-DEFAULT_REDIS_URL = 'redis://localhost:6379'
+DEFAULT_VALKEY_URL = 'valkey://localhost:6379'
 
 # Server configuration
 DEFAULT_SERVER_HOST = '0.0.0.0'
@@ -37,7 +37,7 @@ ENV_VARS = {
     'OPENAI_API_KEY': 'OPENAI_API_KEY',
     'ANTHROPIC_API_KEY': 'ANTHROPIC_API_KEY',
     'OLLAMA_BASE_URL': 'OLLAMA_BASE_URL',
-    'REDIS_URL': 'REDIS_URL',
+    'VALKEY_URL': 'VALKEY_URL',
     'DATABASE_URL': 'DATABASE_URL',
     'AGENT_CONFIG_PATH': 'AGENT_CONFIG_PATH',
     'SERVER_HOST': 'SERVER_HOST',

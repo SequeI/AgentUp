@@ -11,7 +11,7 @@ from .api import router, jsonrpc_error_handler, create_agent_card, set_request_h
 from .config import load_config
 from .models import JSONRPCError
 from .security import create_security_manager
-from .constants import DEFAULT_REDIS_URL, DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT
+from .constants import DEFAULT_VALKEY_URL, DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT
 
 from a2a.server.tasks import InMemoryTaskStore
 from .push_notifier import EnhancedPushNotifier, ValkeyPushNotifier
