@@ -34,7 +34,7 @@ from agent.models import (
 class TestAgentCard:
     """Test agent card creation."""
 
-    @patch("agent.api.load_config")
+    @patch("agent.api.routes.load_config")
     def test_create_agent_card_minimal(self, mock_load_config):
         """Test creating agent card with minimal configuration."""
         mock_load_config.return_value = {
@@ -58,7 +58,7 @@ class TestAgentCard:
         assert card.capabilities.pushNotifications is True
         assert card.capabilities.stateTransitionHistory is True
 
-    @patch("agent.api.load_config")
+    @patch("agent.api.routes.load_config")
     def test_create_agent_card_with_skills(self, mock_load_config):
         """Test creating agent card with skills."""
         mock_load_config.return_value = {
@@ -81,7 +81,7 @@ class TestAgentCard:
         assert card.skills[0].id == "chat"
         assert card.skills[0].name == "Chat"
 
-    @patch("agent.api.load_config")
+    @patch("agent.api.routes.load_config")
     def test_create_agent_card_with_security_enabled(self, mock_load_config):
         """Test creating agent card with security enabled."""
         mock_load_config.return_value = {
@@ -113,9 +113,9 @@ class TestRequestHandlerManagement:
     def test_get_request_handler_not_initialized(self):
         """Test getting request handler when not initialized."""
         # Clear the global handler
-        import agent.api
+        import agent.api.routes
 
-        agent.api._request_handler = None
+        agent.api.routes._request_handler = None
 
         with pytest.raises(RuntimeError, match="Request handler not initialized"):
             get_request_handler()
@@ -136,7 +136,7 @@ class TestHealthEndpoints:
         """Create test client."""
         return TestClient(app)
 
-    @patch("agent.api.load_config")
+    @patch("agent.api.routes.load_config")
     def test_health_check(self, mock_load_config, client):
         """Test basic health check endpoint."""
         mock_load_config.return_value = {"project_name": "TestAgent"}
@@ -160,7 +160,7 @@ class TestAgentDiscovery:
         app.include_router(router)
         return TestClient(app)
 
-    @patch("agent.api.create_agent_card")
+    @patch("agent.api.routes.create_agent_card")
     def test_agent_discovery_endpoint(self, mock_create_card, client):
         """Test /.well-known/agent.json endpoint."""
         mock_card = AgentCard(

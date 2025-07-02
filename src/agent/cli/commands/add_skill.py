@@ -343,7 +343,7 @@ def ensure_function_dispatcher_import_available() -> bool:
         handlers_content = handlers_path.read_text()
 
         # Check if function_dispatcher import already exists
-        if "from .function_dispatcher import ai_function" not in handlers_content:
+        if "from .core.dispatcher import ai_function" not in handlers_content:
             click.echo(f"{click.style('📝 Adding Agent Exectutor import to handlers.py...', fg='blue')}")
 
             # Find where to insert the import (after existing imports)
@@ -360,7 +360,7 @@ def ensure_function_dispatcher_import_available() -> bool:
 
             # Insert function_dispatcher import
             ai_import = (
-                "\n# Import AI function decorator for LLM-powered agents\nfrom .function_dispatcher import ai_function"
+                "\n# Import AI function decorator for LLM-powered agents\nfrom .core.dispatcher import ai_function"
             )
 
             if insert_line > 0:

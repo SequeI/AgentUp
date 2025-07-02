@@ -14,8 +14,8 @@ _project_name = _config.get("agent", {}).get("name", "Agent")
 
 # Import shared utilities (with fallbacks for testing)
 try:
-    from ..messages import ConversationContext, MessageProcessor
-    from ..utils import extract_parameter
+    from ..utils.helpers import extract_parameter
+    from ..utils.messages import MessageProcessor
 except ImportError:
 
     class ConversationContext:
@@ -84,7 +84,7 @@ except ImportError:
 
 # Optional AI decorator (no-op if unavailable)
 try:
-    from ..function_dispatcher import ai_function
+    from ..core.dispatcher import ai_function
 except ImportError:
 
     def ai_function(description=None, parameters=None):
@@ -120,7 +120,7 @@ def get_handler(skill_id: str) -> Callable[[Task], str] | None:
 
     # Finally check registry skills
     try:
-        from ..registry_skill_loader import get_registry_skill_handler
+        from ..utils.loaders import get_registry_skill_handler
 
         return get_registry_skill_handler(skill_id)
     except ImportError:

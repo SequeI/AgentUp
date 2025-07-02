@@ -69,7 +69,7 @@ async def _initialize_mcp_client(services, client_config: dict[str, Any]) -> Non
 
             # Register HTTP MCP tools with AI orchestrator
             try:
-                from ..function_dispatcher import get_function_registry
+                from ..core.dispatcher import get_function_registry
 
                 registry = get_function_registry()
 
@@ -104,7 +104,7 @@ async def _initialize_mcp_client(services, client_config: dict[str, Any]) -> Non
             logger.info("Registered MCP stdio client with service registry")
             # Register stdio MCP tools with function dispatcher
             try:
-                from ..function_dispatcher import get_function_registry
+                from ..core.dispatcher import get_function_registry
 
                 registry = get_function_registry()
 
@@ -169,7 +169,7 @@ async def _expose_handlers_as_mcp_tools(mcp_server) -> None:
 
     try:
         # Get registered handlers from the function registry
-        from ..function_dispatcher import get_function_registry
+        from ..core.dispatcher import get_function_registry
 
         registry = get_function_registry()
 

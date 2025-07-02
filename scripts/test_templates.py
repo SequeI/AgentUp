@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Test template rendering and generated code."""
 
-import click
-import sys
-import subprocess
 import shutil
+import subprocess
+import sys
 from pathlib import Path
+
+import click
 
 
 @click.command()
@@ -16,7 +17,7 @@ from pathlib import Path
 def test_templates(keep, verbose, template, quick):
     """Test template rendering and generated code quality."""
 
-    click.echo("🧪 Testing template rendering...")
+    click.echo("Testing template rendering...")
 
     # Paths
     project_root = Path(__file__).parent.parent
@@ -27,7 +28,7 @@ def test_templates(keep, verbose, template, quick):
         shutil.rmtree(output_dir)
 
     # Step 1: Render templates
-    click.echo("\n📝 Rendering templates...")
+    click.echo("\nRendering templates...")
     cmd = [
         "uv", "run", "agentup", "render-templates",
         "--output-dir", str(output_dir),
@@ -99,7 +100,7 @@ def test_templates(keep, verbose, template, quick):
         if import_errors:
             click.echo(f"  ❌ {len(import_errors)} files have import errors", err=True)
             for file, error in import_errors[:5]:  # Show first 5
-                click.echo(f"    - {file.name}", err=True)
+                click.echo(f"    - {file.name}: {error.stderr.decode('utf-8').strip()}", err=True)
         else:
             click.echo(f"  ✅ All {len(py_files)} Python files compile successfully")
 

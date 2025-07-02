@@ -4,12 +4,12 @@ from typing import Any
 
 from a2a.types import Task
 
-from .conversation_manager import ConversationManager
+from ..api.streaming import StreamingHandler
+from ..services import get_services
+from ..services.llm.manager import LLMManager
+from ..state.conversation import ConversationManager
+from ..utils.messages import MessageProcessor
 from .function_executor import FunctionExecutor
-from .llm_manager import LLMManager
-from .messages import MessageProcessor
-from .services import get_services
-from .streaming_handler import StreamingHandler
 
 logger = logging.getLogger(__name__)
 
@@ -295,18 +295,18 @@ def register_ai_functions_from_handlers():
     """Auto-register functions from handlers with @ai_function decorator."""
     # CONDITIONAL_HANDLERS_IMPORT
     try:
-        from .handlers import handlers
+        from ..handlers import handlers
 
         # Also try importing individual handler modules
         handler_modules = []
         try:
-            from .handlers import handlers as main_handlers
+            from ..handlers import handlers as main_handlers
 
             handler_modules.append(main_handlers)
         except ImportError:
             pass
         try:
-            from .handlers import handlers_multimodal
+            from ..handlers import handlers_multimodal
 
             handler_modules.append(handlers_multimodal)
         except ImportError as e:
@@ -315,7 +315,7 @@ def register_ai_functions_from_handlers():
             logger.error(f"Failed to import handlers_multimodal: {e}", exc_info=True)
 
         try:
-            from .handlers import handlers_with_services
+            from ..handlers import handlers_with_services
 
             handler_modules.append(handlers_with_services)
         except ImportError as e:
@@ -324,7 +324,7 @@ def register_ai_functions_from_handlers():
             logger.error(f"Failed to import handlers_with_services: {e}", exc_info=True)
 
         try:
-            from .handlers import user_handlers
+            from ..handlers import user_handlers
 
             handler_modules.append(user_handlers)
         except ImportError as e:
@@ -334,7 +334,7 @@ def register_ai_functions_from_handlers():
 
         # Import system_tools_handler if available
         try:
-            from .handlers import system_tools_handler
+            from ..handlers import system_tools_handler
 
             handler_modules.append(system_tools_handler)
         except ImportError as e:

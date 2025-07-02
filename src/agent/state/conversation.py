@@ -17,7 +17,7 @@ class ConversationManager:
         """Prepare conversation for LLM with system prompt and history."""
 
         # Get system prompt from config
-        from .config import load_config
+        from ..config import load_config
 
         config = load_config()
         ai_config = config.get("ai", {})

@@ -33,7 +33,7 @@ class MCPHTTPServer:
 
             # Get registered AI functions from the function registry
             try:
-                from ..function_dispatcher import get_function_registry
+                from ..core.dispatcher import get_function_registry
 
                 registry = get_function_registry()
 
@@ -60,7 +60,7 @@ class MCPHTTPServer:
         async def handle_call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
             """Handle MCP tool calls by routing to AI functions."""
             try:
-                from ..function_dispatcher import get_function_registry
+                from ..core.dispatcher import get_function_registry
 
                 registry = get_function_registry()
 
@@ -171,7 +171,7 @@ def create_mcp_router(mcp_server: MCPHTTPServer):
             if method == "tools/list":
                 # Get available AI functions as MCP tools
                 try:
-                    from ..function_dispatcher import get_function_registry
+                    from ..core.dispatcher import get_function_registry
 
                     registry = get_function_registry()
 
@@ -206,7 +206,7 @@ def create_mcp_router(mcp_server: MCPHTTPServer):
 
                     from a2a.types import Message, Part, Role, Task, TaskState, TaskStatus, TextPart
 
-                    from ..function_dispatcher import get_function_registry
+                    from ..core.dispatcher import get_function_registry
 
                     registry = get_function_registry()
                     tool_name = params.get("name")

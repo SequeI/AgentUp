@@ -6,7 +6,7 @@ from typing import Any
 import httpx
 import yaml
 
-from ..constants import (
+from ..config.constants import (
     DEFAULT_API_ENDPOINTS,
     DEFAULT_HTTP_TIMEOUT,
     DEFAULT_MODELS,

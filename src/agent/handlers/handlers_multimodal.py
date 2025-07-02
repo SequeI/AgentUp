@@ -3,7 +3,7 @@ import logging
 from a2a.types import Task
 
 from ..config import load_config
-from ..multimodal import MultiModalProcessor
+from ..services.multimodal import MultiModalProcessor
 
 # Load config and extract project name
 _config = load_config()
@@ -41,7 +41,7 @@ except ImportError:
 
 
 try:
-    from ..function_dispatcher import ai_function
+    from ..core.dispatcher import ai_function
 except ImportError:
 
     def ai_function(*args, **kwargs):

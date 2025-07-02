@@ -48,7 +48,7 @@ ENV_VARS = {
 }
 
 # Model capabilities configuration file path
-MODEL_CAPABILITIES_FILE = os.path.join(os.path.dirname(__file__), "model_capabilities.yaml")
+MODEL_CAPABILITIES_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "model_capabilities.yaml")
 
 # Security defaults
 DEFAULT_JWT_ALGORITHM = "HS256"

@@ -1,23 +1,23 @@
 import logging
 from typing import Any
 
-from .config import load_config
-from .llm_providers.anthropic import AnthropicProvider
-from .llm_providers.ollama import OllamaProvider
-from .llm_providers.openai import OpenAIProvider
-from .models import AgentConfig, ServiceConfig
-from .utils import load_callable
+from ..config import load_config
+from ..config.models import AgentConfig, ServiceConfig
+from ..llm_providers.anthropic import AnthropicProvider
+from ..llm_providers.ollama import OllamaProvider
+from ..llm_providers.openai import OpenAIProvider
+from ..utils.helpers import load_callable
 
 # Fallback stubs if the real modules aren’t installed
 try:
-    from .mcp_support.mcp_client import MCPClientService
-    from .mcp_support.mcp_http_client import MCPHTTPClientService
+    from ..mcp_support.mcp_client import MCPClientService
+    from ..mcp_support.mcp_http_client import MCPHTTPClientService
 except ImportError:
     MCPClientService = None
     MCPHTTPClientService = None
 
 try:
-    from .mcp_support.mcp_server import MCPServerComponent
+    from ..mcp_support.mcp_server import MCPServerComponent
 except ImportError:
     MCPServerComponent = None
     MCPHTTPServer = None

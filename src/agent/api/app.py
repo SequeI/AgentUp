@@ -6,28 +6,28 @@ import uvicorn
 from a2a.server.tasks import InMemoryTaskStore
 from fastapi import FastAPI
 
-from .agent_executor import GenericAgentExecutor as AgentExecutorImpl
-from .api import create_agent_card, jsonrpc_error_handler, router, set_request_handler_instance
-from .config import load_config
-from .constants import DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT
-from .custom_request_handler import CustomRequestHandler
-from .models import JSONRPCError
-from .push_notifier import EnhancedPushNotifier, ValkeyPushNotifier
-from .security import create_security_manager
+from ..config import load_config
+from ..config.constants import DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT
+from ..config.models import JSONRPCError
+from ..core.executor import GenericAgentExecutor as AgentExecutorImpl
+from ..push.handler import CustomRequestHandler
+from ..push.notifier import EnhancedPushNotifier, ValkeyPushNotifier
+from ..security import create_security_manager
+from .routes import create_agent_card, jsonrpc_error_handler, router, set_request_handler_instance
 
 # Optional imports; fall back to None if the module isn't present
 try:
-    from .services import initialize_services_from_config
+    from ..services import initialize_services_from_config
 except ImportError:
     initialize_services_from_config = None
 
 try:
-    from .function_dispatcher import register_ai_functions_from_handlers
+    from ..core.dispatcher import register_ai_functions_from_handlers
 except ImportError:
     register_ai_functions_from_handlers = None
 
 try:
-    from .mcp_support.mcp_integration import initialize_mcp_integration, shutdown_mcp_integration
+    from ..mcp_support.mcp_integration import initialize_mcp_integration, shutdown_mcp_integration
 except ImportError:
     initialize_mcp_integration = None
     shutdown_mcp_integration = None
@@ -77,7 +77,7 @@ async def lifespan(app: FastAPI):
 
     # Load registry skills if available
     try:
-        from .registry_skill_loader import load_all_registry_skills
+        from ..utils.loaders import load_all_registry_skills
 
         load_all_registry_skills()
         logger.info("Registry skills loaded successfully")
@@ -109,7 +109,7 @@ async def lifespan(app: FastAPI):
     state_cfg = config.get("state", {})
     if state_cfg:
         try:
-            from .context import get_context_manager
+            from ..state.context import get_context_manager
 
             backend = state_cfg.get("backend", "memory")
             backend_config = {}
@@ -143,7 +143,7 @@ async def lifespan(app: FastAPI):
             # Add MCP HTTP endpoint if server is enabled
             if mcp_cfg.get("server", {}).get("enabled", False):
                 try:
-                    from .mcp_support.mcp_http_server import MCPHTTPServer, create_mcp_router
+                    from ..mcp_support.mcp_http_server import MCPHTTPServer, create_mcp_router
 
                     # Create MCP HTTP server
                     mcp_http_server = MCPHTTPServer(
@@ -169,7 +169,7 @@ async def lifespan(app: FastAPI):
     push_config = config.get("push_notifications", {})
     if push_config.get("backend") == "valkey" and push_config.get("enabled", True):
         try:
-            from .services import get_services
+            from ..services import get_services
 
             services = get_services()
 
@@ -207,7 +207,7 @@ async def lifespan(app: FastAPI):
                     validate_urls=push_config.get("validate_urls", True),
                 )
                 # Update the request handler to use Valkey push notifier
-                from .api import get_request_handler
+                from .routes import get_request_handler
 
                 handler = get_request_handler()
                 handler._push_notifier = valkey_push_notifier

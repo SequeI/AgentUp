@@ -24,8 +24,8 @@ from a2a.utils import (
 )
 from a2a.utils.errors import ServerError
 
-from .function_dispatcher import get_function_dispatcher
-from .models import BaseAgent
+from ..config.models import BaseAgent
+from .dispatcher import get_function_dispatcher
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -45,7 +45,7 @@ class GenericAgentExecutor(AgentExecutor):
             self.agent_name = agent.agent_name
 
         # Load config for new routing system
-        from .config import load_config
+        from ..config import load_config
 
         config = load_config()
 
@@ -228,7 +228,7 @@ class GenericAgentExecutor(AgentExecutor):
         logger.info(f"Routing to skill: {skill_id}")
 
         # Get handler for the skill
-        from .handlers import get_handler
+        from ..handlers import get_handler
 
         handler = get_handler(skill_id)
 
