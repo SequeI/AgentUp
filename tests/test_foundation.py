@@ -75,7 +75,7 @@ class TestTestFoundation:
         assert project_config["template"] == "standard"
         assert "services" in project_config["features"]
         assert "ai_provider" in project_config["features"]
-        assert "redis" in project_config["services"]
+        assert "valkey" in project_config["services"]
 
 
 class TestTestHelpers:
