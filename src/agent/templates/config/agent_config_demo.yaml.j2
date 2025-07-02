@@ -111,10 +111,10 @@ services:
 {% endif %}
     model: {{ llm_model }}
 {% endif %}
-  redis:
+  valkey:
     type: cache
     config:
-      url: '${REDIS_URL:redis://localhost:6379}'
+      url: '${VALKEY_URL:valkey://localhost:6379}'
       db: 1                    # Use DB 1 for cache
       max_connections: 10
 
@@ -162,21 +162,21 @@ middleware:
 # Push notifications configuration
 push_notifications:
   enabled: true
-  backend: redis              # Redis backend for demo features
+  backend: valkey              # Valkey backend for demo features
   key_prefix: "demo:push:"    # Demo-specific key prefix
   validate_urls: true         # Enable webhook URL validation
   timeout: 15                 # Shorter timeout for demo
 
 # Cache management
 cache:
-  backend: redis
+  backend: valkey
   default_ttl: 900            # 15 minutes for demo
   key_prefix: "demo:cache:"
   enabled: true
 
 # State management
 state:
-  backend: redis
-  url: '${REDIS_URL:redis://localhost:6379}'
+  backend: valkey
+  url: '${VALKEY_URL:valkey://localhost:6379}'
   key_prefix: "demo:state:"
   ttl: 3600  # 1 hour

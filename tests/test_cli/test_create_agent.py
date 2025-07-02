@@ -334,7 +334,7 @@ class TestServiceSelection:
         ]
         mock_questionary.select.return_value.ask.return_value = "standard"
         mock_questionary.confirm.return_value.ask.return_value = False
-        mock_questionary.checkbox.return_value.ask.return_value = ["openai", "redis", "postgres"]
+        mock_questionary.checkbox.return_value.ask.return_value = ["openai", "valkey", "postgres"]
 
         with patch('pathlib.Path.cwd', return_value=temp_dir):
             result = runner.invoke(create_agent, ['--no-git'])
@@ -343,7 +343,7 @@ class TestServiceSelection:
 
         call_args = mock_generator.call_args[0]
         config = call_args[1]
-        assert set(config['services']) == {"openai", "redis", "postgres"}
+        assert set(config['services']) == {"openai", "valkey", "postgres"}
 
     def test_service_selection_no_services(self, runner, mock_generator, mock_questionary, temp_dir, mock_template_features):
         """Test when user selects no services."""
@@ -444,7 +444,7 @@ class TestFeatureCustomization:
             # User selects additional features
             mock_questionary.checkbox.return_value.ask.side_effect = [
                 ["services", "middleware", "auth", "state"],  # Feature selection
-                ["openai", "redis"]  # Service selection
+                ["openai", "valkey"]  # Service selection
             ]
 
             # Mock configure_features call
@@ -464,7 +464,7 @@ class TestFeatureCustomization:
                 config = call_args[1]
                 assert set(config['features']) == {"services", "middleware", "auth", "state"}
                 assert config['feature_config']['auth'] == "api_key"
-                assert config['services'] == ["openai", "redis"]
+                assert config['services'] == ["openai", "valkey"]
 
     def test_configure_features_middleware(self, mock_questionary):
         """Test configure_features function for middleware."""

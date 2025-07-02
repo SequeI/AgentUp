@@ -74,10 +74,10 @@ services:
 {% endif %}
     model: {{ llm_model }}
 {% endif %}
-  redis:
+  valkey:
     type: cache
     config:
-      url: '${REDIS_URL:redis://localhost:6379}'
+      url: '${VALKEY_URL:valkey://localhost:6379}'
       db: 1                    # Use DB 1 for cache
       max_connections: 10
 

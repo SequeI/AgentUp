@@ -130,7 +130,7 @@ class TestCacheService:
     def test_cache_service_initialization(self):
         """Test CacheService initialization."""
         config = {
-            "url": "redis://localhost:6379/0",
+            "url": "valkey://localhost:6379/0",
             "ttl": 1800
         }
 
@@ -138,7 +138,7 @@ class TestCacheService:
 
         assert cache_service.name == "test_cache"
         assert cache_service.config == config
-        assert cache_service.url == "redis://localhost:6379/0"
+        assert cache_service.url == "valkey://localhost:6379/0"
         assert cache_service.ttl == 1800
         assert cache_service.is_initialized is False
 
@@ -148,13 +148,13 @@ class TestCacheService:
 
         cache_service = CacheService("test_cache", config)
 
-        assert cache_service.url == "redis://localhost:6379"
+        assert cache_service.url == "valkey://localhost:6379"
         assert cache_service.ttl == 3600
 
     @pytest.mark.asyncio
     async def test_cache_service_initialize(self):
         """Test CacheService initialization."""
-        config = {"url": "redis://localhost:6379/0"}
+        config = {"url": "valkey://localhost:6379/0"}
         cache_service = CacheService("test_cache", config)
 
         await cache_service.initialize()
@@ -164,7 +164,7 @@ class TestCacheService:
     @pytest.mark.asyncio
     async def test_cache_service_close(self):
         """Test CacheService close method."""
-        config = {"url": "redis://localhost:6379"}
+        config = {"url": "valkey://localhost:6379"}
         cache_service = CacheService("test_cache", config)
         cache_service._initialized = True
 
@@ -175,18 +175,18 @@ class TestCacheService:
     @pytest.mark.asyncio
     async def test_cache_service_health_check_healthy(self):
         """Test CacheService health check when healthy."""
-        config = {"url": "redis://localhost:6379"}
+        config = {"url": "valkey://localhost:6379"}
         cache_service = CacheService("test_cache", config)
 
         health = await cache_service.health_check()
 
         assert health["status"] == "healthy"
-        assert health["url"] == "redis://localhost:6379"
+        assert health["url"] == "valkey://localhost:6379"
 
     @pytest.mark.asyncio
     async def test_cache_service_get_method(self):
         """Test CacheService get method."""
-        config = {"url": "redis://localhost:6379"}
+        config = {"url": "valkey://localhost:6379"}
         cache_service = CacheService("test_cache", config)
 
         value = await cache_service.get("test_key")
@@ -197,7 +197,7 @@ class TestCacheService:
     @pytest.mark.asyncio
     async def test_cache_service_set_method(self):
         """Test CacheService set method."""
-        config = {"url": "redis://localhost:6379"}
+        config = {"url": "valkey://localhost:6379"}
         cache_service = CacheService("test_cache", config)
 
         await cache_service.set("test_key", "test_value", ttl=300)
@@ -207,7 +207,7 @@ class TestCacheService:
     @pytest.mark.asyncio
     async def test_cache_service_delete_method(self):
         """Test CacheService delete method."""
-        config = {"url": "redis://localhost:6379"}
+        config = {"url": "valkey://localhost:6379"}
         cache_service = CacheService("test_cache", config)
 
         await cache_service.delete("test_key")
@@ -418,9 +418,9 @@ class TestServiceRegistry:
         config_data = {
             "agent": {"name": "test"},
             "services": {
-                "redis": {
+                "valkey": {
                     "type": "cache",
-                    "settings": {"url": "redis://localhost:6379"}
+                    "settings": {"url": "valkey://localhost:6379"}
                 },
                 "postgres": {
                     "type": "database",
@@ -439,9 +439,9 @@ class TestServiceRegistry:
 
             # Should have created services for configured items
             assert len(registry._services) == 2
-            assert "redis" in registry._services
+            assert "valkey" in registry._services
             assert "postgres" in registry._services
-            assert isinstance(registry._services["redis"], CacheService)
+            assert isinstance(registry._services["valkey"], CacheService)
             assert isinstance(registry._services["postgres"], DatabaseService)
 
 
@@ -453,9 +453,9 @@ class TestServiceRegistryIntegration:
         config_data = {
             "agent": {"name": "integration-test"},
             "services": {
-                "redis": {
+                "valkey": {
                     "type": "cache",
-                    "settings": {"url": "redis://localhost:6379"}
+                    "settings": {"url": "valkey://localhost:6379"}
                 },
                 "postgres": {
                     "type": "database",
@@ -478,12 +478,12 @@ class TestServiceRegistryIntegration:
 
             # Verify all services were created
             assert len(registry._services) == 3
-            assert "redis" in registry._services
+            assert "valkey" in registry._services
             assert "postgres" in registry._services
             assert "custom_api" in registry._services
 
             # Verify service types
-            assert isinstance(registry._services["redis"], CacheService)
+            assert isinstance(registry._services["valkey"], CacheService)
             assert isinstance(registry._services["postgres"], DatabaseService)
             assert isinstance(registry._services["custom_api"], WebAPIService)
 

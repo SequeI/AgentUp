@@ -153,15 +153,15 @@ class TestMockServices:
         assert "openai" in registry.list_services()
         assert "anthropic" in registry.list_services()
         assert "ollama" in registry.list_services()
-        assert "redis" in registry.list_services()
+        assert "valkey" in registry.list_services()
         assert "postgres" in registry.list_services()
 
         # Test service retrieval
         openai_service = registry.get_llm("openai")
         assert openai_service is not None
 
-        redis_service = registry.get_cache("redis")
-        assert redis_service is not None
+        valkey_service = registry.get_cache("valkey")
+        assert valkey_service is not None
 
         postgres_service = registry.get_database("postgres")
         assert postgres_service is not None
@@ -190,21 +190,21 @@ class TestMockServices:
         assert response.content == "Mock Ollama response"
 
     @pytest.mark.asyncio
-    async def test_mock_redis_service(self):
-        """Test the mock Redis service."""
+    async def test_mock_valkey_service(self):
+        """Test the mock Valkey service."""
         registry = create_mock_services()
-        redis = registry.get_cache("redis")
+        valkey = registry.get_cache("valkey")
 
         # Test basic operations
-        await redis.set("test_key", "test_value")
-        value = await redis.get("test_key")
+        await valkey.set("test_key", "test_value")
+        value = await valkey.get("test_key")
         assert value == "test_value"
 
         # Test deletion
-        deleted = await redis.delete("test_key")
+        deleted = await valkey.delete("test_key")
         assert deleted is True
 
-        value = await redis.get("test_key")
+        value = await valkey.get("test_key")
         assert value is None
 
     def test_env_vars_fixture(self, env_vars):
@@ -214,7 +214,7 @@ class TestMockServices:
         assert os.environ.get("OPENAI_API_KEY") == "test_openai_key"
         assert os.environ.get("ANTHROPIC_API_KEY") == "test_anthropic_key"
         assert os.environ.get("OLLAMA_BASE_URL") == "http://localhost:11434"
-        assert os.environ.get("REDIS_URL") == "redis://localhost:6379"
+        assert os.environ.get("VALKEY_URL") == "valkey://localhost:6379"
         assert os.environ.get("DATABASE_URL") == "postgresql://test:test@localhost/test"
 
 

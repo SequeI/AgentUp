@@ -538,10 +538,10 @@ Always be helpful, accurate, and maintain a friendly tone. You are designed to a
                         'url': '${DATABASE_URL:postgresql://user:pass@localhost/db}'
                     }
                 }
-                services['redis'] = {
+                services['valkey'] = {
                     'type': 'cache',
                     'config': {
-                        'url': '${REDIS_URL:redis://localhost:6379}',
+                        'url': '${VALKEY_URL:valkey://localhost:6379}',
                         'db': 1,
                         'max_connections': 10
                     }
@@ -559,11 +559,11 @@ Always be helpful, accurate, and maintain a friendly tone. You are designed to a
                             'url': '${DATABASE_URL:postgresql://user:pass@localhost/db}'
                         }
                     }
-                elif service_type == 'redis':
-                    services['redis'] = {
+                elif service_type == 'valkey':
+                    services['valkey'] = {
                         'type': 'cache',
                         'config': {
-                            'url': '${REDIS_URL:redis://localhost:6379}',
+                            'url': '${VALKEY_URL:valkey://localhost:6379}',
                             'db': 1,
                             'max_connections': 10
                         }

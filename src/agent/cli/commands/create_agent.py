@@ -194,7 +194,7 @@ def create_agent(name: Optional[str], template: Optional[str], quick: bool, mini
             questionary.Choice("Anthropic", value="anthropic"),
             questionary.Choice("Ollama", value="ollama"),
             questionary.Choice("PostgreSQL", value="postgres"),
-            questionary.Choice("Redis", value="redis"),
+            questionary.Choice("Valkey", value="valkey"),
             questionary.Choice("Custom API", value="custom"),
         ]
 

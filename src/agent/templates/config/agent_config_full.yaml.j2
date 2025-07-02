@@ -121,10 +121,10 @@ services:
     type: database
     config:
       connection_url: '${DATABASE_URL:postgresql://user:pass@localhost/db}'
-  redis:
+  valkey:
     type: cache
     config:
-      url: '${REDIS_CACHE_URL:redis://localhost:6379}'
+      url: '${VALKEY_CACHE_URL:valkey://localhost:6379}'
       db: 1                    # Use DB 1 for cache (DB 0 for state)
       max_connections: 20
       retry_on_timeout: true
@@ -178,22 +178,22 @@ middleware:
 # Push notifications configuration
 push_notifications:
   enabled: true
-  backend: redis              # Options: memory, redis
-  key_prefix: "agentup:push:" # Redis key prefix for push configs
+  backend: valkey              # Options: memory, valkey
+  key_prefix: "agentup:push:" # Valkey key prefix for push configs
   validate_urls: true         # Enable webhook URL validation for security
   retry_attempts: 3           # Number of retry attempts for failed webhooks
   timeout: 30                 # Webhook request timeout in seconds
 
 # Cache management
 cache:
-  backend: redis
+  backend: valkey
   default_ttl: 1800           # 30 minutes
   key_prefix: "agentup:cache:"
   enabled: true
 
 # State management
 state:
-  backend: redis
-  url: '${REDIS_STATE_URL:redis://localhost:6379}'
+  backend: valkey
+  url: '${VALKEY_STATE_URL:valkey://localhost:6379}'
   key_prefix: "agentup:state:"
   ttl: 7200  # 2 hours

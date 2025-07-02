@@ -152,10 +152,10 @@ full_config:
       type: database
       config:
         url: "${DATABASE_URL:postgresql://user:pass@localhost/db}"
-    redis:
+    valkey:
       type: cache
       config:
-        url: "${REDIS_URL:redis://localhost:6379}"
+        url: "${VALKEY_URL:valkey://localhost:6379}"
         db: 1
         max_connections: 10
   security:
@@ -194,10 +194,10 @@ full_config:
       expose_resources: [agent_status, agent_capabilities]
   push_notifications:
     enabled: true
-    backend: redis
+    backend: valkey
     validate_urls: true
   cache:
-    backend: redis
+    backend: valkey
     default_ttl: 1800
     max_size: 1000
     enabled: true
