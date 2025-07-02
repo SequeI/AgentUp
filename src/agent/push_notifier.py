@@ -295,21 +295,21 @@ class EnhancedPushNotifier:
         return config
 
 
-class RedisPushNotifier(EnhancedPushNotifier):
+class ValkeyPushNotifier(EnhancedPushNotifier):
     """
-    Redis-backed push notifier for persistent storage.
+    Valkey-backed push notifier for persistent storage.
 
-    This stores push notification configurations in Redis for persistence
+    This stores push notification configurations in Valkey for persistence
     across agent restarts.
     """
 
-    def __init__(self, client: httpx.AsyncClient, redis_client, key_prefix: str = "agentup:push:", validate_urls: bool = True):
+    def __init__(self, client: httpx.AsyncClient, valkey_client, key_prefix: str = "agentup:push:", validate_urls: bool = True):
         super().__init__(client, validate_urls)
-        self.redis = redis_client
+        self.valkey = valkey_client
         self.key_prefix = key_prefix
 
     async def set_info(self, task_id: str, push_config: PushNotificationConfig) -> TaskPushNotificationConfig:
-        """Store configuration in Redis."""
+        """Store configuration in Valkey."""
         # Create TaskPushNotificationConfig wrapper
         config = TaskPushNotificationConfig(
             taskId=task_id,
@@ -322,22 +322,22 @@ class RedisPushNotifier(EnhancedPushNotifier):
         if self.validate_urls:
             await self._validate_webhook_url(push_config.url)
 
-        # Store in Redis
+        # Store in Valkey
         key = f"{self.key_prefix}{task_id}:{config_id}"
         value = config.model_dump_json(by_alias=True)
 
-        await self.redis.set(key, value, ex=7200)  # 2 hour expiration
+        await self.valkey.set(key, value, ex=7200)  # 2 hour expiration
 
-        logger.info(f"Stored push notification config {config_id} for task {task_id} in Redis")
+        logger.info(f"Stored push notification config {config_id} for task {task_id} in Valkey")
 
         return self._mask_sensitive_data(config)
 
     async def get_info(self, task_id: str, config_id: Optional[str] = None) -> Optional[TaskPushNotificationConfig]:
-        """Get configuration from Redis."""
+        """Get configuration from Valkey."""
         if config_id:
             # Get specific configuration
             key = f"{self.key_prefix}{task_id}:{config_id}"
-            value = await self.redis.get(key)
+            value = await self.valkey.get(key)
             if value:
                 config_data = json.loads(value)
                 config = TaskPushNotificationConfig(**config_data)
@@ -345,9 +345,9 @@ class RedisPushNotifier(EnhancedPushNotifier):
         else:
             # Get first available configuration
             pattern = f"{self.key_prefix}{task_id}:*"
-            keys = await self.redis.keys(pattern)
+            keys = await self.valkey.keys(pattern)
             if keys:
-                value = await self.redis.get(keys[0])
+                value = await self.valkey.get(keys[0])
                 if value:
                     config_data = json.loads(value)
                     config = TaskPushNotificationConfig(**config_data)
@@ -356,13 +356,13 @@ class RedisPushNotifier(EnhancedPushNotifier):
         return None
 
     async def list_info(self, task_id: str) -> List[TaskPushNotificationConfig]:
-        """List all configurations for task from Redis."""
+        """List all configurations for task from Valkey."""
         pattern = f"{self.key_prefix}{task_id}:*"
-        keys = await self.redis.keys(pattern)
+        keys = await self.valkey.keys(pattern)
 
         configs = []
         for key in keys:
-            value = await self.redis.get(key)
+            value = await self.valkey.get(key)
             if value:
                 config_data = json.loads(value)
                 config = TaskPushNotificationConfig(**config_data)
@@ -371,17 +371,17 @@ class RedisPushNotifier(EnhancedPushNotifier):
         return configs
 
     async def delete_info(self, task_id: str, config_id: str) -> bool:
-        """Delete configuration from Redis."""
+        """Delete configuration from Valkey."""
         key = f"{self.key_prefix}{task_id}:{config_id}"
-        result = await self.redis.delete(key)
+        result = await self.valkey.delete(key)
 
         if result:
-            logger.info(f"Deleted push notification config {config_id} for task {task_id} from Redis")
+            logger.info(f"Deleted push notification config {config_id} for task {task_id} from Valkey")
 
         return bool(result)
 
     async def send_notification(self, task: Task) -> None:
-        """Send notifications using configurations from Redis."""
+        """Send notifications using configurations from Valkey."""
         task_id = task.id
         configs = await self.list_info(task_id)
 

@@ -28,8 +28,8 @@ It's important to understand the distinction between **cache** and **state** in 
 
 ## Cache Backends
 
-### Redis Cache (Recommended)
-- **Type**: `redis`
+### Valkey Cache (Recommended)
+- **Type**: `valkey`
 - **Performance**: Excellent for high concurrency
 - **Persistence**: Optional (configurable)
 - **Scalability**: Supports multiple agent instances
@@ -53,24 +53,24 @@ It's important to understand the distinction between **cache** and **state** in 
 
 ### Cache vs State Configuration
 
-AgentUp uses **two separate Redis configurations** for different purposes:
+AgentUp uses **two separate Valkey configurations** for different purposes:
 
 ```yaml
 services:
-  redis:
+  valkey:
     type: cache                           # Used for CACHING
     config:
-      url: "redis://localhost:6379"
+      url: "valkey://localhost:6379"
       db: 1                              # Use different DB for cache
 
 state:
-  backend: redis                         # Used for CONVERSATION MEMORY
-  url: "redis://localhost:6379"  
+  backend: valkey                        # Used for CONVERSATION MEMORY
+  url: "valkey://localhost:6379"  
   key_prefix: "agentup:state:"
   ttl: 3600
 
 cache:
-  backend: redis                         # Used for PERFORMANCE OPTIMIZATION
+  backend: valkey                        # Used for PERFORMANCE OPTIMIZATION
   key_prefix: "agentup:cache:"
   default_ttl: 1800
 ```
@@ -82,25 +82,25 @@ cache:
 | **Data Type** | API responses, computations | Conversation history, user context |
 | **Failure Impact** | Slower performance | Lost memory |
 | **TTL Policy** | Short (minutes) | Long (hours/days) |
-| **Redis DB** | Can use separate database | Typically DB 0 |
+| **Valkey DB** | Can use separate database | Typically DB 0 |
 | **Cleanup** | Can clear anytime | Requires careful management |
 
-### Redis Cache Configuration
+### Valkey Cache Configuration
 
 #### Basic Setup
 
 ```yaml
-# External services - Redis for caching
+# External services - Valkey for caching
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "redis://localhost:6379"
+      url: "valkey://localhost:6379"
       db: 1                    # Use DB 1 for cache (DB 0 for state)
 
 # Cache system configuration
 cache:
-  backend: redis
+  backend: valkey
   default_ttl: 3600           # 1 hour default TTL
   key_prefix: "agentup:cache:"
   enabled: true
@@ -110,17 +110,17 @@ cache:
 
 ```yaml
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "${REDIS_CACHE_URL:redis://redis-cache:6379}"
+      url: "${VALKEY_CACHE_URL:valkey://valkey-cache:6379}"
       db: 1
       max_connections: 20
       retry_on_timeout: true
       socket_keepalive: true
 
 cache:
-  backend: redis
+  backend: valkey
   default_ttl: 1800           # 30 minutes
   key_prefix: "${CACHE_PREFIX:agentup:cache:}"
   enabled: true
@@ -130,10 +130,10 @@ cache:
 
 ```yaml
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "redis://redis-cluster:6379"
+      url: "valkey://valkey-cluster:6379"
       db: 1
       max_connections: 50
       connection_pool_kwargs:
@@ -143,7 +143,7 @@ services:
         socket_timeout: 5
 
 cache:
-  backend: redis
+  backend: valkey
   default_ttl: 3600
   key_prefix: "agentup:cache:"
   enabled: true
@@ -204,50 +204,50 @@ cache:
 
 ```yaml
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "${REDIS_CACHE_URL}"
-      db: "${REDIS_CACHE_DB:1}"
+      url: "${VALKEY_CACHE_URL}"
+      db: "${VALKEY_CACHE_DB:1}"
       max_connections: 20
       retry_on_timeout: true
 
 cache:
-  backend: redis
+  backend: valkey
   default_ttl: 3600
   key_prefix: "${CACHE_KEY_PREFIX:prod:cache:}"
   enabled: true
 ```
 
-### Multi-Redis Setup
+### Multi-Valkey Setup
 
-Using different Redis instances for cache and state:
+Using different Valkey instances for cache and state:
 
 ```yaml
 services:
-  # High-performance Redis for caching
-  redis:
+  # High-performance Valkey for caching
+  valkey:
     type: cache
     config:
-      url: "redis://fast-redis:6379"
+      url: "valkey://fast-valkey:6379"
       db: 0
       max_connections: 30
 
-  # Persistent Redis for state
-  redis_state:
+  # Persistent Valkey for state
+  valkey_state:
     type: database
     config:
-      url: "redis://persistent-redis:6379"
+      url: "valkey://persistent-valkey:6379"
       db: 0
 
 state:
-  backend: redis
-  url: "redis://persistent-redis:6379"
+  backend: valkey
+  url: "valkey://persistent-valkey:6379"
   key_prefix: "agentup:state:"
   ttl: 86400                  # 24 hours
 
 cache:
-  backend: redis
+  backend: valkey
   key_prefix: "agentup:cache:"
   default_ttl: 1800           # 30 minutes
 ```
@@ -593,15 +593,15 @@ cache:
 
 ```yaml
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "${REDIS_CACHE_URL:redis://redis-cache:6379}"
+      url: "${VALKEY_CACHE_URL:valkey://valkey-cache:6379}"
       db: 1                    # Separate from state storage
       max_connections: 20
 
 cache:
-  backend: redis
+  backend: valkey
   default_ttl: 3600           # 1 hour default
   key_prefix: "${CACHE_PREFIX:agentup:cache:}"
   enabled: true
@@ -611,17 +611,17 @@ cache:
 
 ```yaml
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "redis://redis-cluster:6379"
+      url: "valkey://valkey-cluster:6379"
       db: 0
       max_connections: 50
       socket_keepalive: true
       retry_on_timeout: true
 
 cache:
-  backend: redis
+  backend: valkey
   default_ttl: 1800
   key_prefix: "agentup:cache:"
   enabled: true
@@ -629,7 +629,7 @@ cache:
   # Cache-specific optimizations
   compression: true           # Compress large values
   serialization: "pickle"     # Fast serialization
-  pipeline_size: 100         # Batch Redis operations
+  pipeline_size: 100         # Batch Valkey operations
 ```
 
 ## Configuration Validation
@@ -638,7 +638,7 @@ cache:
 
 ```python
 import yaml
-import redis
+import valkey
 
 def validate_cache_config():
     """Validate cache configuration."""
@@ -656,16 +656,16 @@ def validate_cache_config():
     backend = cache_cfg.get('backend')
     print(f"✅ Cache backend: {backend}")
     
-    if backend == 'redis':
-        # Check Redis service config
-        redis_cfg = config.get('services', {}).get('redis', {}).get('config', {})
-        url = redis_cfg.get('url', 'redis://localhost:6379')
+    if backend == 'valkey':
+        # Check Valkey service config
+        valkey_cfg = config.get('services', {}).get('valkey', {}).get('config', {})
+        url = valkey_cfg.get('url', 'valkey://localhost:6379')
         
         try:
-            # Test Redis connection
-            client = redis.from_url(url)
+            # Test Valkey connection
+            client = valkey.from_url(url)
             client.ping()
-            print(f"✅ Redis connection successful: {url}")
+            print(f"✅ Valkey connection successful: {url}")
             
             # Test basic operations
             test_key = "agentup:cache:config_test"
@@ -681,7 +681,7 @@ def validate_cache_config():
                 return False
                 
         except Exception as e:
-            print(f"❌ Redis connection failed: {e}")
+            print(f"❌ Valkey connection failed: {e}")
             return False
     
     elif backend == 'memory':
@@ -711,37 +711,37 @@ if __name__ == "__main__":
 # Ensure cache is enabled
 cache:
   enabled: true              # This must be true
-  backend: redis
+  backend: valkey
 
-# Verify Redis service configuration
+# Verify Valkey service configuration
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "redis://localhost:6379"  # Verify URL is correct
+      url: "valkey://localhost:6379"  # Verify URL is correct
 ```
 
-### Issue 2: Redis Connection Failed
+### Issue 2: Valkey Connection Failed
 
-**Problem**: Cannot connect to Redis server
+**Problem**: Cannot connect to Valkey server
 
-**Solution**: Verify Redis configuration and server status
+**Solution**: Verify Valkey configuration and server status
 
 ```bash
-# Test Redis connection manually
-redis-cli -h localhost -p 6379 ping
+# Test Valkey connection manually
+valkey-cli -h localhost -p 6379 ping
 
-# Check Redis server status
-redis-cli -h localhost -p 6379 info server
+# Check Valkey server status
+valkey-cli -h localhost -p 6379 info server
 ```
 
 ```yaml
 # Update configuration with correct settings
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "redis://localhost:6379"
+      url: "valkey://localhost:6379"
       db: 1                   # Use correct database
       socket_timeout: 10      # Increase timeout
 ```
@@ -750,23 +750,23 @@ services:
 
 **Problem**: Cache and state interfering with each other
 
-**Solution**: Use separate Redis databases or key prefixes
+**Solution**: Use separate Valkey databases or key prefixes
 
 ```yaml
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "redis://localhost:6379"
+      url: "valkey://localhost:6379"
       db: 1                   # Cache uses DB 1
 
 state:
-  backend: redis
-  url: "redis://localhost:6379"
+  backend: valkey
+  url: "valkey://localhost:6379"
   key_prefix: "agentup:state:"  # State uses DB 0 with prefix
 
 cache:
-  backend: redis
+  backend: valkey
   key_prefix: "agentup:cache:"  # Different prefix
 ```
 
@@ -774,14 +774,14 @@ cache:
 
 **Problem**: Cache operations are slow
 
-**Solution**: Optimize Redis configuration
+**Solution**: Optimize Valkey configuration
 
 ```yaml
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "redis://localhost:6379"
+      url: "valkey://localhost:6379"
       max_connections: 20     # Increase connection pool
       socket_keepalive: true  # Keep connections alive
       socket_timeout: 5       # Reduce timeout
@@ -793,7 +793,7 @@ services:
 
 1. **Cache Not Working**
    - Check `cache.enabled: true` in configuration
-   - Verify Redis connection settings
+   - Verify Valkey connection settings
    - Ensure cache backend is properly configured
 
 2. **Poor Hit Rates**
@@ -807,39 +807,39 @@ services:
    - Implement cache cleanup routines
 
 4. **Performance Problems**
-   - Check Redis connection settings
+   - Check Valkey connection settings
    - Consider connection pooling
-   - Monitor network latency to Redis
+   - Monitor network latency to Valkey
 
 ### Debugging Commands
 
 ```bash
-# Check Redis cache data
-redis-cli -h localhost -p 6379
+# Check Valkey cache data
+valkey-cli -h localhost -p 6379
 > SELECT 1                    # Switch to cache database
 > KEYS agentup:cache:*        # List cache keys
 > GET agentup:cache:some_key  # Examine cache value
 > TTL agentup:cache:some_key  # Check remaining TTL
 
-# Monitor Redis operations
-redis-cli -h localhost -p 6379 MONITOR
+# Monitor Valkey operations
+valkey-cli -h localhost -p 6379 MONITOR
 ```
 
 ## Migration Between Backends
 
-### From Memory to Redis
+### From Memory to Valkey
 
 ```yaml
 # Update configuration
 cache:
-  backend: redis      # Changed from memory
+  backend: valkey      # Changed from memory
   default_ttl: 3600
 
 services:
-  redis:              # Add Redis service
+  valkey:              # Add Valkey service
     type: cache
     config:
-      url: "redis://localhost:6379"
+      url: "valkey://localhost:6379"
 ```
 
 ### Cache Invalidation Strategies

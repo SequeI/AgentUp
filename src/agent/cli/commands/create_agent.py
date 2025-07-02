@@ -208,7 +208,7 @@ def create_agent(name: Optional[str], template: Optional[str], quick: bool, mini
     if 'services' in final_features:
         service_choices = [
             questionary.Choice("PostgreSQL", value="postgres"),
-            questionary.Choice("Redis", value="redis"),
+            questionary.Choice("Valkey", value="valkey"),
             questionary.Choice("Custom API", value="custom"),
         ]
 

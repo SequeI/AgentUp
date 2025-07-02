@@ -8,20 +8,20 @@ This guide provides step-by-step manual testing scenarios to verify the complete
 1. **Missing A2A Methods**: `tasks/pushNotificationConfig/list` and `tasks/pushNotificationConfig/delete`
 2. **Multiple Configurations**: Support for multiple push notification configs per task
 3. **Enhanced Push Notifier**: Custom implementation with security validation
-4. **Persistent Storage**: Redis backend support for push notification configurations
+4. **Persistent Storage**: Valkey backend support for push notification configurations
 5. **Security Validation**: Webhook URL validation and authentication support
 6. **Configuration Options**: Full configuration in agent_config.yaml templates
 
 ### 🔧 **Architecture:**
 - **EnhancedPushNotifier**: In-memory implementation with multiple config support
-- **RedisPushNotifier**: Redis-backed persistent storage
+- **ValkeyPushNotifier**: Valkey-backed persistent storage
 - **A2A Compliant**: Full JSON-RPC 2.0 compliance for all methods
 - **Security Features**: URL validation, authentication headers, SSRF protection
 
 ## 🧪 Testing Scenarios
 
 ### **Prerequisites:**
-1. Start Redis server: `redis-server`
+1. Start Valkey server: `valkey-server`
 2. Create an agent with push notifications enabled
 3. Set up a webhook endpoint to receive notifications
 
@@ -364,26 +364,26 @@ curl -X POST http://localhost:8000/ \
 - Should return error indicating configuration not found
 - Error should be properly formatted JSON-RPC error
 
-## **Redis Backend Testing**
+## **Valkey Backend Testing**
 
-### Enable Redis Backend
+### Enable Valkey Backend
 
 Update your `agent_config.yaml`:
 ```yaml
 push_notifications:
   enabled: true
-  backend: redis
+  backend: valkey
   key_prefix: "agentup:push:"
   validate_urls: true
 ```
 
 Restart your agent and repeat the above tests. The behavior should be identical, but configurations will persist across agent restarts.
 
-### Verify Redis Storage
+### Verify Valkey Storage
 
 ```bash
-# Check Redis for stored configurations
-redis-cli
+# Check Valkey for stored configurations
+valkey-cli
 > KEYS agentup:push:*
 > GET agentup:push:TASK_ID:CONFIG_ID
 ```
@@ -398,11 +398,11 @@ redis-cli
 5. Webhooks are delivered with correct data and headers
 6. Security validation prevents obvious attack vectors
 7. Error handling returns appropriate JSON-RPC errors
-8. Redis backend persists data across restarts
+8. Valkey backend persists data across restarts
 
 ### 🐛 **Common Issues to Watch For:**
 1. Import errors due to missing dependencies
-2. Redis connection failures
+2. Valkey connection failures
 3. Webhook delivery timeouts
 4. JSON serialization issues
 5. Authentication header formatting
@@ -411,7 +411,7 @@ redis-cli
 ## **Debugging Tips**
 
 1. **Check Logs**: Monitor agent logs for error messages
-2. **Redis Inspection**: Use Redis CLI to verify data storage
+2. **Valkey Inspection**: Use Valkey CLI to verify data storage
 3. **Webhook Testing**: Use online webhook testing tools
 4. **Network Issues**: Ensure webhook URLs are accessible
 5. **Configuration**: Verify agent_config.yaml settings

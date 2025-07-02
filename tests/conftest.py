@@ -160,7 +160,7 @@ def project_config() -> Dict[str, Any]:
         "description": "Test Project Description",
         "template": "standard",
         "features": ["services", "middleware", "auth", "ai_provider", "mcp"],
-        "services": ["redis"],
+        "services": ["valkey"],
         "ai_provider_config": {
             "provider": "openai"
         },
@@ -169,7 +169,7 @@ def project_config() -> Dict[str, Any]:
             "middleware": ["rate_limit", "cache", "logging"]
         }
     }
-
+  
 
 @pytest.fixture
 def mock_llm_service():
@@ -235,7 +235,7 @@ def env_vars():
         'OPENAI_API_KEY': 'test_openai_key',
         'ANTHROPIC_API_KEY': 'test_anthropic_key', 
         'OLLAMA_BASE_URL': 'http://localhost:11434',
-        'REDIS_URL': 'redis://localhost:6379',
+        'VALKEY_URL': 'valkey://localhost:6379',
         'DATABASE_URL': 'postgresql://test:test@localhost/test'
     }
     

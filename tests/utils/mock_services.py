@@ -82,8 +82,8 @@ class MockOllamaService:
         return self.available
 
 
-class MockRedisService:
-    """Mock Redis service for testing."""
+class MockValkeyService:
+    """Mock Valkey service for testing."""
     
     def __init__(self):
         self.data = {}
@@ -255,7 +255,7 @@ def create_mock_services() -> MockServiceRegistry:
     registry.register_service("ollama", MockOllamaService(), "llm")
     
     # Add cache services
-    registry.register_service("redis", MockRedisService(), "cache")
+    registry.register_service("valkey", MockValkeyService(), "cache")
     
     # Add database services  
     registry.register_service("postgres", MockDatabaseService(), "database")

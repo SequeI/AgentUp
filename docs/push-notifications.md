@@ -32,7 +32,7 @@ AgentUp fully implements the A2A specification for push notifications, supportin
 
 ## Configuration
 
-Push notifications are configured in your `agent_config.yaml` file. The system supports two storage backends: memory (for development) and Redis (for production).
+Push notifications are configured in your `agent_config.yaml` file. The system supports two storage backends: memory (for development) and Valkey (for production).
 
 ### Quick Start Configuration
 
@@ -54,30 +54,30 @@ Standard development configuration:
 # Push notifications configuration
 push_notifications:
   enabled: true
-  backend: memory             # Options: memory, redis
+  backend: memory             # Options: memory, valkey
   validate_urls: true         # Enable webhook URL validation for security
 ```
 
-### Production Configuration with Redis Backend
+### Production Configuration with Valkey Backend
 
 For production deployments with persistence and security:
 
 ```yaml
-# External services configuration - Required for Redis backend
+# External services configuration - Required for Valkey backend
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "${REDIS_URL:redis://localhost:6379}"
-      db: 0                   # Redis database number
+      url: "${VALKEY_URL:valkey://localhost:6379}"
+      db: 0                   # Valkey database number
       max_connections: 20
       retry_on_timeout: true
 
 # Push notifications configuration
 push_notifications:
   enabled: true
-  backend: redis              # Persistent storage
-  key_prefix: "agentup:push:" # Redis key prefix for configurations
+  backend: valkey             # Persistent storage
+  key_prefix: "agentup:push:" # Valkey key prefix for configurations
   validate_urls: true         # URL validation for security
 
 # Agent capabilities - Push notifications are automatically enabled
@@ -89,14 +89,14 @@ push_notifications:
 Set these environment variables for production:
 
 ```bash
-# Redis connection
-export REDIS_URL="redis://localhost:6379"
+# Valkey connection
+export VALKEY_URL="valkey://localhost:6379"
 
-# Optional: Redis authentication
-export REDIS_URL="redis://:password@localhost:6379"
+# Optional: Valkey authentication
+export VALKEY_URL="valkey://:password@localhost:6379"
 
-# Optional: Redis cluster
-export REDIS_URL="redis://node1:6379,node2:6379,node3:6379"
+# Optional: Valkey cluster
+export VALKEY_URL="valkey://node1:6379,node2:6379,node3:6379"
 ```
 
 ### Configuration Options
@@ -104,8 +104,8 @@ export REDIS_URL="redis://node1:6379,node2:6379,node3:6379"
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `enabled` | boolean | `true` | Enable/disable push notifications |
-| `backend` | string | `memory` | Storage backend: `memory` or `redis` |
-| `key_prefix` | string | `"agentup:push:"` | Redis key prefix for configurations (Redis backend only) |
+| `backend` | string | `memory` | Storage backend: `memory` or `valkey` |
+| `key_prefix` | string | `"agentup:push:"` | Valkey key prefix for configurations (Valkey backend only) |
 | `validate_urls` | boolean | `true` | Enable webhook URL security validation |
 
 **Note**: The timeout and retry configuration is handled by the HTTP client. The default timeout is 30 seconds per webhook request.
@@ -415,31 +415,31 @@ push_notifications:
   backend: memory
 ```
 
-### Redis Backend
+### Valkey Backend
 
 - **Use case**: Production, distributed deployments
 - **Persistence**: Yes (survives agent restarts)
 - **Performance**: Excellent
-- **Configuration**: Requires Redis service configuration
+- **Configuration**: Requires Valkey service configuration
 
 ```yaml
-# Required: Redis service must be configured for Redis backend
+# Required: Valkey service must be configured for Valkey backend
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "${REDIS_URL:redis://localhost:6379}"
+      url: "${VALKEY_URL:valkey://localhost:6379}"
       db: 0
       max_connections: 20
       retry_on_timeout: true
 
 push_notifications:
   enabled: true
-  backend: redis
+  backend: valkey
   key_prefix: "agentup:push:"
 ```
 
-**Important**: When using the Redis backend, you must configure a Redis service in the `services` section with `type: cache`. The push notification system will automatically discover and use this Redis service.
+**Important**: When using the Valkey backend, you must configure a Valkey service in the `services` section with `type: cache`. The push notification system will automatically discover and use this Valkey service.
 
 ## Common Patterns
 
@@ -615,12 +615,12 @@ import logging
 logging.getLogger('src.agent.push_notifier').setLevel(logging.DEBUG)
 ```
 
-### Redis Inspection
+### Valkey Inspection
 
-For Redis backend, inspect stored configurations:
+For Valkey backend, inspect stored configurations:
 
 ```bash
-redis-cli
+valkey-cli
 > KEYS agentup:push:*
 > GET agentup:push:task-id:config-id
 ```
@@ -663,7 +663,7 @@ curl -X POST https://your-app.com/webhook \
 
 1. **Async Processing**: Process webhook data asynchronously when possible
 2. **Batch Operations**: Batch multiple notifications if your system supports it
-3. **Efficient Storage**: Use Redis backend for high-throughput scenarios
+3. **Efficient Storage**: Use Valkey backend for high-throughput scenarios
 4. **Connection Pooling**: Configure appropriate connection pools
 
 ## Troubleshooting
@@ -681,12 +681,12 @@ curl -X POST https://your-app.com/webhook \
    - Check authentication scheme spelling
    - Ensure webhook endpoint expects the authentication method
 
-3. **Redis Connection Issues**
-   - Verify Redis server is running and accessible
-   - Check Redis URL format and credentials in environment variables
-   - Ensure Redis service is configured with `type: cache` in the services section
-   - Confirm Redis backend is enabled in push_notifications configuration
-   - Check agent logs for Redis connection errors during startup
+3. **Valkey Connection Issues**
+   - Verify Valkey server is running and accessible
+   - Check Valkey URL format and credentials in environment variables
+   - Ensure Valkey service is configured with `type: cache` in the services section
+   - Confirm Valkey backend is enabled in push_notifications configuration
+   - Check agent logs for Valkey connection errors during startup
 
 4. **URL Validation Errors**
    - Check webhook URL format
@@ -699,7 +699,7 @@ curl -X POST https://your-app.com/webhook \
 2. **Test Webhook Manually**: Send test requests to webhook endpoint
 3. **Verify Configuration**: Confirm push notification settings in agent config
 4. **Check Network**: Ensure webhook URL is accessible from agent
-5. **Monitor Redis**: For Redis backend, check data storage and expiration
+5. **Monitor Valkey**: For Valkey backend, check data storage and expiration
 
 ## Migration
 
@@ -712,14 +712,14 @@ If upgrading from a basic push notification setup:
 3. **Update Client Code**: Use new list/delete methods if needed
 4. **Monitor Delivery**: Ensure webhook delivery continues working
 
-### Moving to Redis Backend
+### Moving to Valkey Backend
 
-To migrate from memory to Redis backend:
+To migrate from memory to Valkey backend:
 
-1. **Add Redis Service**: Configure Redis in services section with `type: cache`
-2. **Set Environment Variables**: Ensure `REDIS_URL` is configured
-3. **Update Backend Setting**: Change `push_notifications.backend` from `memory` to `redis`
-4. **Restart Agent**: The system will automatically discover and use the Redis service
+1. **Add Valkey Service**: Configure Valkey in services section with `type: cache`
+2. **Set Environment Variables**: Ensure `VALKEY_URL` is configured
+3. **Update Backend Setting**: Change `push_notifications.backend` from `memory` to `valkey`
+4. **Restart Agent**: The system will automatically discover and use the Valkey service
 5. **Verify Persistence**: Test that configurations survive restarts
 
 **Example migration configuration**:
@@ -730,16 +730,16 @@ push_notifications:
   enabled: true
   backend: memory
 
-# After (Redis backend)
+# After (Valkey backend)
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "${REDIS_URL:redis://localhost:6379}"
+      url: "${VALKEY_URL:valkey://localhost:6379}"
 
 push_notifications:
   enabled: true
-  backend: redis
+  backend: valkey
 ```
 
 ## Next Steps

@@ -106,17 +106,17 @@ class DatabaseService(Service):
 
 
 class CacheService(Service):
-    """Service for caching (Redis, Memcached, etc.)."""
+    """Service for caching (Valkey, Memcached, etc.)."""
 
     def __init__(self, name: str, config: Dict[str, Any]):
         super().__init__(name, config)
-        self.url = config.get('url', 'redis://localhost:6379')
+        self.url = config.get('url', 'valkey://localhost:6379')
         self.ttl = config.get('ttl', 3600)
         self.client = None
 
     async def initialize(self) -> None:
         """Initialize cache connection."""
-        # In production, use redis-py or similar
+        # In production, use valkey-py or similar
         logger.info(f"Cache service {self.name} initialized with URL: {self.url}")
         self._initialized = True
 

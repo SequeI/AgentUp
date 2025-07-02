@@ -119,8 +119,8 @@ class TestProcessEnvVars:
                     "api_key": "${OPENAI_API_KEY}",
                     "model": "gpt-4"
                 },
-                "redis": {
-                    "url": "${REDIS_URL}"
+                "valkey": {
+                    "url": "${VALKEY_URL}"
                 }
             }
         }
@@ -129,7 +129,7 @@ class TestProcessEnvVars:
 
         assert result["services"]["openai"]["api_key"] == "test_openai_key"
         assert result["services"]["openai"]["model"] == "gpt-4"  # unchanged
-        assert result["services"]["redis"]["url"] == "redis://localhost:6379"
+        assert result["services"]["valkey"]["url"] == "valkey://localhost:6379"
 
     def test_process_env_vars_list(self, env_vars):
         """Test processing environment variables in lists."""
@@ -137,7 +137,7 @@ class TestProcessEnvVars:
             "servers": [
                 "${OPENAI_API_KEY}",
                 "static_value",
-                "${REDIS_URL}"
+                "${VALKEY_URL}"
             ]
         }
 
@@ -145,7 +145,7 @@ class TestProcessEnvVars:
 
         assert result["servers"][0] == "test_openai_key"
         assert result["servers"][1] == "static_value"
-        assert result["servers"][2] == "redis://localhost:6379"
+        assert result["servers"][2] == "valkey://localhost:6379"
 
     def test_process_env_vars_non_env_strings(self):
         """Test that non-environment variable strings are left unchanged."""
@@ -183,10 +183,10 @@ class TestProcessEnvVars:
                     }
                 },
                 {
-                    "name": "redis",
+                    "name": "valkey",
                     "config": {
-                        "url": "${REDIS_URL}",
-                        "db": "${REDIS_DB:0}"
+                        "url": "${VALKEY_URL}",
+                        "db": "${VALKEY_DB:0}"
                     }
                 }
             ],
@@ -202,7 +202,7 @@ class TestProcessEnvVars:
         assert result["agent"]["name"] == "test-agent"
         assert result["services"][0]["config"]["api_key"] == "test_openai_key"
         assert result["services"][0]["config"]["timeout"] == 30
-        assert result["services"][1]["config"]["url"] == "redis://localhost:6379"
+        assert result["services"][1]["config"]["url"] == "valkey://localhost:6379"
         assert result["services"][1]["config"]["db"] == "0"
         assert result["middleware"]["auth"]["secret"] == "default-secret"
 
@@ -378,7 +378,7 @@ class TestConfigValidation:
                 "model": "some-model"
             },
             "services": {
-                "redis": {"type": "cache"}  # Missing the required LLM service
+                "valkey": {"type": "cache"}  # Missing the required LLM service
             }
         }
 
@@ -502,10 +502,10 @@ class TestConfigIntegration:
                     "api_key": "${OPENAI_API_KEY}",
                     "model": "gpt-4o-mini"
                 },
-                "redis": {
+                "valkey": {
                     "type": "cache",
                     "config": {
-                        "url": "${REDIS_URL}",
+                        "url": "${VALKEY_URL}",
                         "db": 1,
                         "max_connections": 10
                     }
@@ -536,7 +536,7 @@ class TestConfigIntegration:
 
         # Validate environment variable processing
         assert loaded_config["services"]["openai"]["api_key"] == "test_openai_key"
-        assert loaded_config["services"]["redis"]["config"]["url"] == "redis://localhost:6379"
+        assert loaded_config["services"]["valkey"]["config"]["url"] == "valkey://localhost:6379"
 
         # Validate service name consistency (critical test)
         ai_service = loaded_config["ai"]["llm_service"]
@@ -558,7 +558,7 @@ class TestConfigIntegration:
             "agent": {"name": "production-agent"},
             "services": {
                 "openai": {"model": "gpt-4", "api_key": "prod-key"},
-                "redis": {"url": "redis://prod:6379"}
+                "valkey": {"url": "valkey://prod:6379"}
             },
             "security": {"enabled": True}
         }
@@ -571,7 +571,7 @@ class TestConfigIntegration:
         assert merged["services"]["openai"]["model"] == "gpt-4"  # Overridden
         assert merged["services"]["openai"]["timeout"] == 30  # Preserved from base
         assert merged["services"]["openai"]["api_key"] == "prod-key"  # Added
-        assert merged["services"]["redis"]["url"] == "redis://prod:6379"  # New service
+        assert merged["services"]["valkey"]["url"] == "valkey://prod:6379"  # New service
         assert merged["security"]["enabled"] is True  # New section
         assert merged["middleware"] == [{"name": "logged"}]  # Preserved
 

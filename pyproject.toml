@@ -27,7 +27,7 @@ dependencies = [
     "mkdocs-material>=9.6.14",
     "authlib>=1.6.0",
     "psutil>=7.0.0",
-    "redis>=6.2.0",
+    "valkey>=6.0.0",
     "pyjwt>=2.10.1",
 ]
 

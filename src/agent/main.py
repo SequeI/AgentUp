@@ -14,7 +14,7 @@ from .security import create_security_manager
 from .constants import DEFAULT_REDIS_URL, DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT
 
 from a2a.server.tasks import InMemoryTaskStore
-from .push_notifier import EnhancedPushNotifier, RedisPushNotifier
+from .push_notifier import EnhancedPushNotifier, ValkeyPushNotifier
 from .custom_request_handler import CustomRequestHandler
 
 # Optional imports; fall back to None if the module isn't present
@@ -114,11 +114,11 @@ async def lifespan(app: FastAPI):
 
             backend = state_cfg.get("backend", "memory")
             backend_config = {}
-
-            if backend == "redis":
-                # Get Redis URL from services configuration or state config
-                redis_service = config.get("services", {}).get("redis", {}).get("config", {})
-                backend_config["url"] = redis_service.get("url", DEFAULT_REDIS_URL)
+            
+            if backend == "valkey":
+                # Get Valkey URL from services configuration or state config
+                valkey_service = config.get("services", {}).get("valkey", {}).get("config", {})
+                backend_config["url"] = valkey_service.get("url", "valkey://localhost:6379")
                 backend_config["ttl"] = state_cfg.get("ttl", 3600)
             elif backend == "file":
                 backend_config["storage_dir"] = state_cfg.get("storage_dir", "./conversation_states")
@@ -167,9 +167,9 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Failed to initialize MCP integration: {e}")
 
-    # Initialize push notifier with Redis if configured
+    # Initialize push notifier with Valkey if configured
     push_config = config.get('push_notifications', {})
-    if push_config.get('backend') == 'redis' and push_config.get('enabled', True):
+    if push_config.get('backend') == 'valkey' and push_config.get('enabled', True):
         try:
             from .services import get_services
             services = get_services()
@@ -183,41 +183,39 @@ async def lifespan(app: FastAPI):
                     break
 
             if cache_service_name:
-                redis_service = services.get_cache(cache_service_name)
+                valkey_service = services.get_cache(cache_service_name)
             else:
-                redis_service = None
+                valkey_service = None
                 logger.warning("No cache service found in configuration")
-
-            # Create Redis client from service URL
-            if redis_service and hasattr(redis_service, 'url'):
-                import redis.asyncio as redis
-                redis_url = redis_service.url
-                redis_client = redis.from_url(redis_url)
+            
+            # Create Valkey client from service URL
+            if valkey_service and hasattr(valkey_service, 'url'):
+                import valkey.asyncio as valkey
+                valkey_url = valkey_service.url
+                valkey_client = valkey.from_url(valkey_url)
             else:
-                redis_client = None
-                logger.warning("Cannot create Redis client - no URL available")
-
-            if redis_client:
-                # Create new Redis push notifier
+                valkey_client = None
+                logger.warning("Cannot create Valkey client - no URL available")
+            
+            if valkey_client:
+                # Create new Valkey push notifier
                 client = httpx.AsyncClient()
-                redis_push_notifier = RedisPushNotifier(
+                valkey_push_notifier = ValkeyPushNotifier(
                     client=client,
-                    redis_client=redis_client,
+                    valkey_client=valkey_client,
                     key_prefix=push_config.get('key_prefix', 'agentup:push:'),
                     validate_urls=push_config.get('validate_urls', True)
                 )
-
-                # Update the request handler to use Redis push notifier
+                # Update the request handler to use Valkey push notifier
                 from .api import get_request_handler
                 handler = get_request_handler()
-                handler._push_notifier = redis_push_notifier
-
-                logger.info("Updated to Redis-backed push notifier")
+                handler._push_notifier = valkey_push_notifier
+                
+                logger.info("Updated to Valkey-backed push notifier")
             else:
-                logger.warning("Redis service available but no client found, using memory push notifier")
-
+                logger.warning("Valkey service available but no client found, using memory push notifier")
         except Exception as e:
-            logger.error(f"Failed to initialize Redis push notifier: {e}")
+            logger.error(f"Failed to initialize Valkey push notifier: {e}")
             logger.info("Using memory push notifier")
 
     yield

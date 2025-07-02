@@ -9,7 +9,7 @@ State management in AgentUp allows agents to:
 - **Remember conversations** across sessions and restarts
 - **Learn user preferences** and adapt responses over time
 - **Track long-running tasks** with pause/resume functionality
-- **Share state** across multiple agent instances (with Redis)
+- **Share state** across multiple agent instances (with Valkey)
 - **Maintain context** for complex multi-turn interactions
 
 ## Storage Backends
@@ -30,9 +30,9 @@ AgentUp supports three storage backends, each optimized for different use cases:
 - **Use case**: Single-instance production deployments
 - **Scalability**: Limited (file locking issues under high concurrency)
 
-### Redis Storage
-- **Type**: `redis`
-- **Persistence**: Yes (in Redis database)
+### Valkey Storage
+- **Type**: `valkey`
+- **Persistence**: Yes (in Valkey database)
 - **Performance**: Excellent for high concurrency
 - **Use case**: Production deployments, distributed systems
 - **Scalability**: Excellent (supports multiple agent instances)
@@ -41,83 +41,83 @@ AgentUp supports three storage backends, each optimized for different use cases:
 ## Configuration
 
 Three different backends are supported for state management:
-- **Redis**: For distributed, persistent state storage
+- **Valkey**: For distributed, persistent state storage
 - **File**: For local, file-based state storage  
 - **Memory**: For in-memory state storage (not persistent)
 
 In time more will be added, but these are the most common use cases. If something is of particular importance to you (PostgreSQL etc.), please open an issue on GitHub. AgentUp is built to be extensible, so adding new backends should be straightforward using the `StateStorage` interface.
 
-### Redis Backend Configuration
+### Valkey Backend Configuration
 
-**IMPORTANT**: Redis state management requires explicit configuration in the `state` section, even if Redis is configured in `services`.
+**IMPORTANT**: Valkey state management requires explicit configuration in the `state` section, even if Valkey is configured in `services`.
 
-Add Redis configuration to your `agent_config.yaml`:
+Add Valkey configuration to your `agent_config.yaml`:
 
 ```yaml
 # External services configuration
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "redis://localhost:6379"
+      url: "valkey://localhost:6379"
 
-# State management - IMPORTANT: Explicit Redis configuration required
+# State management - IMPORTANT: Explicit Valkey configuration required
 state:
-  backend: redis
+  backend: valkey
   ttl: 3600  # 1 hour expiration
-  url: "redis://localhost:6379"          # REQUIRED: Explicit Redis URL
+  url: "valkey://localhost:6379"          # REQUIRED: Explicit Valkey URL
   key_prefix: "agentup:state:"           # REQUIRED: Key prefix for namespacing
 ```
 
 **Why Explicit Configuration is Required:**
-1. **Service vs State separation**: The `services.redis` is for caching, `state.redis` is for conversation persistence
-2. **Different use cases**: Cache and state may use different Redis instances or configurations
+1. **Service vs State separation**: The `services.valkey` is for caching, `state.valkey` is for conversation persistence
+2. **Different use cases**: Cache and state may use different Valkey instances or configurations
 3. **Namespace isolation**: State uses key prefixes to avoid conflicts with cache data
 
-#### Production Redis Configuration
+#### Production Valkey Configuration
 
 ```yaml
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "${REDIS_CACHE_URL:redis://redis-cache:6379}"
+      url: "${VALKEY_CACHE_URL:valkey://valkey-cache:6379}"
       db: 1                    # Use different DB for cache
       max_connections: 20
       retry_on_timeout: true
       socket_keepalive: true
 
 state:
-  backend: redis
-  url: "${REDIS_STATE_URL:redis://redis-state:6379}"
+  backend: valkey
+  url: "${VALKEY_STATE_URL:valkey://valkey-state:6379}"
   key_prefix: "${STATE_KEY_PREFIX:agentup:state:}"
   ttl: 7200  # 2 hours
 ```
 
-#### Multi-Redis Setup
+#### Multi-Valkey Setup
 
-Using different Redis instances for cache and state:
+Using different Valkey instances for cache and state:
 
 ```yaml
 services:
-  # High-performance Redis for caching
-  redis:
+  # High-performance Valkey for caching
+  valkey:
     type: cache
     config:
-      url: "redis://fast-redis:6379"
+      url: "valkey://fast-valkey:6379"
       db: 0
       max_connections: 30
 
-  # Persistent Redis for state
-  redis_state:
+  # Persistent Valkey for state
+  valkey_state:
     type: database
     config:
-      url: "redis://persistent-redis:6379"
+      url: "valkey://persistent-valkey:6379"
       db: 0
 
 state:
-  backend: redis
-  url: "redis://persistent-redis:6379"
+  backend: valkey
+  url: "valkey://persistent-valkey:6379"
   key_prefix: "agentup:state:"
   ttl: 86400                  # 24 hours
 ```
@@ -152,7 +152,7 @@ To use state management in your skills, import and apply the `@stateful` decorat
 from src.agent.context import stateful
 from a2a.types import Task
 
-@stateful(storage='redis', url='redis://localhost:6379', key_prefix='agentup:state:', ttl=3600)
+@stateful(storage='valkey', url='valkey://localhost:6379', key_prefix='agentup:state:', ttl=3600)
 async def my_stateful_skill(task: Task, context, context_id):
     """A skill that uses state management."""
     
@@ -176,17 +176,17 @@ async def my_stateful_skill(task: Task, context, context_id):
 
 The `@stateful` decorator accepts the following parameters:
 
-- **`storage`**: Backend type (`'memory'`, `'file'`, `'redis'`)
-- **`url`**: Redis URL (Redis only)
-- **`key_prefix`**: Key prefix for namespacing (Redis only)
-- **`ttl`**: Time-to-live in seconds (Redis only)
+- **`storage`**: Backend type (`'memory'`, `'file'`, `'valkey'`)
+- **`url`**: Valkey URL (Valkey only)
+- **`key_prefix`**: Key prefix for namespacing (Valkey only)
+- **`ttl`**: Time-to-live in seconds (Valkey only)
 - **`storage_dir`**: Directory path (File only)
 
-**Note**: You can override the configuration in the decorator if you need to use a different Redis instance or key prefix for specific handlers. However, an agent configuration is still required, even if you override the configuration in the decorator.
+**Note**: You can override the configuration in the decorator if you need to use a different Valkey instance or key prefix for specific handlers. However, an agent configuration is still required, even if you override the configuration in the decorator.
 
 ```python
-# For Redis backend
-@stateful(storage='redis', url='redis://localhost:6379', key_prefix='agentup:state:', ttl=3600)
+# For Valkey backend
+@stateful(storage='valkey', url='valkey://localhost:6379', key_prefix='agentup:state:', ttl=3600)
 
 # For file backend  
 @stateful(storage='file', storage_dir='./conversation_states')
@@ -277,7 +277,7 @@ agentup skill create
 # Interactive prompts:
 # ? Skill name: Conversation Memory Assistant
 # ? Enable state management? Yes
-# ? Storage backend: redis
+# ? Storage backend: valkey
 ```
 
 This generates a handler with the `@stateful` decorator already configured.
@@ -293,7 +293,7 @@ from a2a.types import Task
 from datetime import datetime
 
 @register_handler("memory_assistant")
-@stateful(storage='redis', url='redis://localhost:6379', key_prefix='agentup:state:', ttl=3600)
+@stateful(storage='valkey', url='valkey://localhost:6379', key_prefix='agentup:state:', ttl=3600)
 async def memory_assistant(task: Task, context, context_id):
     """AI assistant with conversation memory."""
     
@@ -340,7 +340,7 @@ def extract_user_message(task):
 ### User Preference Learning
 
 ```python
-@stateful(storage='redis')
+@stateful(storage='valkey')
 async def learning_assistant(task: Task, context, context_id):
     user_message = extract_user_message(task)
     
@@ -368,7 +368,7 @@ async def learning_assistant(task: Task, context, context_id):
 ### Long-Running Task Management
 
 ```python
-@stateful(storage='redis')
+@stateful(storage='valkey')
 async def task_manager(task: Task, context, context_id):
     user_message = extract_user_message(task)
     
@@ -408,9 +408,9 @@ async def task_manager(task: Task, context, context_id):
 ### Performance
 
 1. **Limit History Size**: Use the `limit` parameter when retrieving history
-2. **Use TTL**: Set appropriate TTL values for Redis to prevent unbounded growth
+2. **Use TTL**: Set appropriate TTL values for Valkey to prevent unbounded growth
 3. **Batch Operations**: Group multiple state operations when possible
-4. **Choose Right Backend**: Use Redis for production, file for development
+4. **Choose Right Backend**: Use Valkey for production, file for development
 
 ### Data Management
 
@@ -423,7 +423,7 @@ async def task_manager(task: Task, context, context_id):
 
 1. **User Isolation**: Ensure context IDs prevent cross-user data access
 2. **Sensitive Data**: Be careful storing sensitive information in state
-3. **Redis Security**: Use Redis AUTH and network security in production
+3. **Valkey Security**: Use Valkey AUTH and network security in production
 4. **Data Encryption**: Consider encrypting sensitive state data
 
 ## Testing State Management
@@ -465,8 +465,8 @@ python test_memory_storage.py
 # Test file storage  
 python test_file_storage.py
 
-# Test Redis storage (requires Redis server)
-python test_redis_storage.py
+# Test Valkey storage (requires Valkey server)
+python test_valkey_storage.py
 ```
 
 ## Environment-Specific Configurations
@@ -491,15 +491,15 @@ state:
 
 ```yaml
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "${REDIS_URL:redis://redis-server:6379}"
+      url: "${VALKEY_URL:valkey://valkey-server:6379}"
 
 state:
-  backend: redis
-  url: "${REDIS_URL:redis://redis-server:6379}"
-  key_prefix: "${REDIS_KEY_PREFIX:agentup:state:}"
+  backend: valkey
+  url: "${VALKEY_URL:valkey://valkey-server:6379}"
+  key_prefix: "${VALKEY_KEY_PREFIX:agentup:state:}"
   ttl: 7200  # 2 hours
 ```
 
@@ -517,29 +517,29 @@ async def ai_assistant(task: Task):
     return "I don't remember conversations"
 
 # ✅ Stateful handler - persistent memory
-@stateful(storage='redis', url='redis://localhost:6379', key_prefix='agentup:state:', ttl=3600)
+@stateful(storage='valkey', url='valkey://localhost:6379', key_prefix='agentup:state:', ttl=3600)
 async def ai_assistant(task: Task, context, context_id):
     history = await context.get_history(context_id)
     return f"I remember our {len(history)} previous interactions"
 ```
 
-### Issue 2: Redis Connection Failed
+### Issue 2: Valkey Connection Failed
 
-**Problem**: Missing explicit Redis URL in state configuration
+**Problem**: Missing explicit Valkey URL in state configuration
 
-**Solution**: Add explicit Redis configuration:
+**Solution**: Add explicit Valkey configuration:
 
 ```yaml
 # ❌ INSUFFICIENT - Will not work
 state:
-  backend: redis
+  backend: valkey
   ttl: 3600
 
 # ✅ CORRECT - Required for state management
 state:
-  backend: redis
+  backend: valkey
   ttl: 3600
-  url: "redis://localhost:6379"          # This line is critical
+  url: "valkey://localhost:6379"          # This line is critical
   key_prefix: "agentup:state:"
 ```
 
@@ -562,10 +562,10 @@ from .context import stateful
 
 ### Common Issues
 
-1. **Redis Connection Failed**
-   - Ensure Redis server is running: `redis-server`
-   - Check Redis URL in configuration
-   - Install Redis client: `pip install redis`
+1. **Valkey Connection Failed**
+   - Ensure Valkey server is running: `valkey-server`
+   - Check Valkey URL in configuration
+   - Install Valkey client: `pip install valkey`
 
 2. **State Not Persisting**
    - Verify `@stateful` decorator is applied to handlers
@@ -601,19 +601,19 @@ def validate_state_config():
     backend = state_cfg.get('backend')
     print(f"✅ Backend: {backend}")
     
-    if backend == 'redis':
+    if backend == 'valkey':
         url = state_cfg.get('url')
         prefix = state_cfg.get('key_prefix')
         ttl = state_cfg.get('ttl')
         
         if not url:
-            print("❌ Missing Redis URL")
+            print("❌ Missing Valkey URL")
             return False
         if not prefix:
             print("❌ Missing key prefix")
             return False
         
-        print(f"✅ Redis URL: {url}")
+        print(f"✅ Valkey URL: {url}")
         print(f"✅ Key prefix: {prefix}")
         print(f"✅ TTL: {ttl}")
     
@@ -638,9 +638,9 @@ async def test_state():
     state_cfg = config['state']
     backend = state_cfg['backend']
     
-    if backend == 'redis':
+    if backend == 'valkey':
         context_manager = get_context_manager(
-            'redis',
+            'valkey',
             url=state_cfg['url'],
             key_prefix=state_cfg['key_prefix'],
             ttl=state_cfg['ttl']
@@ -669,10 +669,10 @@ import logging
 logging.getLogger('src.agent.context').setLevel(logging.DEBUG)
 ```
 
-Check Redis data directly:
+Check Valkey data directly:
 
 ```bash
-redis-cli
+valkey-cli
 > KEYS agentup:state:*
 > GET agentup:state:your_context_id
 ```
@@ -691,25 +691,25 @@ state:
 @stateful(storage='file', storage_dir='./conversation_states')  # Updated decorator
 ```
 
-### From File to Redis
+### From File to Valkey
 
 ```yaml
-# Add Redis service
+# Add Valkey service
 services:
-  redis:
+  valkey:
     type: cache
     config:
-      url: "redis://localhost:6379"
+      url: "valkey://localhost:6379"
 
 # Update state configuration
 state:
-  backend: redis  # Changed from file
-  url: "redis://localhost:6379"
+  backend: valkey  # Changed from file
+  url: "valkey://localhost:6379"
   key_prefix: "agentup:state:"
   ttl: 3600
 
 # Update handlers
-@stateful(storage='redis', url='redis://localhost:6379', key_prefix='agentup:state:', ttl=3600)
+@stateful(storage='valkey', url='valkey://localhost:6379', key_prefix='agentup:state:', ttl=3600)
 ```
 
 ### Upgrading from Previous Versions
@@ -749,12 +749,12 @@ See the complete examples in the repository:
 1. **Test with all backends** during development
 2. **Use memory backend** for unit tests
 3. **Validate configuration** before deployment
-4. **Monitor Redis** connections and memory usage
+4. **Monitor Valkey** connections and memory usage
 
 ## Next Steps
 
 1. **Choose your backend** based on deployment needs
-2. **Configure agent_config.yaml** with explicit Redis settings
+2. **Configure agent_config.yaml** with explicit Valkey settings
 3. **Apply @stateful decorator** to handlers that need memory
 4. **Test with provided scripts** to verify functionality
 5. **Monitor and optimize** based on usage patterns

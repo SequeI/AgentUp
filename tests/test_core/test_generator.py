@@ -34,7 +34,7 @@ class TestProjectGenerator:
             "feature-test",
             "standard",
             ["services", "middleware", "auth"],
-            ["openai", "redis"]
+            ["openai", "valkey"]
         )
 
         generator = ProjectGenerator(temp_dir, config)
@@ -82,7 +82,7 @@ class TestProjectGenerator:
         assert model == "gpt-4o-mini"
 
         # Test no LLM provider
-        provider, service_name, model = generator._get_llm_provider_info(["redis", "postgres"])
+        provider, service_name, model = generator._get_llm_provider_info(["valkey", "postgres"])
         assert provider is None
         assert service_name is None
         assert model is None
@@ -239,7 +239,7 @@ class TestTemplateRendering:
             "context-test",
             "standard",
             ["services", "middleware", "auth"],
-            ["openai", "redis"]
+            ["openai", "valkey"]
         )
 
         generator = ProjectGenerator(temp_dir, config)
@@ -372,7 +372,7 @@ class TestConfigurationGeneration:
             "multi-service-test",
             "full",
             ["services"],
-            ["openai", "redis", "postgres"]
+            ["openai", "valkey", "postgres"]
         )
         generator = ProjectGenerator(temp_dir, config)
 
@@ -382,10 +382,10 @@ class TestConfigurationGeneration:
         assert "openai" in services_config
         assert services_config["openai"]["type"] == "llm"
 
-        # Check Redis service
-        assert "redis" in services_config
-        assert services_config["redis"]["type"] == "cache"
-        assert "url" in services_config["redis"]["config"]
+        # Check Valkey service
+        assert "valkey" in services_config
+        assert services_config["valkey"]["type"] == "cache"
+        assert "url" in services_config["valkey"]["config"]
 
         # Check PostgreSQL service
         assert "postgres" in services_config

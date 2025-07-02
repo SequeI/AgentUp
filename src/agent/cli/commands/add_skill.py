@@ -246,7 +246,7 @@ def collect_advanced_options() -> Dict[str, Any]:
         advanced['stateful'] = True
         advanced['storage'] = questionary.select(
             "Storage backend:",
-            choices=['file', 'memory', 'redis'],
+            choices=['file', 'memory', 'valkey'],
             default='file',
             style=custom_style
         ).ask()

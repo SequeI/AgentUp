@@ -81,7 +81,7 @@ First let's add some an AI provider. For example, to use OpenAI, add the followi
 ### Full Template
 - Enterprise-ready with all features enabled
 - Multiple MCP servers (filesystem, GitHub)
-- Database (PostgreSQL) and cache (Redis) support
+- Database (PostgreSQL) and cache (Valkey) support
 - Advanced middleware (rate limiting, caching, retry)
 - State management and monitoring
 - Perfect for production deployments

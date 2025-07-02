@@ -153,12 +153,12 @@ services:
 # Optional services
 # Uncomment and configure as needed
 
-#  redis:
-#    image: redis:7-alpine
-#    container_name: {image_name}-redis
+#  valkey:
+#    image: valkey/valkey:7-alpine
+#    container_name: {image_name}-valkey
 #    restart: unless-stopped
 #    volumes:
-#      - redis_data:/data
+#      - valkey_data:/data
 
 #  postgres:
 #    image: postgres:15-alpine
@@ -172,7 +172,7 @@ services:
 #    restart: unless-stopped
 
 #volumes:
-#  redis_data:
+#  valkey_data:
 #  postgres_data:
 """
 
@@ -480,9 +480,9 @@ config:
 
 # External services
 services:
-  redis:
+  valkey:
     enabled: false
-    host: redis
+    host: valkey
     port: 6379
 
   postgres:
