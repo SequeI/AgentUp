@@ -7,48 +7,50 @@ agent:
   description: {{ description }}
   version: 0.1.0
 
-# Routing configuration
-routing:
-  default_mode: ai
-  fallback_skill: ai_assistant
-  fallback_enabled: true
-
 # Core skills configuration
 skills:
   - skill_id: ai_assistant
     name: AI Assistant
-    description: General purpose AI assistant
+    description: AI-powered assistant for various tasks
+    tags: [ai, assistant, helper]
+    # No keywords or patterns defined, only available via AI routing
     input_mode: text
     output_mode: text
-    routing_mode: ai
+    priority: 100
   - skill_id: document_processor
     name: Document Processor
     description: Process and analyze documents
+    tags: [document, processing, analysis]
+    # No keywords or patterns defined, only available via AI routing
     input_mode: multimodal
     output_mode: text
-    routing_mode: ai
+    priority: 90
   - skill_id: data_analyzer
     name: Data Analyzer
     description: Analyze and visualize data
+    tags: [data, analysis, visualization]
+    # No keywords or patterns defined, only available via AI routing
     input_mode: text
     output_mode: multimodal
-    routing_mode: ai
+    priority: 90
   - skill_id: hello_world
     name: Hello World
     description: Simple greeting handler
+    tags: [greeting, basic, direct]
     input_mode: text
     output_mode: text
-    routing_mode: direct
     keywords: [hello, hi, hey, greetings]
     patterns: ['hello.*', 'hi\\s+.*', 'greet.*']
+    priority: 30
   - skill_id: conversation
     name: Conversation
     description: Basic conversation handler
+    tags: [conversation, chat, direct]
     input_mode: text
     output_mode: text
-    routing_mode: direct
     keywords: [chat, talk, conversation]
     patterns: ['chat.*', 'talk.*', 'conversation.*']
+    priority: 40
 
 # Registry skills section - for skills installed from AgentUp Skills Registry
 registry_skills: []
@@ -78,45 +80,27 @@ security:
       write: Write access to send messages
       admin: Administrative access
 
-# AI configuration for LLM-powered agents
-ai:
-  enabled: true
-  llm_service: {{ llm_service_name }}
-  model: {{ llm_model }}
-  system_prompt: |
-    You are {{ project_name }}, an AI agent with access to specific functions/skills.
-
-    Your role:
-    - Understand user requests naturally and conversationally
-    - Use the appropriate functions when needed to help users
-    - Provide helpful, accurate, and friendly responses
-    - Maintain context across conversations
-
-    When users ask for something:
-    1. If you have a relevant function, call it with appropriate parameters
-    2. If multiple functions are needed, call them in logical order
-    3. Synthesize the results into a natural, helpful response
-    4. If no function is needed, respond conversationally
-
-    Always be helpful, accurate, and maintain a friendly tone. You are designed to assist users effectively while being natural and conversational.
-  max_context_turns: 10
-  fallback_to_routing: true  # Fall back to keyword routing if LLM fails
-
-# External services configuration - Full enterprise setup
-services:
-{% if llm_provider_config %}
-  {{ llm_service_name }}:
-    type: llm
-    provider: {{ llm_provider }}
-{% if llm_provider == 'openai' %}
+# AI configuration
+{% if ai_provider_config %}
+ai_provider:
+    provider: {{ ai_provider_config.provider }}
+{% if ai_provider_config.provider == 'openai' %}
     api_key: ${OPENAI_API_KEY}
-{% elif llm_provider == 'anthropic' %}
+    model: {{ ai_provider_config.model | default('gpt-4o-mini') }}
+{% elif ai_provider_config.provider == 'anthropic' %}
     api_key: ${ANTHROPIC_API_KEY}
-{% elif llm_provider == 'ollama' %}
-    base_url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    model: {{ ai_provider_config.model | default('claude-3-5-sonnet-20241022') }}
+{% elif ai_provider_config.provider == 'ollama' %}
+    model: {{ ai_provider_config.model | default('llama3') }}
+    base_url: ${OLLAMA_BASE_URL:http://localhost:11434/v1}
 {% endif %}
-    model: {{ llm_model }}
+    temperature: 0.7
+    max_tokens: 1000
+    top_p: 1.0
 {% endif %}
+
+# External services configuration - Full enterprise setup (LLM configuration moved to ai_provider section)
+services:
   postgres:
     type: database
     config:
