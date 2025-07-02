@@ -3,26 +3,17 @@ agent:
   description: AI Agent myagent Project.
   version: 0.1.0
 
-# New routing configuration
-routing:
-  default_mode: direct
-  fallback_skill: echo
-  fallback_enabled: true
-
-# Updated skills with integrated routing
+# Core skills configuration
 skills:
   - skill_id: echo
     name: Echo
     description: Echo back the input text
+    tags: [echo, basic, simple]
     input_mode: text
     output_mode: text
-    routing_mode: direct
-    keywords:
-      - echo
-      - repeat
-      - say
-    patterns:
-      - .*
+    keywords: [echo, repeat, say]
+    patterns: ['.*']  # Catch-all for minimal template
+    priority: 50
 
 # Registry skills section
 registry_skills: []

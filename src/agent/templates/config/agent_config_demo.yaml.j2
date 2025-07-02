@@ -7,56 +7,59 @@ agent:
   description: {{ description }}
   version: 0.1.0
 
-# Routing configuration - Mixed routing demonstration
-routing:
-  default_mode: ai
-  fallback_skill: file_assistant
-  fallback_enabled: true
-
 # Core skills configuration - Demo skills showcase mixed routing
 skills:
   - skill_id: file_assistant
     name: File Assistant
     description: Read and write files using MCP
+    tags: [file, mcp, assistant]
+    # No keywords or patterns defined, only available via AI routing
     input_mode: text
     output_mode: text
-    routing_mode: ai  # AI routing for natural file operations
+    priority: 90
   - skill_id: weather_bot
     name: Weather Bot
     description: Get weather information using function calling
+    tags: [weather, forecast, external]
+    # No keywords or patterns defined, only available via AI routing
     input_mode: text
     output_mode: text
-    routing_mode: ai  # AI routing for natural weather queries
+    priority: 80
   - skill_id: code_analyzer
     name: Code Analyzer
     description: Analyze code repositories
+    tags: [code, analysis, repository]
+    # No keywords or patterns defined, only available via AI routing
     input_mode: text
     output_mode: text
-    routing_mode: ai  # AI routing for complex analysis
+    priority: 85
   - skill_id: joke_teller
     name: Joke Teller
     description: Tell jokes on demand
+    tags: [joke, humor, entertainment]
     input_mode: text
     output_mode: text
-    routing_mode: direct  # Direct routing for quick jokes
     keywords: [joke, funny, humor, laugh]
     patterns: ['joke.*', 'tell.*joke.*', 'funny.*', 'laugh.*']
+    priority: 20
   - skill_id: hello_world
     name: Hello World
     description: Simple greeting handler
+    tags: [greeting, basic, direct]
     input_mode: text
     output_mode: text
-    routing_mode: direct  # Direct routing for quick greetings
     keywords: [hello, hi, hey, greetings]
     patterns: ['hello.*', 'hi\\s+.*', 'greet.*']
+    priority: 10
   - skill_id: system_status
     name: System Status
     description: Check system health and status
+    tags: [system, status, health]
     input_mode: text
     output_mode: text
-    routing_mode: direct  # Direct routing for system commands
     keywords: [status, health, system, ping]
     patterns: ['system.*status', 'health.*check', 'ping']
+    priority: 30
 
 # Registry skills section - for skills installed from AgentUp Skills Registry
 registry_skills: []
@@ -72,45 +75,27 @@ security:
       # Generated API keys - replace with your own
       - "{{ generate_api_key() }}"
 
-# AI configuration for LLM-powered agents
-ai:
-  enabled: true
-  llm_service: {{ llm_service_name }}
-  model: {{ llm_model }}
-  system_prompt: |
-    You are {{ project_name }}, an AI agent with access to specific functions/skills.
-
-    Your role:
-    - Understand user requests naturally and conversationally
-    - Use the appropriate functions when needed to help users
-    - Provide helpful, accurate, and friendly responses
-    - Maintain context across conversations
-
-    When users ask for something:
-    1. If you have a relevant function, call it with appropriate parameters
-    2. If multiple functions are needed, call them in logical order
-    3. Synthesize the results into a natural, helpful response
-    4. If no function is needed, respond conversationally
-
-    Always be helpful, accurate, and maintain a friendly tone. You are designed to assist users effectively while being natural and conversational.
-  max_context_turns: 10
-  fallback_to_routing: true  # Fall back to keyword routing if LLM fails
-
-# External services configuration
-services:
-{% if llm_provider_config %}
-  {{ llm_service_name }}:
-    type: llm
-    provider: {{ llm_provider }}
-{% if llm_provider == 'openai' %}
+# AI configuration
+{% if ai_provider_config %}
+ai_provider:
+    provider: {{ ai_provider_config.provider }}
+{% if ai_provider_config.provider == 'openai' %}
     api_key: ${OPENAI_API_KEY}
-{% elif llm_provider == 'anthropic' %}
+    model: {{ ai_provider_config.model | default('gpt-4o-mini') }}
+{% elif ai_provider_config.provider == 'anthropic' %}
     api_key: ${ANTHROPIC_API_KEY}
-{% elif llm_provider == 'ollama' %}
-    base_url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    model: {{ ai_provider_config.model | default('claude-3-5-sonnet-20241022') }}
+{% elif ai_provider_config.provider == 'ollama' %}
+    model: {{ ai_provider_config.model | default('llama3') }}
+    base_url: ${OLLAMA_BASE_URL:http://localhost:11434/v1}
 {% endif %}
-    model: {{ llm_model }}
+    temperature: 0.7
+    max_tokens: 1000
+    top_p: 1.0
 {% endif %}
+
+# External services configuration (LLM configuration moved to ai_provider section)
+services:
   redis:
     type: cache
     config:

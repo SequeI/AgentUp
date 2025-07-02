@@ -186,13 +186,27 @@ def create_agent(name: Optional[str], template: Optional[str], quick: bool, mini
                 project_config['features'] = selected_features
                 project_config['feature_config'] = feature_config
         
-    # Always configure services if 'services' is in features (even if not customizing)
+    # Configure AI provider if 'ai_provider' is in features
     final_features = project_config.get('features', [])
+    if 'ai_provider' in final_features:
+        ai_provider_choice = questionary.select(
+            "Please select an AI Provider:",
+            choices=[
+                questionary.Choice("OpenAI", value="openai"),
+                questionary.Choice("Anthropic", value="anthropic"),
+                questionary.Choice("Ollama", value="ollama"),
+            ],
+            style=custom_style
+        ).ask()
+
+        if ai_provider_choice:
+            project_config['ai_provider_config'] = {
+                'provider': ai_provider_choice
+            }
+
+    # Configure external services if 'services' is in features (Database, Cache only)
     if 'services' in final_features:
         service_choices = [
-            questionary.Choice("OpenAI", value="openai"),
-            questionary.Choice("Anthropic", value="anthropic"),
-            questionary.Choice("Ollama", value="ollama"),
             questionary.Choice("PostgreSQL", value="postgres"),
             questionary.Choice("Redis", value="redis"),
             questionary.Choice("Custom API", value="custom"),

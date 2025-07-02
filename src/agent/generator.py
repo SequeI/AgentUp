@@ -286,7 +286,20 @@ class ProjectGenerator:
             'template_name': self.template_name,
         }
 
-        # Add LLM provider context for templates
+        # Add AI provider context for templates (new structure)
+        ai_provider_config = self.config.get('ai_provider_config')
+        if ai_provider_config:
+            context.update({
+                'ai_provider_config': ai_provider_config,
+                'llm_provider_config': True  # For backward compatibility with existing templates
+            })
+        else:
+            context.update({
+                'ai_provider_config': None,
+                'llm_provider_config': False
+            })
+
+        # Legacy LLM provider context for old templates (if still needed)
         if 'services' in self.features:
             selected_services = self.config.get('services', [])
             llm_provider, llm_service_name, llm_model = self._get_llm_provider_info(selected_services)
@@ -296,12 +309,14 @@ class ProjectGenerator:
                     'llm_provider': llm_provider,
                     'llm_service_name': llm_service_name,
                     'llm_model': llm_model,
-                    'llm_provider_config': True
+                    'llm_provider_config': True  # Set to True when LLM services are available
                 })
             else:
-                context['llm_provider_config'] = False
-        else:
-            context['llm_provider_config'] = False
+                context.update({
+                    'llm_provider': None,
+                    'llm_service_name': None,
+                    'llm_model': None,
+                })
 
         # Add feature config
         if 'feature_config' in self.config:

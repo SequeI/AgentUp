@@ -130,6 +130,19 @@ def collect_skill_info(name: Optional[str], id: Optional[str], description: Opti
 
     skill_data['output_mode'] = output_mode
 
+    # Routing mode selection - this is now a core configuration step
+    routing_mode = questionary.select(
+        "Routing mode:",
+        choices=[
+            questionary.Choice("AI (intelligent routing using LLM)", value="ai"),
+            questionary.Choice("Direct (keyword/pattern matching)", value="direct"),
+        ],
+        default="ai",
+        style=custom_style
+    ).ask()
+
+    skill_data['routing_mode'] = routing_mode
+
     # Advanced options
     if questionary.confirm(
         "Configure advanced options?",
@@ -138,13 +151,18 @@ def collect_skill_info(name: Optional[str], id: Optional[str], description: Opti
     ).ask():
         skill_data.update(collect_advanced_options())
 
-    # Routing configuration
-    if questionary.confirm(
-        "Configure routing rules for this skill?",
-        default=True,
-        style=custom_style
-    ).ask():
-        skill_data.update(collect_routing_config(skill_data))
+    # Routing configuration based on routing mode
+    if routing_mode == "direct":
+        if questionary.confirm(
+            "Configure routing rules for this skill?",
+            default=True,
+            style=custom_style
+        ).ask():
+            skill_data.update(collect_routing_config(skill_data))
+    else:
+        # AI routing mode - no keywords or patterns needed
+        click.echo(f"\n{click.style('AI Routing Mode', fg='cyan', bold=True)}")
+        click.echo("Using AI routing - no keywords or patterns needed.")
 
     return skill_data
 
@@ -602,17 +620,25 @@ def add_skill_to_config(skill_data: Dict[str, Any]) -> bool:
             'output_mode': skill_data['output_mode'],
         }
 
-        # Add routing configuration to skill
+        # Add tags if available (used in @ai_function decorator)
         routing_data = skill_data.get('routing', {})
-        if routing_data.get('keywords'):
-            skill_entry['keywords'] = routing_data['keywords']
-        if routing_data.get('patterns'):
-            skill_entry['patterns'] = routing_data['patterns']
+        if skill_data.get('routing_mode') == 'direct':
+            # Add default tags for direct routing skills
+            skill_entry['tags'] = [skill_data['skill_id'], 'direct', 'keyword']
+        else:
+            # Add default tags for AI routing skills
+            skill_entry['tags'] = [skill_data['skill_id'], 'ai', 'assistant']
+
+        # Add routing configuration for direct routing skills only
+        if skill_data.get('routing_mode') == 'direct':
+            if routing_data.get('keywords'):
+                skill_entry['keywords'] = routing_data['keywords']
+            if routing_data.get('patterns'):
+                skill_entry['patterns'] = routing_data['patterns']
         
-        # Determine routing mode (default to 'direct' if keywords/patterns provided, otherwise use default)
-        if routing_data.get('keywords') or routing_data.get('patterns'):
-            skill_entry['routing_mode'] = 'direct'
-        # else: let skill use the routing.default_mode
+        # Add priority based on routing configuration
+        priority_map = {'high': 10, 'normal': 50, 'low': 90}
+        skill_entry['priority'] = priority_map.get(routing_data.get('priority', 'normal'), 50)
 
         # Add middleware if configured
         if skill_data.get('middleware'):
@@ -633,15 +659,20 @@ def add_skill_to_config(skill_data: Dict[str, Any]) -> bool:
 
         config['skills'].append(skill_entry)
 
-        # Update routing configuration
-        update_routing_config(config, skill_data)
+        # Clean up old routing configuration if it exists (migration to implicit routing)
+        if 'routing' in config:
+            # Remove the old routing section as we now use implicit routing
+            del config['routing']
 
         # Write back to file
         with open('agent_config.yaml', 'w') as f:
             yaml.dump(config, f, default_flow_style=False, sort_keys=False)
 
         click.echo(f"{click.style('✓', fg='green')} Updated agent_config.yaml")
-        click.echo(f"{click.style('✓', fg='green')} Updated routing configuration")
+        if skill_data.get('routing_mode') == 'direct':
+            click.echo(f"{click.style('✓', fg='green')} Updated routing configuration")
+        else:
+            click.echo(f"{click.style('✓', fg='green')} Updated routing configuration")
         return True
 
     except Exception as e:
@@ -649,35 +680,13 @@ def add_skill_to_config(skill_data: Dict[str, Any]) -> bool:
         return False
 
 
-def update_routing_config(config: Dict[str, Any], skill_data: Dict[str, Any]):
-    """Update routing configuration with new skill."""
-    # Initialize routing section if it doesn't exist
-    if 'routing' not in config:
-        config['routing'] = {
-            'default_mode': 'ai',
-            'fallback_skill': 'ai_assistant',
-            'fallback_enabled': True
-        }
-
-    # Update fallback skill if requested
-    routing_data = skill_data.get('routing', {})
-    if routing_data.get('is_default'):
-        config['routing']['fallback_skill'] = skill_data['skill_id']
-
-
 def migrate_config_if_needed(config: Dict[str, Any]):
-    """Ensure routing configuration exists with proper defaults."""
-    if 'routing' not in config:
-        click.echo(f"{click.style('🔄 Adding default routing configuration...', fg='blue')}")
-
-        # Simple routing configuration - let individual skills specify their routing
-        config['routing'] = {
-            'default_mode': 'ai',
-            'fallback_skill': 'ai_assistant',
-            'fallback_enabled': True
-        }
-
-        click.echo(f"{click.style('✓', fg='green')} Added default routing configuration")
+    """Clean up old routing configuration for implicit routing migration."""
+    if 'routing' in config:
+        click.echo(f"{click.style('🔄 Migrating to implicit routing configuration...', fg='blue')}")
+        # Remove old routing section - we now use implicit routing based on keywords/patterns
+        del config['routing']
+        click.echo(f"{click.style('✓', fg='green')} Migrated to implicit routing configuration")
 
 
 def add_skill_handler(skill_data: Dict[str, Any]) -> bool:

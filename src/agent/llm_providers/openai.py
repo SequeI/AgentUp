@@ -1,7 +1,7 @@
-"""OpenAI LLM provider implementation for {{ project_name }}."""
-
 import json
 import logging
+import yaml
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -16,6 +16,13 @@ from .base import (
     LLMProviderAPIError,
     LLMProviderConfigError
 )
+from ..constants import (
+    DEFAULT_MODELS,
+    DEFAULT_API_ENDPOINTS,
+    DEFAULT_HTTP_TIMEOUT,
+    DEFAULT_USER_AGENT,
+    MODEL_CAPABILITIES_FILE
+)
 
 logger = logging.getLogger(__name__)
 
@@ -27,48 +34,44 @@ class OpenAIProvider(BaseLLMService):
         super().__init__(name, config)
         self.client: Optional[httpx.AsyncClient] = None
         self.api_key = config.get('api_key', '')
-        self.model = config.get('model', 'gpt-4')
-        self.base_url = config.get('base_url', 'https://api.openai.com/v1')
+        self.model = config.get('model', DEFAULT_MODELS['openai'])
+        self.base_url = config.get('base_url', DEFAULT_API_ENDPOINTS['openai'])
         self.organization = config.get('organization')
-        self.timeout = config.get('timeout', 60.0)
+        self.timeout = config.get('timeout', DEFAULT_HTTP_TIMEOUT)
 
-        # Model capabilities mapping
-        self._model_capabilities = {
-            'gpt-4': [
-                LLMCapability.TEXT_COMPLETION,
-                LLMCapability.CHAT_COMPLETION,
-                LLMCapability.FUNCTION_CALLING,
-                LLMCapability.STREAMING,
-                LLMCapability.JSON_MODE,
-                LLMCapability.SYSTEM_MESSAGES,
-                LLMCapability.IMAGE_UNDERSTANDING
-            ],
-            'gpt-4-turbo': [
-                LLMCapability.TEXT_COMPLETION,
-                LLMCapability.CHAT_COMPLETION,
-                LLMCapability.FUNCTION_CALLING,
-                LLMCapability.STREAMING,
-                LLMCapability.JSON_MODE,
-                LLMCapability.SYSTEM_MESSAGES,
-                LLMCapability.IMAGE_UNDERSTANDING
-            ],
-            'gpt-3.5-turbo': [
-                LLMCapability.TEXT_COMPLETION,
-                LLMCapability.CHAT_COMPLETION,
-                LLMCapability.FUNCTION_CALLING,
-                LLMCapability.STREAMING,
-                LLMCapability.JSON_MODE,
-                LLMCapability.SYSTEM_MESSAGES
-            ],
-            'text-embedding-ada-002': [
-                LLMCapability.EMBEDDINGS
-            ],
-            'text-embedding-3-small': [
-                LLMCapability.EMBEDDINGS
-            ],
-            'text-embedding-3-large': [
-                LLMCapability.EMBEDDINGS
-            ]
+        # Load model capabilities from configuration file
+        self._model_capabilities = self._load_model_capabilities()
+
+    def _load_model_capabilities(self) -> Dict[str, List[LLMCapability]]:
+        """Load model capabilities from external configuration file."""
+        try:
+            if Path(MODEL_CAPABILITIES_FILE).exists():
+                with open(MODEL_CAPABILITIES_FILE, 'r') as f:
+                    capabilities_config = yaml.safe_load(f)
+
+                openai_config = capabilities_config.get('openai', {})
+                models_config = openai_config.get('models', {})
+
+                # Convert string capabilities to LLMCapability enums
+                capabilities_map = {}
+                for model, caps in models_config.items():
+                    model_caps = []
+                    for cap in caps:
+                        try:
+                            # Try to get the capability by name
+                            model_caps.append(LLMCapability(cap.lower()))
+                        except ValueError:
+                            logger.warning(f"Unknown capability '{cap}' for model {model}")
+                    capabilities_map[model] = model_caps
+
+                return capabilities_map
+        except Exception as e:
+            logger.warning(f"Failed to load model capabilities from {MODEL_CAPABILITIES_FILE}: {e}")
+
+        # Fallback to basic capabilities
+        return {
+            'gpt-4': [LLMCapability.TEXT_COMPLETION, LLMCapability.CHAT_COMPLETION, LLMCapability.FUNCTION_CALLING],
+            'gpt-3.5-turbo': [LLMCapability.TEXT_COMPLETION, LLMCapability.CHAT_COMPLETION, LLMCapability.FUNCTION_CALLING],
         }
 
     async def initialize(self) -> None:
@@ -82,7 +85,7 @@ class OpenAIProvider(BaseLLMService):
         headers = {
             'Authorization': f'Bearer {self.api_key}',
             'Content-Type': 'application/json',
-            'User-Agent': 'AgentUp-Agent/1.0'
+            'User-Agent': DEFAULT_USER_AGENT
         }
 
         if self.organization:
@@ -263,11 +266,11 @@ class OpenAIProvider(BaseLLMService):
                                 logger.info(f"Fixed malformed JSON: {fixed_args}")
                             except json.JSONDecodeError:
                                 # If still can't parse, use empty dict
-                                logger.warning(f"Could not fix JSON, using empty arguments")
+                                logger.warning("Could not fix JSON, using empty arguments")
                                 arguments = {}
                     else:
                         arguments = fc['arguments']
-                    
+
                     function_calls.append(FunctionCall(
                         name=fc['name'],
                         arguments=arguments

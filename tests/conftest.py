@@ -29,37 +29,27 @@ def sample_agent_config() -> Dict[str, Any]:
             "description": "Test Agent for Unit Testing",
             "version": "0.1.0"
         },
-        "routing": {
-            "default_mode": "ai",
-            "fallback_skill": "ai_assistant",
-            "fallback_enabled": True
-        },
         "skills": [
             {
                 "skill_id": "ai_assistant",
                 "name": "AI Assistant",
                 "description": "General purpose AI assistant",
+                "tags": ["ai", "assistant", "helper"],
+                # No keywords or patterns defined, only available via AI routing
                 "input_mode": "text",
                 "output_mode": "text",
-                "routing_mode": "ai"
+                "priority": 100
             }
         ],
-        "ai": {
-            "enabled": True,
-            "llm_service": "openai",
+        "ai_provider": {
+            "provider": "openai",
+            "api_key": "${OPENAI_API_KEY}",
             "model": "gpt-4o-mini",
-            "system_prompt": "You are a test AI assistant.",
-            "max_context_turns": 10,
-            "fallback_to_routing": True
+            "temperature": 0.7,
+            "max_tokens": 1000,
+            "top_p": 1.0
         },
-        "services": {
-            "openai": {
-                "type": "llm",
-                "provider": "openai",
-                "api_key": "${OPENAI_API_KEY}",
-                "model": "gpt-4o-mini"
-            }
-        },
+        "services": {},
         "security": {
             "enabled": False,
             "type": "api_key"
@@ -104,21 +94,17 @@ def minimal_agent_config() -> Dict[str, Any]:
             "description": "Minimal Test Agent",
             "version": "0.1.0"
         },
-        "routing": {
-            "default_mode": "direct",
-            "fallback_skill": "echo",
-            "fallback_enabled": True
-        },
         "skills": [
             {
                 "skill_id": "echo",
                 "name": "Echo",
-                "description": "Echo back the input text", 
+                "description": "Echo back the input text",
+                "tags": ["echo", "basic", "simple"],
                 "input_mode": "text",
                 "output_mode": "text",
-                "routing_mode": "direct",
                 "keywords": ["echo", "repeat", "say"],
-                "patterns": [".*"]
+                "patterns": [".*"],
+                "priority": 50
             }
         ]
     }
@@ -133,20 +119,15 @@ def ollama_agent_config() -> Dict[str, Any]:
             "description": "Ollama Test Agent",
             "version": "0.1.0"
         },
-        "ai": {
-            "enabled": True,
-            "llm_service": "ollama",
+        "ai_provider": {
+            "provider": "ollama",
             "model": "qwen3:0.6b",
-            "system_prompt": "You are an Ollama-powered AI assistant."
+            "base_url": "${OLLAMA_BASE_URL:http://localhost:11434/v1}",
+            "temperature": 0.7,
+            "max_tokens": 1000,
+            "top_p": 1.0
         },
-        "services": {
-            "ollama": {
-                "type": "llm",
-                "provider": "ollama",
-                "base_url": "${OLLAMA_BASE_URL:http://localhost:11434}",
-                "model": "qwen3:0.6b"
-            }
-        }
+        "services": {}
     }
 
 
@@ -159,20 +140,15 @@ def anthropic_agent_config() -> Dict[str, Any]:
             "description": "Anthropic Test Agent",
             "version": "0.1.0"
         },
-        "ai": {
-            "enabled": True,
-            "llm_service": "anthropic",
+        "ai_provider": {
+            "provider": "anthropic",
+            "api_key": "${ANTHROPIC_API_KEY}",
             "model": "claude-3-haiku-20240307",
-            "system_prompt": "You are a Claude-powered AI assistant."
+            "temperature": 0.7,
+            "max_tokens": 1000,
+            "top_p": 1.0
         },
-        "services": {
-            "anthropic": {
-                "type": "llm",
-                "provider": "anthropic", 
-                "api_key": "${ANTHROPIC_API_KEY}",
-                "model": "claude-3-haiku-20240307"
-            }
-        }
+        "services": {}
     }
 
 
@@ -183,8 +159,11 @@ def project_config() -> Dict[str, Any]:
         "name": "test-project",
         "description": "Test Project Description",
         "template": "standard",
-        "features": ["services", "middleware", "auth", "mcp"],
-        "services": ["openai", "redis"],
+        "features": ["services", "middleware", "auth", "ai_provider", "mcp"],
+        "services": ["redis"],
+        "ai_provider_config": {
+            "provider": "openai"
+        },
         "feature_config": {
             "auth": "api_key",
             "middleware": ["rate_limit", "cache", "logging"]

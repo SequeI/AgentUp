@@ -7,20 +7,16 @@ agent:
   description: {{ description }}
   version: 0.1.0
 
-# Routing configuration
-routing:
-  default_mode: ai
-  fallback_skill: ai_assistant
-  fallback_enabled: true
-
 # Core skills configuration
 skills:
   - skill_id: ai_assistant
     name: AI Assistant
-    description: General purpose AI assistant
+    description: AI-powered assistant for various tasks
+    tags: [ai, assistant, helper]  # Tags for use within the @ai_function decorator
+    # No keywords or patterns defined, only available via AI routing
     input_mode: text
     output_mode: text
-    routing_mode: ai
+    priority: 100
 
 # Registry skills section - for skills installed from AgentUp Skills Registry
 registry_skills: []
@@ -35,45 +31,27 @@ security:
     issuer: your-agent
     audience: agentup-client
 
-# AI configuration for LLM-powered agents
-ai:
-  enabled: true
-  llm_service: {{ llm_service_name }}
-  model: {{ llm_model }}
-  system_prompt: |
-    You are {{ project_name }}, an AI agent with access to specific functions/skills.
-
-    Your role:
-    - Understand user requests naturally and conversationally
-    - Use the appropriate functions when needed to help users
-    - Provide helpful, accurate, and friendly responses
-    - Maintain context across conversations
-
-    When users ask for something:
-    1. If you have a relevant function, call it with appropriate parameters
-    2. If multiple functions are needed, call them in logical order
-    3. Synthesize the results into a natural, helpful response
-    4. If no function is needed, respond conversationally
-
-    Always be helpful, accurate, and maintain a friendly tone. You are designed to assist users effectively while being natural and conversational.
-  max_context_turns: 10
-  fallback_to_routing: true  # Fall back to keyword routing if LLM fails
-
-# External services configuration
-services:
-{% if llm_provider_config %}
-  {{ llm_service_name }}:
-    type: llm
-    provider: {{ llm_provider }}
-{% if llm_provider == 'openai' %}
+# AI configuration
+{% if ai_provider_config %}
+ai_provider:
+    provider: {{ ai_provider_config.provider }}
+{% if ai_provider_config.provider == 'openai' %}
     api_key: ${OPENAI_API_KEY}
-{% elif llm_provider == 'anthropic' %}
+    model: {{ ai_provider_config.model | default('gpt-4o-mini') }}
+{% elif ai_provider_config.provider == 'anthropic' %}
     api_key: ${ANTHROPIC_API_KEY}
-{% elif llm_provider == 'ollama' %}
-    base_url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    model: {{ ai_provider_config.model | default('claude-3-5-sonnet-20241022') }}
+{% elif ai_provider_config.provider == 'ollama' %}
+    model: {{ ai_provider_config.model | default('llama3') }}
+    base_url: ${OLLAMA_BASE_URL:http://localhost:11434/v1}
 {% endif %}
-    model: {{ llm_model }}
+    temperature: 0.7
+    max_tokens: 1000
+    top_p: 1.0
 {% endif %}
+
+# External services configuration (LLM configuration moved to ai_provider section)
+services:
   redis:
     type: cache
     config:

@@ -11,6 +11,7 @@ from .api import router, jsonrpc_error_handler, create_agent_card, set_request_h
 from .config import load_config
 from .models import JSONRPCError
 from .security import create_security_manager
+from .constants import DEFAULT_REDIS_URL, DEFAULT_SERVER_HOST, DEFAULT_SERVER_PORT
 
 from a2a.server.tasks import InMemoryTaskStore
 from .push_notifier import EnhancedPushNotifier, RedisPushNotifier
@@ -66,7 +67,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize services if available & enabled
     svc_cfg = config.get("services", {})
-    
+
     if initialize_services_from_config and svc_cfg.get("enabled", True):
         try:
             await initialize_services_from_config(config)
@@ -90,12 +91,12 @@ async def lifespan(app: FastAPI):
     routing_cfg = config.get("routing", {})
     default_mode = routing_cfg.get("default_mode", "ai")
     logger.info(f"Routing default mode set to: {default_mode}")
-    
+
     # Register AI functions if any skills might use AI routing
     # Note: In mixed routing, skills can override the default mode
     skills = config.get("skills", [])
     needs_ai = any(skill.get("routing_mode", default_mode) == "ai" for skill in skills)
-    
+
     if register_ai_functions_from_handlers and needs_ai and svc_cfg.get("ai_functions", True):
         try:
             register_ai_functions_from_handlers()
@@ -110,24 +111,24 @@ async def lifespan(app: FastAPI):
     if state_cfg:
         try:
             from .context import get_context_manager
-            
+
             backend = state_cfg.get("backend", "memory")
             backend_config = {}
-            
+
             if backend == "redis":
                 # Get Redis URL from services configuration or state config
                 redis_service = config.get("services", {}).get("redis", {}).get("config", {})
-                backend_config["url"] = redis_service.get("url", "redis://localhost:6379")
+                backend_config["url"] = redis_service.get("url", DEFAULT_REDIS_URL)
                 backend_config["ttl"] = state_cfg.get("ttl", 3600)
             elif backend == "file":
                 backend_config["storage_dir"] = state_cfg.get("storage_dir", "./conversation_states")
-            
+
             # Initialize global state manager
             context_manager = get_context_manager(backend, **backend_config)
             app.state.context_manager = context_manager
-            
+
             logger.info(f"State management initialized with {backend} backend")
-            
+
         except Exception as e:
             logger.error(f"Failed to initialize state management: {e}")
             # Continue without state management
@@ -172,7 +173,7 @@ async def lifespan(app: FastAPI):
         try:
             from .services import get_services
             services = get_services()
-            
+
             # Find the cache service name from config
             cache_service_name = None
             services_config = config.get('services', {})
@@ -180,13 +181,13 @@ async def lifespan(app: FastAPI):
                 if service_config.get('type') == 'cache':
                     cache_service_name = service_name
                     break
-            
+
             if cache_service_name:
                 redis_service = services.get_cache(cache_service_name)
             else:
                 redis_service = None
                 logger.warning("No cache service found in configuration")
-            
+
             # Create Redis client from service URL
             if redis_service and hasattr(redis_service, 'url'):
                 import redis.asyncio as redis
@@ -195,7 +196,7 @@ async def lifespan(app: FastAPI):
             else:
                 redis_client = None
                 logger.warning("Cannot create Redis client - no URL available")
-            
+
             if redis_client:
                 # Create new Redis push notifier
                 client = httpx.AsyncClient()
@@ -205,16 +206,16 @@ async def lifespan(app: FastAPI):
                     key_prefix=push_config.get('key_prefix', 'agentup:push:'),
                     validate_urls=push_config.get('validate_urls', True)
                 )
-                
+
                 # Update the request handler to use Redis push notifier
                 from .api import get_request_handler
                 handler = get_request_handler()
                 handler._push_notifier = redis_push_notifier
-                
+
                 logger.info("Updated to Redis-backed push notifier")
             else:
                 logger.warning("Redis service available but no client found, using memory push notifier")
-                
+
         except Exception as e:
             logger.error(f"Failed to initialize Redis push notifier: {e}")
             logger.info("Using memory push notifier")
@@ -223,7 +224,7 @@ async def lifespan(app: FastAPI):
 
     # Shutdown hooks
     logger.info("Shutting down...")
-    
+
     # State management cleanup
     if hasattr(app.state, 'context_manager') and app.state.context_manager:
         try:
@@ -233,7 +234,7 @@ async def lifespan(app: FastAPI):
                 logger.info(f"Cleaned up {cleaned} old conversation contexts")
         except Exception as e:
             logger.error(f"Error during state cleanup: {e}")
-    
+
     if shutdown_mcp_integration and mcp_cfg.get("enabled", False):
         try:
             await shutdown_mcp_integration()
@@ -249,7 +250,7 @@ def create_app() -> FastAPI:
     # Create basic request handler with memory push notifier
     client = httpx.AsyncClient()
     push_notifier = EnhancedPushNotifier(client=client)
-    
+
     request_handler = CustomRequestHandler(
         agent_executor=AgentExecutorImpl(agent=create_agent_card()),
         task_store=InMemoryTaskStore(),
@@ -277,8 +278,13 @@ app = create_app()
 
 def main():
     """Main function to set up and run the agent."""
-    logger.info("Starting server")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    import os
+
+    host = os.getenv('SERVER_HOST', DEFAULT_SERVER_HOST)
+    port = int(os.getenv('SERVER_PORT', DEFAULT_SERVER_PORT))
+
+    logger.info(f"Starting server on {host}:{port}")
+    uvicorn.run(app, host=host, port=port)
 
 if __name__ == "__main__":
     main()

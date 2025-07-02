@@ -7,25 +7,39 @@ agent:
   description: {{ description }}
   version: 0.1.0
 
-# Routing configuration
-routing:
-  default_mode: direct
-  fallback_skill: echo
-  fallback_enabled: true
-
 # Core skills configuration
 skills:
   - skill_id: echo
     name: Echo
     description: Echo back the input text
+    tags: [echo, basic, simple]
     input_mode: text
     output_mode: text
-    routing_mode: direct
     keywords: [echo, repeat, say]
-    patterns: ['.*']  # Catch-all for minimal template
+    patterns: ['.echo']  # Catch-all for minimal template
+    priority: 50
 
 # Registry skills section - for skills installed from AgentUp Skills Registry
 registry_skills: []
+
+# AI configuration
+{% if ai_provider_config %}
+ai_provider:
+    provider: {{ ai_provider_config.provider }}
+{% if ai_provider_config.provider == 'openai' %}
+    api_key: ${OPENAI_API_KEY}
+    model: {{ ai_provider_config.model | default('gpt-4o-mini') }}
+{% elif ai_provider_config.provider == 'anthropic' %}
+    api_key: ${ANTHROPIC_API_KEY}
+    model: {{ ai_provider_config.model | default('claude-3-5-sonnet-20241022') }}
+{% elif ai_provider_config.provider == 'ollama' %}
+    model: {{ ai_provider_config.model | default('llama3') }}
+    base_url: ${OLLAMA_BASE_URL:http://localhost:11434/v1}
+{% endif %}
+    temperature: 0.7
+    max_tokens: 1000
+    top_p: 1.0
+{% endif %}
 
 # Security configuration
 security:
