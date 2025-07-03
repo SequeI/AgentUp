@@ -14,8 +14,7 @@ _project_name = _config.get("agent", {}).get("name", "Agent")
 
 # Import shared utilities (with fallbacks for testing)
 try:
-    from ..utils.helpers import extract_parameter
-    from ..utils.messages import MessageProcessor
+    from ..utils.messages import ConversationContext, MessageProcessor
 except ImportError:
 
     class ConversationContext:
@@ -35,6 +34,12 @@ except ImportError:
         @staticmethod
         def get_latest_user_message(messages):
             return None
+
+
+# Separate import for extract_parameter with fallback
+try:
+    from ..utils.helpers import extract_parameter
+except ImportError:
 
     def extract_parameter(text, param):
         return None
