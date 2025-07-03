@@ -1,18 +1,31 @@
 # AgentUp
 
-**A comprehensive framework for building A2A-compliant AI agents**
+**The fastest way to bootstrap full capability A2A-compliant AI Agents**
 
-AgentUp is a developer-focused framework that provides a complete foundation for building interoperable AI agents. The framework combines a powerful CLI for rapid development with a flexible, configuration-driven architecture that scales from simple automation to complex multi-modal AI systems.
+AgentUp is a developer-focused framework that provides a complete foundation for building
+interoperable AI agents. The framework combines a powerful CLI for rapid development with
+a flexible, configuration-driven architecture that scales from simple automation to complex multi-modal AI systems.
 
 ## Core Philosophy
 
-AgentUp follows a config-driven approach where all features are controlled through configuration. This design enables dynamic component loading, simplified maintenance, and consistent behavior across different deployment environments. The framework emphasizes standards compliance, developer experience, and architectural flexibility.
+AgentUp follows a config-driven/ plugin approach where all features are controlled through configuration.
+This design enables dynamic component loading, simplified maintenance, and consistent behavior across
+different deployment environments. The framework emphasizes standards compliance, developer experience,
+and architectural flexibility / ownership, allowing teams to focus on quickly bootstrapping
+intelligent agents with everything they need to get started, out of the box.
 
 ## Open Source and Standards-Based
 
-AgentUp is built on open standards - most notably the A2A protocol - which governs agent-to-agent communication, capability discovery, and task orchestration. Its modular architecture makes it highly extensible: developers can rapidly author custom plugins (Tools) that plug directly into the core runtime. The AgentUp maintainers actively contribute to both the A2A specification and its reference libraries, the framework stays tightly aligned with emerging best practices and evolving protocol enhancements. The team has a proven pedigree in security and open source: they’re the driving force behind projects like [sigstore](https://sigstore.dev/) and [Bandit](https://bandit.readthedocs.io/), and have consistently demonstrated a commitment to writing code that is secure, scalable, and maintainable.
+AgentUp is built on open standards - most notably the A2A protocol - which governs agent-to-agent
+communication, capability discovery, and task orchestration. Its modular architecture makes it
+highly extensible: developers can rapidly author custom plugins (Tools) that plug directly into the
+core runtime. The AgentUp maintainers actively contribute to both the A2A specification and its reference
+libraries, the framework stays tightly aligned with emerging best practices and evolving protocol enhancements.
 
-AgentUp is licensed under the Apache 2.0 License, promoting collaboration and community contributions.
+The folks behind AgentUp have a proven pedigree in security and open source: they’re the driving force
+behind projects like [sigstore](https://sigstore.dev/) and [Bandit](https://bandit.readthedocs.io/),
+and have consistently demonstrated a commitment to writing code that is secure, scalable, while also being
+transparent and open.
 
 ## Rich Feature Set
 
