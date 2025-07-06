@@ -102,7 +102,6 @@ class PluginManager:
         except Exception as e:
             logger.error(f"Error loading entry point plugins: {e}")
 
-
     def _load_installed_plugins(self) -> None:
         """Load plugins from installed skills directory."""
         installed_dir = Path.home() / ".agentup" / "plugins"
