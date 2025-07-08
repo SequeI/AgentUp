@@ -37,6 +37,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "a2a-sdk" },
+    { name = "asgi-correlation-id" },
     { name = "asyncio" },
     { name = "authlib" },
     { name = "click" },
@@ -82,6 +83,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "a2a-sdk", specifier = ">=0.2.7" },
+    { name = "asgi-correlation-id", specifier = ">=4.3.4" },
     { name = "asyncio", specifier = ">=3.4.3" },
     { name = "authlib", specifier = ">=1.6.0" },
     { name = "bandit", extras = ["toml"], marker = "extra == 'dev'", specifier = ">=1.8.0" },
@@ -140,6 +142,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/95/7d/4c1bd541d4dffa1b52bd83fb8527089e097a106fc90b467a7313b105f840/anyio-4.9.0.tar.gz", hash = "sha256:673c0c244e15788651a4ff38710fea9675823028a6f08a5eda409e0c9840a028", size = 190949, upload-time = "2025-03-17T00:02:54.77Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a1/ee/48ca1a7c89ffec8b6a0c5d02b89c305671d5ffd8d3c94acf8b8c408575bb/anyio-4.9.0-py3-none-any.whl", hash = "sha256:9f76d541cad6e36af7beb62e978876f3b41e3e04f2c1fbf0884604c0a9c4d93c", size = 100916, upload-time = "2025-03-17T00:02:52.713Z" },
+]
+
+[[package]]
+name = "asgi-correlation-id"
+version = "4.3.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+    { name = "starlette" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f4/ff/a6538245ac1eaa7733ec6740774e9d5add019e2c63caa29e758c16c0afdd/asgi_correlation_id-4.3.4.tar.gz", hash = "sha256:ea6bc310380373cb9f731dc2e8b2b6fb978a76afe33f7a2384f697b8d6cd811d", size = 20075, upload-time = "2024-10-17T11:44:30.324Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d9/ab/6936e2663c47a926e0659437b9333ad87d1ff49b1375d239026e0a268eba/asgi_correlation_id-4.3.4-py3-none-any.whl", hash = "sha256:36ce69b06c7d96b4acb89c7556a4c4f01a972463d3d49c675026cbbd08e9a0a2", size = 15262, upload-time = "2024-10-17T11:44:28.739Z" },
 ]
 
 [[package]]
