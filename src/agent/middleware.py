@@ -352,7 +352,7 @@ def get_cache_backend() -> CacheBackend:
         try:
             # Try relative import first (development context)
             try:
-                from ..config import load_config
+                from ..agent.config import load_config
             except ImportError:
                 # Try installed package import (agent context)
                 from agent.config import load_config
