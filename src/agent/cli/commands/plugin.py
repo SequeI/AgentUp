@@ -31,7 +31,7 @@ def list_plugins(verbose: bool, capabilities: bool, format: str, debug: bool):
         # Configure logging based on verbose/debug flags
         import logging
         import os
-        
+
         if debug:
             os.environ["AGENTUP_LOG_LEVEL"] = "DEBUG"
             logging.getLogger("agent.plugins").setLevel(logging.DEBUG)
@@ -44,7 +44,7 @@ def list_plugins(verbose: bool, capabilities: bool, format: str, debug: bool):
             # Suppress all plugin discovery logs for clean output
             logging.getLogger("agent.plugins").setLevel(logging.WARNING)
             logging.getLogger("agent.plugins.manager").setLevel(logging.WARNING)
-        
+
         from agent.plugins.manager import get_plugin_manager
 
         manager = get_plugin_manager()
@@ -64,7 +64,7 @@ def list_plugins(verbose: bool, capabilities: bool, format: str, debug: bool):
                     for p in plugins
                 ]
             }
-            
+
             # Only include capabilities if -c flag is used
             if capabilities:
                 output["capabilities"] = [
@@ -77,7 +77,7 @@ def list_plugins(verbose: bool, capabilities: bool, format: str, debug: bool):
                     }
                     for c in available_capabilities
                 ]
-            
+
             console.print_json(json.dumps(output, indent=2))
             return
 
@@ -96,7 +96,7 @@ def list_plugins(verbose: bool, capabilities: bool, format: str, debug: bool):
                     for p in plugins
                 ]
             }
-            
+
             # Only include capabilities if -c flag is used
             if capabilities:
                 output["capabilities"] = [
@@ -109,7 +109,7 @@ def list_plugins(verbose: bool, capabilities: bool, format: str, debug: bool):
                     }
                     for c in available_capabilities
                 ]
-            
+
             console.print(yaml.dump(output, default_flow_style=False))
             return
 
@@ -161,27 +161,29 @@ def list_plugins(verbose: bool, capabilities: bool, format: str, debug: bool):
         if capabilities:
             # AI Functions table - show individual functions instead of capabilities
             console.print()  # Blank line
-            
+
             # Collect all AI functions from all capabilities
             all_ai_functions = []
             for capability in available_capabilities:
                 plugin_name = manager.capability_to_plugin.get(capability.id, "unknown")
                 ai_functions = manager.get_ai_functions(capability.id)
-                
+
                 if ai_functions:
                     for func in ai_functions:
                         # Extract parameter names from the function schema
                         param_names = []
                         if "properties" in func.parameters:
                             param_names = list(func.parameters["properties"].keys())
-                        
-                        all_ai_functions.append({
-                            "name": func.name,
-                            "description": func.description,
-                            "parameters": param_names,
-                            "plugin": plugin_name,
-                            "capability_id": capability.id
-                        })
+
+                        all_ai_functions.append(
+                            {
+                                "name": func.name,
+                                "description": func.description,
+                                "parameters": param_names,
+                                "plugin": plugin_name,
+                                "capability_id": capability.id,
+                            }
+                        )
 
             if all_ai_functions:
                 ai_table = Table(title="Available Capabilities", box=box.ROUNDED, title_style="bold cyan")
@@ -194,7 +196,7 @@ def list_plugins(verbose: bool, capabilities: bool, format: str, debug: bool):
 
                 for func in all_ai_functions:
                     parameters_str = ", ".join(func["parameters"]) if func["parameters"] else "none"
-                    
+
                     row = [
                         func["name"],
                         func["plugin"],
@@ -202,7 +204,9 @@ def list_plugins(verbose: bool, capabilities: bool, format: str, debug: bool):
                     ]
 
                     if verbose:
-                        row.append(func["description"][:80] + "..." if len(func["description"]) > 80 else func["description"])
+                        row.append(
+                            func["description"][:80] + "..." if len(func["description"]) > 80 else func["description"]
+                        )
 
                     ai_table.add_row(*row)
 

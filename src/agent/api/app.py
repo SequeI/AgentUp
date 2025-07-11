@@ -105,7 +105,7 @@ async def lifespan(app: FastAPI):
         if security_manager.is_auth_enabled():
             logger.info(f"Security enabled with {security_manager.get_primary_auth_type()} authentication")
         else:
-            logger.info("Security disabled - all endpoints will be public")
+            logger.warning("Security disabled - all endpoints are UNPROTECTED")
     except Exception as e:
         logger.error(f"Failed to initialize security manager: {e}")
         # Continue without security for now, but log the error
@@ -179,7 +179,7 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"Failed to register AI functions: {e}")
     elif not needs_ai:
-        logger.info("No AI routing plugins found - skipping AI function registration")
+        logger.info("No AI enabled plugins found - skipping AI function registration")
 
     # Initialize state management if configured
     state_cfg = config.get("state", {})
@@ -211,7 +211,6 @@ async def lifespan(app: FastAPI):
 
     # Initialize MCP integration if available & enabled
     mcp_cfg = config.get("mcp", {})
-    logger.info(f"MCP debug: initialize_mcp_integration is None!: {initialize_mcp_integration is None}")
     if initialize_mcp_integration and mcp_cfg.get("enabled", False):
         try:
             await initialize_mcp_integration(config)
@@ -245,6 +244,7 @@ async def lifespan(app: FastAPI):
 
         except Exception as e:
             logger.error(f"Failed to initialize MCP integration: {e}")
+        logger.debug("MCP integration initialization complete")
 
     # Initialize push notifier with Valkey if configured
     push_config = config.get("push_notifications", {})

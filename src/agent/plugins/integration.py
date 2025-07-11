@@ -19,31 +19,56 @@ def integrate_plugins_with_handlers() -> None:
     2. Registers only configured plugin capabilities as handlers
     3. Makes them available through the existing get_handler() mechanism
     """
-    logger.info("Integrating plugin system with existing handlers...")
 
     # Get the plugin manager and adapter
     plugin_manager = get_plugin_manager()
     adapter = PluginAdapter(plugin_manager)
 
-    # Get configured capabilities from the agent config
+    # Get configured plugins from the agent config
     try:
         from ..config import load_config
 
         config = load_config()
-        configured_capabilities = {plugin.get("plugin_id") for plugin in config.get("plugins", [])}
+        configured_plugins = {plugin.get("plugin_id") for plugin in config.get("plugins", [])}
     except Exception as e:
         logger.warning(f"Could not load agent config, registering all plugins: {e}")
-        configured_capabilities = set(adapter.list_available_capabilities())
+        configured_plugins = set()
 
     registered_count = 0
 
-    # Register each configured plugin capability as a handler
+    # Build a mapping of plugin names to their capabilities
+    plugin_to_capabilities = {}
     for capability_id in adapter.list_available_capabilities():
-        # Only register capabilities that are configured in agent_config.yaml
-        if capability_id not in configured_capabilities:
-            logger.debug(f"Capability '{capability_id}' not in agent config, skipping registration")
-            continue
+        capability_info = adapter.get_capability_info(capability_id)
+        if capability_info and "plugin_name" in capability_info:
+            plugin_name = capability_info["plugin_name"]
+            if plugin_name not in plugin_to_capabilities:
+                plugin_to_capabilities[plugin_name] = []
+            plugin_to_capabilities[plugin_name].append(capability_id)
 
+    # Determine which capabilities to register
+    capabilities_to_register = set()
+
+    if not configured_plugins:
+        # If no config loaded, register all capabilities
+        capabilities_to_register = set(adapter.list_available_capabilities())
+    else:
+        for plugin_id in configured_plugins:
+            # Case 1: plugin_id matches a plugin name (e.g., "system_tools")
+            if plugin_id in plugin_to_capabilities:
+                logger.debug(f"Enabling all capabilities from plugin '{plugin_id}'")
+                capabilities_to_register.update(plugin_to_capabilities[plugin_id])
+
+            # Case 2: plugin_id matches a specific capability ID (e.g., "read_file")
+            elif plugin_id in adapter.list_available_capabilities():
+                logger.debug(f"Enabling specific capability '{plugin_id}'")
+                capabilities_to_register.add(plugin_id)
+
+            else:
+                logger.warning(f"Plugin/capability '{plugin_id}' not found")
+
+    # Register each capability as a handler
+    for capability_id in capabilities_to_register:
         # Skip if handler already exists (don't override existing handlers)
         if capability_id in _handlers:
             logger.debug(f"Capability '{capability_id}' already registered as handler, skipping plugin")
@@ -59,7 +84,8 @@ def integrate_plugins_with_handlers() -> None:
 
     # Store the adapter globally for other uses
     _plugin_adapter[0] = adapter
-
+    if registered_count == 0:
+        logger.debug("No plugin capabilities registered in Agents config, integration complete")
     logger.info(
         f"Plugin integration complete. Added {registered_count} plugin capabilities (out of {len(adapter.list_available_capabilities())} discovered)"
     )

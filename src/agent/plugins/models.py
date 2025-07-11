@@ -51,6 +51,7 @@ class CapabilityInfo:
     name: str
     version: str
     description: str | None = None
+    plugin_name: str | None = None  # Name of the plugin providing this capability
     capabilities: list[CapabilityType] = field(default_factory=list)
     input_mode: str = "text"
     output_mode: str = "text"

@@ -22,16 +22,17 @@ class CapabilitySpec:
     """Hook specifications that capability plugins must implement."""
 
     @hookspec
-    def register_capability(self) -> CapabilityInfo:
+    def register_capability(self) -> CapabilityInfo | list[CapabilityInfo]:
         """
-        Register the capability with AgentUp.
+        Register the capability or capabilities with AgentUp.
 
         This hook is called during plugin discovery to get information
-        about the capability provided by this plugin.
+        about the capability or capabilities provided by this plugin.
 
         Returns:
-            CapabilityInfo: Information about the capability including ID, name,
-                           features, and configuration schema.
+            CapabilityInfo or list[CapabilityInfo]: Information about the capability/capabilities
+                                                    including ID, name, features, and configuration schema.
+                                                    A plugin can provide a single capability or multiple capabilities.
         """
 
     @hookspec

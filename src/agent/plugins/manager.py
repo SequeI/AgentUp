@@ -185,7 +185,7 @@ class PluginManager:
         self._register_plugin_capability(plugin_name, plugin_instance)
 
     def _register_plugin_capability(self, plugin_name: str, plugin_instance: Any) -> None:
-        """Register a capability from a plugin."""
+        """Register capability or capabilities from a plugin."""
         try:
             # Get capability info from the plugin
             results = self.pm.hook.register_capability()
@@ -194,37 +194,46 @@ class PluginManager:
                 return
 
             # Find the result from this specific plugin
-            capability_info = None
+            plugin_result = None
             for result in results:
                 # Check if this result came from our plugin
                 if hasattr(plugin_instance, "register_capability"):
                     test_result = plugin_instance.register_capability()
                     if test_result == result:
-                        capability_info = result
+                        plugin_result = result
                         break
 
-            if capability_info is None:
-                capability_info = results[-1]  # Fallback to last result
+            if plugin_result is None:
+                plugin_result = results[-1]  # Fallback to last result
 
-            # Check if this is a CapabilityInfo object (handle different import paths)
-            if not (
-                hasattr(capability_info, "id")
-                and hasattr(capability_info, "name")
-                and hasattr(capability_info, "capabilities")
-                and type(capability_info).__name__ == "CapabilityInfo"
-            ):
-                logger.error(f"Plugin {plugin_name} returned invalid capability info: {type(capability_info)}")
-                return
+            # Handle both single capability and list of capabilities
+            capabilities_to_register = []
+            if isinstance(plugin_result, list):
+                capabilities_to_register = plugin_result
+            else:
+                capabilities_to_register = [plugin_result]
 
-            # Register the capability
-            self.capabilities[capability_info.id] = capability_info
-            self.capability_to_plugin[capability_info.id] = plugin_name
-            self.capability_hooks[capability_info.id] = plugin_instance
+            # Register each capability
+            for capability_info in capabilities_to_register:
+                # Check if this is a CapabilityInfo object (handle different import paths)
+                if not (
+                    hasattr(capability_info, "id")
+                    and hasattr(capability_info, "name")
+                    and hasattr(capability_info, "capabilities")
+                    and type(capability_info).__name__ == "CapabilityInfo"
+                ):
+                    logger.error(f"Plugin {plugin_name} returned invalid capability info: {type(capability_info)}")
+                    continue
 
-            logger.info(f"Discovered capability '{capability_info.id}' from plugin '{plugin_name}'")
+                # Register the capability
+                self.capabilities[capability_info.id] = capability_info
+                self.capability_to_plugin[capability_info.id] = plugin_name
+                self.capability_hooks[capability_info.id] = plugin_instance
+
+                logger.info(f"Discovered capability '{capability_info.id}' from plugin '{plugin_name}'")
 
         except Exception as e:
-            logger.error(f"Failed to register capability from plugin {plugin_name}: {e}")
+            logger.error(f"Failed to register capabilities from plugin {plugin_name}: {e}")
 
     def _get_package_version(self, package_name: str) -> str:
         """Get version of an installed package."""
@@ -268,6 +277,9 @@ class PluginManager:
 
         plugin = self.capability_hooks[capability_id]
         try:
+            # Add capability_id to context metadata so plugin knows which capability is being invoked
+            context.metadata["capability_id"] = capability_id
+
             # Try new interface first
             if hasattr(plugin, "execute_capability"):
                 return plugin.execute_capability(context)
