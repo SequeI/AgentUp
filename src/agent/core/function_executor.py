@@ -121,7 +121,7 @@ class FunctionExecutor:
                         state_configs = [state_config]
                         wrapped_handler = with_state(state_configs)(wrapped_handler)
 
-                        logger.info(f"AI routing: Applied state management to function '{function_name}'")
+                        logger.debug(f"AI routing: Applied state management to function '{function_name}'")
                         return await wrapped_handler(task)
                     else:
                         logger.debug(f"AI routing: State management disabled for function '{function_name}'")

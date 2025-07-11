@@ -191,7 +191,7 @@ class FunctionDispatcher:
             try:
                 ai_context, ai_context_id = await self._get_ai_routing_state_context(task)
                 if ai_context and ai_context_id:
-                    logger.info(f"AI routing: Applied state management for context {ai_context_id}")
+                    logger.debug(f"AI routing: Applied state management for context {ai_context_id}")
                 else:
                     logger.warning(
                         f"AI routing: No state context available - context={ai_context is not None}, context_id={ai_context_id}"
@@ -516,8 +516,6 @@ def register_ai_functions_from_handlers():
 
         logger.info(f"Module {handler_module.__name__}: found {ai_functions_in_module} AI functions")
 
-    logger.info(f"Registered {registered_count} AI functions from handlers")
-
     # Also register AI functions from plugins
     try:
         from agent.plugins.integration import get_plugin_adapter
@@ -558,7 +556,7 @@ def register_ai_functions_from_handlers():
 
                 plugin_name = capability_info["plugin_name"]
                 if plugin_name not in configured_plugins:
-                    logger.debug(f"Skipping AI functions for capability '{capability_id}' from unconfigured plugin '{plugin_name}'")
+                    logger.debug(f"Skipping AI functions for capability '{capability_id}' from unregisterd plugin '{plugin_name}'")
                     continue
 
                 ai_functions = plugin_adapter.get_ai_functions(capability_id)
@@ -585,7 +583,6 @@ def register_ai_functions_from_handlers():
 
                     wrapped_handler = create_wrapper(ai_function.handler)
                     registry.register_function(ai_function.name, wrapped_handler, schema)
-                    logger.debug(f"Registered plugin AI function: {ai_function.name} from capability {capability_id}")
                     plugin_functions_count += 1
 
             if plugin_functions_count > 0:

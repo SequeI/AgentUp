@@ -210,7 +210,7 @@ def _apply_state_to_handler(handler: Callable, plugin_id: str) -> Callable:
         handler._agentup_state_applied = True
         wrapped_handler = with_state([state_config])(handler)
         backend = state_config.get("backend", "memory")
-        logger.info(f"Applied state management to handler '{plugin_id}': backend={backend}")
+        logger.debug(f"Applied state management to handler '{plugin_id}': backend={backend}")
         return wrapped_handler
     except Exception as e:
         logger.error(f"Failed to apply state management to handler '{plugin_id}': {e}")
@@ -242,7 +242,7 @@ def _apply_middleware_to_handler(handler: Callable, plugin_id: str) -> Callable:
         handler._agentup_middleware_applied = True
         wrapped_handler = with_middleware(middleware_configs)(handler)
         middleware_names = [m.get("name") for m in middleware_configs]
-        logger.info(f"Applied middleware to handler '{plugin_id}': {middleware_names}")
+        logger.debug(f"Applied middleware to handler '{plugin_id}': {middleware_names}")
         return wrapped_handler
     except Exception as e:
         logger.error(f"Failed to apply middleware to handler '{plugin_id}': {e}")
@@ -272,7 +272,7 @@ def register_handler_function(plugin_id: str, handler: Callable[[Task], str]) ->
     wrapped_handler = _apply_middleware_to_handler(wrapped_handler, plugin_id)
     wrapped_handler = _apply_state_to_handler(wrapped_handler, plugin_id)
     _handlers[plugin_id] = wrapped_handler
-    logger.debug(f"Registered handler function with auth, middleware and state: {plugin_id}")
+    logger.info(f"Registered handler function with auth, middleware and state: {plugin_id}")
 
 
 def get_handler(plugin_id: str) -> Callable[[Task], str] | None:
