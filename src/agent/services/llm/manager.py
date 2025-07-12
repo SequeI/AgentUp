@@ -82,9 +82,14 @@ class LLMManager:
 
             # Handle function calls if present
             if response.function_calls:
+                # Log which functions the LLM selected
+                selected_functions = [func_call.name for func_call in response.function_calls]
+                logger.info(f"LLM selected function(s): {', '.join(selected_functions)}")
+
                 function_results = []
                 for func_call in response.function_calls:
                     try:
+                        logger.debug(f"Executing function: {func_call.name} with arguments: {func_call.arguments}")
                         result = await function_executor.execute_function_call(func_call.name, func_call.arguments)
                         function_results.append(result)
                     except Exception as e:
@@ -106,9 +111,14 @@ class LLMManager:
 
             # Parse and execute function calls if present
             if response.function_calls:
+                # Log which functions the LLM selected
+                selected_functions = [func_call.name for func_call in response.function_calls]
+                logger.info(f"LLM selected function(s): {', '.join(selected_functions)}")
+
                 function_results = []
                 for func_call in response.function_calls:
                     try:
+                        logger.debug(f"Executing function: {func_call.name} with arguments: {func_call.arguments}")
                         result = await function_executor.execute_function_call(func_call.name, func_call.arguments)
                         function_results.append(result)
                     except Exception as e:
