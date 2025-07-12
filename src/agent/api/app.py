@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 import httpx
 import structlog
 import uvicorn
+from a2a.server.request_handlers import DefaultRequestHandler
 from a2a.server.tasks import InMemoryTaskStore
 from fastapi import FastAPI
 
@@ -14,7 +15,6 @@ from agent.config.models import JSONRPCError
 from agent.core.executor import GenericAgentExecutor as AgentExecutorImpl
 from agent.handlers.handlers import apply_global_middleware, apply_global_state
 from agent.mcp_support.mcp_integration import initialize_mcp_integration, shutdown_mcp_integration
-from agent.push.handler import CustomRequestHandler
 from agent.push.notifier import EnhancedPushNotifier, ValkeyPushNotifier
 from agent.security import create_security_manager
 
@@ -259,7 +259,7 @@ def create_app() -> FastAPI:
     client = httpx.AsyncClient()
     push_notifier = EnhancedPushNotifier(client=client)
 
-    request_handler = CustomRequestHandler(
+    request_handler = DefaultRequestHandler(
         agent_executor=AgentExecutorImpl(agent=create_agent_card()),
         task_store=InMemoryTaskStore(),
         push_config_store=push_notifier,
