@@ -323,7 +323,13 @@ dependencies = [
 ]
 
 classifiers = [
-    "Framework :: AgentUp :: Plugin",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 
 [project.entry-points."agentup.available_capabilities"]
@@ -332,6 +338,12 @@ classifiers = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sys_tools"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
 '''
         (output_dir / "pyproject.toml").write_text(pyproject_content)
 
