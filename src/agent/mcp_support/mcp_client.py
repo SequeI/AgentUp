@@ -107,12 +107,6 @@ class MCPClientService:
         if tools_count == 0 and resources_count == 0:
             logger.warning(f"No tools or resources discovered from {server_name}")
 
-            # Fallback: If this is a filesystem server and discovery failed,
-            # register common filesystem tools manually as a workaround
-            if server_name == "filesystem":
-                logger.info("Attempting fallback: manually registering common filesystem tools")
-                self._register_fallback_filesystem_tools(server_name)
-                logger.info("Registered fallback filesystem tools")
         else:
             logger.info(
                 f"Successfully discovered capabilities from {server_name}: {tools_count} tools, {resources_count} resources"
@@ -123,60 +117,6 @@ class MCPClientService:
                 tool_names = [tool["name"] for tool in self._available_tools.values() if tool["server"] == server_name]
                 logger.info(f"Available tools from {server_name}: {', '.join(tool_names)}")
 
-    def _register_fallback_filesystem_tools(self, server_name: str) -> None:
-        """Register common filesystem tools as fallback when discovery fails."""
-        fallback_tools = [
-            {
-                "name": "read_file",
-                "description": "Read the complete contents of a file from the file system",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"path": {"type": "string", "description": "The path of the file to read"}},
-                    "required": ["path"],
-                },
-            },
-            {
-                "name": "write_file",
-                "description": "Create a new file or completely overwrite an existing file with new content",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "path": {"type": "string", "description": "The path of the file to write"},
-                        "content": {"type": "string", "description": "The content to write to the file"},
-                    },
-                    "required": ["path", "content"],
-                },
-            },
-            {
-                "name": "list_directory",
-                "description": "Get a list of all files and directories in a specified path",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {"path": {"type": "string", "description": "The path of the directory to list"}},
-                    "required": ["path"],
-                },
-            },
-            {
-                "name": "create_directory",
-                "description": "Create a new directory at the specified path",
-                "inputSchema": {
-                    "type": "object",
-                    "properties": {
-                        "path": {"type": "string", "description": "The path where the directory should be created"}
-                    },
-                    "required": ["path"],
-                },
-            },
-        ]
-
-        for tool in fallback_tools:
-            tool_key = f"{server_name}:{tool['name']}"
-            self._available_tools[tool_key] = {
-                "server": server_name,
-                "name": tool["name"],
-                "description": tool["description"],
-                "inputSchema": tool["inputSchema"],
-            }
 
     async def get_available_tools(self) -> list[dict[str, Any]]:
         """Get all available tools from connected MCP servers."""
