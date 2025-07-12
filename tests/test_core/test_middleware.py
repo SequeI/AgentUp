@@ -11,7 +11,6 @@ from agent.middleware import (
     RateLimiter,
     RateLimitError,
     RetryConfig,
-    ValidationError,
     apply_caching,
     apply_rate_limiting,
     apply_retry,
@@ -24,7 +23,6 @@ from agent.middleware import (
     reset_rate_limits,
     retryable,
     timed,
-    validated,
     with_middleware,
 )
 
@@ -331,22 +329,6 @@ class TestMiddlewareDecorators:
             assert "test_func" in log_call
 
     @pytest.mark.asyncio
-    async def test_validated_decorator(self):
-        """Test validated decorator."""
-
-        @validated(schema={"required_fields": ["param1", "param2"]})
-        async def test_func(**kwargs):
-            return "success"
-
-        # Should succeed with required fields
-        result = await test_func(param1="value1", param2="value2")
-        assert result == "success"
-
-        # Should fail without required fields
-        with pytest.raises(ValidationError):
-            await test_func(param1="value1")
-
-    @pytest.mark.asyncio
     async def test_with_middleware_decorator(self):
         """Test with_middleware decorator."""
         call_count = 0
@@ -480,12 +462,6 @@ class TestMiddlewareExceptions:
         """Test RateLimitError exception."""
         error = RateLimitError("Rate limit exceeded")
         assert str(error) == "Rate limit exceeded"
-        assert isinstance(error, MiddlewareError)
-
-    def test_validation_error(self):
-        """Test ValidationError exception."""
-        error = ValidationError("Validation failed")
-        assert str(error) == "Validation failed"
         assert isinstance(error, MiddlewareError)
 
 

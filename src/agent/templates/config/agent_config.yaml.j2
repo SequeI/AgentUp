@@ -215,10 +215,6 @@ middleware:
       max_retries: {{ retry_max_attempts | default(3) }}
       backoff_factor: {{ retry_backoff | default(2) }}
 {% endif %}
-{% if 'validation' in feature_config.get('middleware', []) %}
-  - name: validated
-    params: {}
-{% endif %}
 {% endif %}
 
 # Push notifications configuration

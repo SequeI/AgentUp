@@ -129,7 +129,7 @@ class PluginManager:
         """Load a single installed plugin."""
         plugin_name = f"installed_{plugin_dir.name}"
         plugin_file = plugin_dir / entry_file
-        
+
         logger.info(f"Discovering '{plugin_name}' plugin")
 
         # Similar to local plugin loading

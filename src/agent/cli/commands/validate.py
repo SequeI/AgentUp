@@ -253,7 +253,7 @@ def validate_middleware_config(
         errors.append(f"Plugin '{plugin_id}' middleware must be a list")
         return
 
-    valid_middleware_types = {"rate_limit", "cache", "validation", "retry", "logging", "timing", "transform"}
+    valid_middleware_types = {"rate_limit", "cache", "retry", "logging", "timing", "transform"}
 
     for mw in middleware:
         if not isinstance(mw, dict):
@@ -544,7 +544,7 @@ def validate_middleware_section(middleware: list[dict[str, Any]], errors: list[s
         errors.append("Middleware section must be a list")
         return
 
-    valid_middleware_names = {"timed", "cached", "rate_limited", "retryable", "validated"}
+    valid_middleware_names = {"timed", "cached", "rate_limited", "retryable"}
 
     for i, middleware_config in enumerate(middleware):
         if not isinstance(middleware_config, dict):

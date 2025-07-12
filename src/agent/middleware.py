@@ -33,12 +33,6 @@ class RateLimitError(MiddlewareError):
     pass
 
 
-class ValidationError(MiddlewareError):
-    """Raised when validation fails."""
-
-    pass
-
-
 class MiddlewareRegistry:
     """Registry for middleware functions."""
 
@@ -461,26 +455,6 @@ def timed():
     return decorator
 
 
-def validated(schema: dict[str, Any]):
-    """Input validation middleware decorator."""
-
-    def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        async def wrapper(*args, **kwargs):
-            # Simple validation implementation
-            # In production, integrate with proper validation library like Pydantic
-            if "required_fields" in schema:
-                for field in schema["required_fields"]:
-                    if field not in kwargs:
-                        raise ValidationError(f"Required field '{field}' is missing")
-
-            return await func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
-
-
 def with_middleware(middleware_configs: list[dict[str, Any]]):
     """Apply multiple middleware based on configuration."""
 
@@ -499,8 +473,6 @@ def with_middleware(middleware_configs: list[dict[str, Any]]):
                 wrapped_func = retryable(**params)(wrapped_func)
             elif middleware_name == "timed":
                 wrapped_func = timed()(wrapped_func)
-            elif middleware_name == "validated":
-                wrapped_func = validated(**params)(wrapped_func)
 
         # Preserve AI function attributes and middleware flags on the final wrapped function
         if hasattr(func, "_is_ai_function"):
@@ -638,7 +610,6 @@ _registry.register("rate_limited", rate_limited)
 _registry.register("cached", cached)
 _registry.register("retryable", retryable)
 _registry.register("timed", timed)
-_registry.register("validated", validated)
 
 
 # AI-compatible middleware functions
@@ -662,7 +633,7 @@ def get_ai_compatible_middleware() -> list[dict[str, Any]]:
         ai_compatible = [
             m
             for m in middleware_configs
-            if m.get("name") in ["timed", "validated"]  # Exclude "cached", "rate_limited", "retryable"
+            if m.get("name") in ["timed"]  # Exclude "cached", "rate_limited", "retryable"
         ]
 
         return ai_compatible
@@ -710,7 +681,6 @@ __all__ = [
     "cached",
     "retryable",
     "timed",
-    "validated",
     "with_middleware",
     "clear_cache",
     "get_cache_stats",
@@ -723,7 +693,6 @@ __all__ = [
     "ValkeyCache",
     "MiddlewareError",
     "RateLimitError",
-    "ValidationError",
     "get_ai_compatible_middleware",
     "apply_ai_routing_middleware",
     "execute_ai_function_with_middleware",

@@ -269,7 +269,6 @@ def configure_features(features: list) -> dict[str, Any]:
         middleware_choices = [
             questionary.Choice("Rate Limiting", value="rate_limit", checked=True),
             questionary.Choice("Caching", value="cache", checked=True),
-            questionary.Choice("Input Validation", value="validation"),
             questionary.Choice("Retry Logic", value="retry"),
         ]
 

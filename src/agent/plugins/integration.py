@@ -47,9 +47,7 @@ def integrate_plugins_with_handlers() -> None:
                 plugin_to_capabilities[plugin_name] = []
             plugin_to_capabilities[plugin_name].append(capability_id)
 
-    logger.debug(
-        f"Discovered {len(plugin_to_capabilities)} plugins with capabilities: {plugin_to_capabilities}"
-    )
+    logger.debug(f"Discovered {len(plugin_to_capabilities)} plugins with capabilities: {plugin_to_capabilities}")
 
     # Determine which capabilities to register
     capabilities_to_register = set()

@@ -556,7 +556,9 @@ def register_ai_functions_from_handlers():
 
                 plugin_name = capability_info["plugin_name"]
                 if plugin_name not in configured_plugins:
-                    logger.debug(f"Skipping AI functions for capability '{capability_id}' from unregisterd plugin '{plugin_name}'")
+                    logger.debug(
+                        f"Skipping AI functions for capability '{capability_id}' from unregisterd plugin '{plugin_name}'"
+                    )
                     continue
 
                 ai_functions = plugin_adapter.get_ai_functions(capability_id)
