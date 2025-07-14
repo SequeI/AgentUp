@@ -18,21 +18,15 @@ console = Console()
 def _render_plugin_template(template_name: str, context: dict) -> str:
     """Render a plugin template with the given context."""
     templates_dir = Path(__file__).parent.parent.parent / "templates" / "plugins"
-    
+
     # For YAML files, disable block trimming to preserve proper formatting
-    if template_name.endswith('.yml.j2') or template_name.endswith('.yaml.j2'):
+    if template_name.endswith(".yml.j2") or template_name.endswith(".yaml.j2"):
         jinja_env = Environment(
-            loader=FileSystemLoader(templates_dir),
-            autoescape=True,
-            trim_blocks=False,
-            lstrip_blocks=False
+            loader=FileSystemLoader(templates_dir), autoescape=True, trim_blocks=False, lstrip_blocks=False
         )
     else:
         jinja_env = Environment(
-            loader=FileSystemLoader(templates_dir),
-            autoescape=True,
-            trim_blocks=True,
-            lstrip_blocks=True
+            loader=FileSystemLoader(templates_dir), autoescape=True, trim_blocks=True, lstrip_blocks=True
         )
 
     template = jinja_env.get_template(template_name)
@@ -321,16 +315,10 @@ def create(plugin_name: str | None, template: str, output_dir: str | None, no_gi
     ).ask()
 
     # Ask about coding agent memory
-    coding_agent = questionary.select(
-        "Coding Agent Memory:",
-        choices=["Claude Code", "Cursor"]
-    ).ask()
+    coding_agent = questionary.select("Coding Agent Memory:", choices=["Claude Code", "Cursor"]).ask()
 
     # Ask about GitHub Actions
-    include_github_actions = questionary.confirm(
-        "Include GitHub Actions? (CI/CD workflows)", 
-        default=True
-    ).ask()
+    include_github_actions = questionary.confirm("Include GitHub Actions? (CI/CD workflows)", default=True).ask()
 
     # Determine output directory
     if not output_dir:
@@ -407,15 +395,15 @@ def create(plugin_name: str | None, template: str, output_dir: str | None, no_gi
         if include_github_actions:
             github_workflows_dir = output_dir / ".github" / "workflows"
             github_workflows_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Create CI workflow
             ci_content = _render_plugin_template(".github/workflows/ci.yml.j2", context)
             (github_workflows_dir / "ci.yml").write_text(ci_content)
-            
+
             # Create security workflow
             security_content = _render_plugin_template(".github/workflows/security.yml.j2", context)
             (github_workflows_dir / "security.yml").write_text(security_content)
-            
+
             # Create dependabot.yml
             github_dir = output_dir / ".github"
             github_dir.mkdir(parents=True, exist_ok=True)

@@ -233,7 +233,7 @@ def create_agent(
         project_config["base_config"] = Path(config)
 
     # Generate project
-    click.echo(f"\n{click.style('📁 Creating project...', fg='yellow')}")
+    click.echo(f"\n{click.style('Creating project...', fg='yellow')}")
 
     try:
         generator = ProjectGenerator(output_dir, project_config)
@@ -241,9 +241,9 @@ def create_agent(
 
         # Initialize git repository unless --no-git flag is used
         if not no_git:
-            click.echo(f"{click.style('📝 Initializing git repository...', fg='yellow')}")
+            click.echo(f"{click.style('Initializing git repository...', fg='yellow')}")
             if initialize_git_repo(output_dir):
-                click.echo(f"{click.style('✅ Git repository initialized', fg='green')}")
+                click.echo(f"{click.style('Git repository initialized', fg='green')}")
             else:
                 click.echo(
                     f"{click.style('⚠️  Warning: Could not initialize git repository (git not found or failed)', fg='yellow')}"

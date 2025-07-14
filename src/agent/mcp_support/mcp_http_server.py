@@ -10,12 +10,19 @@ logger = structlog.get_logger(__name__)
 
 
 class MCPHTTPServer:
-    """MCP HTTP server that exposes AgentUp AI functions as MCP tools."""
+    """
+    MCP HTTP server that exposes AgentUp AI functions as MCP tools.
+    This is an experimental implementation using the official MCP SDK.
+    It provides a simple HTTP interface for listing and calling AI functions
+    as MCP tools, along with resource management.
+    It deliberately avoids expossing MCP servers as MCP servers (bare with me),
+    as this would create a circular dependency.
+    """
 
     def __init__(
         self,
         agent_name: str,
-        agent_version: str = "1.0.0",
+        agent_version: str = "1.0.0",  # Likely need to get this from the agent config
         expose_handlers: bool = True,
         expose_resources: list[str] | None = None,
     ):
@@ -24,7 +31,7 @@ class MCPHTTPServer:
         self.expose_handlers = expose_handlers
         self.expose_resources = expose_resources or []
         self._server = None
-        self._handlers: dict[str, Callable] = {}
+        self._handlers: dict[str, Callable] = {}  # Kept for compatibility
         self._initialized = False
 
     async def initialize(self) -> None:
@@ -124,9 +131,10 @@ class MCPHTTPServer:
     def register_handler(self, name: str, handler: Callable, schema: dict[str, Any]) -> None:
         """Register a handler (for compatibility with existing code)."""
         # With the official SDK, tools are dynamically listed from the function registry
-        # So we don't need to manually register handlers
-        self._handlers[name] = handler
-        logger.info(f"Registered handler: {name}")
+        # This method is kept for backward compatibility but does nothing
+        logger.debug(f"Handler registration ignored (using SDK): {name}")
+        # Avoid unused parameter warnings
+        _ = handler, schema
 
     async def get_server_instance(self):
         """Get the MCP server instance for integration with FastAPI."""
@@ -145,7 +153,11 @@ class MCPHTTPServer:
 
 # FastAPI integration helper
 def create_mcp_router(mcp_server: MCPHTTPServer):
-    """Create a FastAPI router for MCP HTTP endpoint."""
+    """Create a FastAPI router for MCP HTTP endpoint.
+
+    Note: The route handlers defined below are automatically registered
+    with FastAPI and are used when the router is included in the app.
+    """
     import json
     import secrets
 
@@ -181,9 +193,9 @@ def create_mcp_router(mcp_server: MCPHTTPServer):
         }
         return session_id
 
-    @router.post("/mcp")
+    @router.post("/mcp")  # This handler is registered with FastAPI
     async def handle_mcp_request(request: Request) -> Response:
-        """Handle MCP JSON-RPC requests via HTTP POST (Streamable HTTP)."""
+        """Handle MCP JSON-RPC requests via HTTP POST using the MCP SDK."""
         try:
             # Validate MCP protocol headers
             _validate_mcp_headers(request)
@@ -203,173 +215,14 @@ def create_mcp_router(mcp_server: MCPHTTPServer):
         try:
             # Get request body
             body = await request.body()
-
-            # Handle the MCP request using the official SDK
-            # For now, we'll create a simple response
-            # In production, you'd implement proper session management and SSE streaming
-
             # Parse the JSON-RPC request
             request_data = json.loads(body)
             method = request_data.get("method")
-            params = request_data.get("params", {})
             request_id = request_data.get("id")
 
-            # Handle different MCP methods
-            if method == "tools/list":
-                # Get available AI functions as MCP tools
-                try:
-                    from agent.core.dispatcher import get_function_registry
-
-                    registry = get_function_registry()
-
-                    tools = []
-                    # Only list tools if configured to expose handlers
-                    if mcp_server.expose_handlers:
-                        for function_name in registry.list_functions():
-                            if not registry.is_mcp_tool(function_name):  # Only local functions
-                                schema = registry._functions.get(function_name, {})
-                                if schema:
-                                    tools.append(
-                                        {
-                                            "name": function_name,
-                                            "description": schema.get("description", f"AI function: {function_name}"),
-                                            "inputSchema": schema.get("parameters", {}),
-                                        }
-                                    )
-
-                    response_data = {"jsonrpc": "2.0", "id": request_id, "result": {"tools": tools}}
-                    logger.info(f"MCP tools/list returned {len(tools)} tools")
-
-                except Exception as e:
-                    logger.error(f"Error listing MCP tools: {e}")
-                    response_data = {
-                        "jsonrpc": "2.0",
-                        "id": request_id,
-                        "error": {"code": -32603, "message": f"Failed to list tools: {str(e)}"},
-                    }
-
-            elif method == "tools/call":
-                # Call an AI function
-                try:
-                    import uuid
-
-                    from a2a.types import Message, Part, Role, Task, TaskState, TaskStatus, TextPart
-
-                    from agent.core.dispatcher import get_function_registry
-
-                    registry = get_function_registry()
-                    tool_name = params.get("name")
-                    arguments = params.get("arguments", {})
-
-                    handler = registry.get_handler(tool_name)
-                    if not handler:
-                        response_data = {
-                            "jsonrpc": "2.0",
-                            "id": request_id,
-                            "error": {"code": -32602, "message": f"Tool {tool_name} not found"},
-                        }
-                    else:
-                        # Create a task for the handler
-                        message_content = arguments.get("message", str(arguments))
-                        text_part = TextPart(text=message_content)
-                        part = Part(root=text_part)
-                        message = Message(messageId=f"mcp_{uuid.uuid4().hex[:8]}", role=Role.user, parts=[part])
-
-                        task = Task(
-                            id=f"mcp_task_{uuid.uuid4().hex[:8]}",
-                            contextId=f"mcp_context_{uuid.uuid4().hex[:8]}",
-                            history=[message],
-                            status=TaskStatus(state=TaskState.submitted, timestamp=datetime.now().isoformat()),
-                            metadata=arguments,
-                        )
-
-                        # Call the handler
-                        result = await handler(task)
-
-                        response_data = {
-                            "jsonrpc": "2.0",
-                            "id": request_id,
-                            "result": {"content": [{"type": "text", "text": str(result)}]},
-                        }
-
-                except Exception as e:
-                    logger.error(f"Error calling MCP tool {tool_name}: {e}")
-                    response_data = {
-                        "jsonrpc": "2.0",
-                        "id": request_id,
-                        "error": {"code": -32603, "message": f"Tool execution failed: {str(e)}"},
-                    }
-
-            elif method == "resources/list":
-                # List available resources
-                resources = []
-
-                # Add configured resources
-                for resource_name in mcp_server.expose_resources:
-                    if resource_name == "agent_status":
-                        resources.append(
-                            {
-                                "uri": "agentup://agent/status",
-                                "name": "Agent Status",
-                                "description": "Current status and health of the agent",
-                                "mimeType": "application/json",
-                            }
-                        )
-                    elif resource_name == "agent_capabilities":
-                        resources.append(
-                            {
-                                "uri": "agentup://agent/capabilities",
-                                "name": "Agent Capabilities",
-                                "description": "List of agent capabilities and plugins",
-                                "mimeType": "application/json",
-                            }
-                        )
-
-                response_data = {"jsonrpc": "2.0", "id": request_id, "result": {"resources": resources}}
-
-            elif method == "resources/read":
-                # Read a specific resource
-                uri = params.get("uri")
-
-                if uri == "agentup://agent/status":
-                    content = {
-                        "status": "healthy",
-                        "agent_name": mcp_server.agent_name,
-                        "version": mcp_server.agent_version,
-                        "timestamp": datetime.now().isoformat(),
-                    }
-                elif uri == "agentup://agent/capabilities":
-                    try:
-                        from agent.core.dispatcher import get_function_registry
-
-                        registry = get_function_registry()
-                        content = {
-                            "functions": list(registry.list_functions()),
-                            "count": len(registry.list_functions()),
-                        }
-                    except Exception as e:
-                        content = {"error": f"Could not load capabilities: {str(e)}"}
-                else:
-                    response_data = {
-                        "jsonrpc": "2.0",
-                        "id": request_id,
-                        "error": {"code": -32602, "message": f"Resource not found: {uri}"},
-                    }
-
-                if "content" in locals():
-                    response_data = {
-                        "jsonrpc": "2.0",
-                        "id": request_id,
-                        "result": {
-                            "contents": [
-                                {"uri": uri, "mimeType": "application/json", "text": json.dumps(content, indent=2)}
-                            ]
-                        },
-                    }
-
-            elif method == "initialize":
-                # MCP session initialization
-                session_id = _create_session()
+            # Handle session initialization manually (not part of MCP SDK core)
+            if method == "initialize":
+                _create_session()  # Create session but don't store ID for now
                 capabilities = {}
 
                 if mcp_server.expose_handlers:
@@ -385,26 +238,23 @@ def create_mcp_router(mcp_server: MCPHTTPServer):
                         "protocolVersion": "2024-11-05",
                         "capabilities": capabilities,
                         "serverInfo": {"name": mcp_server.agent_name, "version": mcp_server.agent_version},
-                        "_debug": "http_server_fixed",
                     },
                 }
-
             else:
-                # Unknown method
+                # Delegate all other MCP methods to the SDK server
+                # TODO: Implement proper MCP SDK HTTP transport integration
+                # For now, return error for unknown methods
                 response_data = {
                     "jsonrpc": "2.0",
                     "id": request_id,
-                    "error": {"code": -32601, "message": f"Method not found: {method}"},
+                    "error": {"code": -32601, "message": f"Method {method} not implemented via HTTP transport yet"},
                 }
 
             # For notifications (no id), return 202 Accepted
             if request_id is None:
                 return Response(status_code=202)
 
-            # Add proper headers for MCP Streamable HTTP
-            headers = {"Content-Type": "application/json", "Transfer-Encoding": "chunked"}
-
-            return Response(content=json.dumps(response_data), media_type="application/json", headers=headers)
+            return Response(content=json.dumps(response_data), media_type="application/json")
 
         except Exception as e:
             logger.error(f"MCP request handling error: {e}")
@@ -416,7 +266,7 @@ def create_mcp_router(mcp_server: MCPHTTPServer):
                 media_type="application/json",
             )
 
-    @router.get("/mcp")
+    @router.get("/mcp")  # This handler is registered with FastAPI
     async def handle_mcp_sse(request: Request) -> StreamingResponse:
         """Handle MCP Server-Sent Events (SSE) for bidirectional streaming."""
         try:

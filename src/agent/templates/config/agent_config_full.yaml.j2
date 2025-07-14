@@ -25,23 +25,6 @@ plugins:
     input_mode: text
     output_mode: text
     priority: 90
-  - plugin_id: data_analyzer
-    name: Data Analyzer
-    description: Analyze and visualize data
-    tags: [data, analysis, visualization]
-    # No keywords or patterns defined, only available via AI routing
-    input_mode: text
-    output_mode: text
-    priority: 90
-  - plugin_id: hello_world
-    name: Hello World
-    description: Simple greeting handler
-    tags: [greeting, basic, direct]
-    input_mode: text
-    output_mode: text
-    keywords: [hello, hi, hey, greetings]
-    patterns: ['hello.*', 'hi\\s+.*', 'greet.*']
-    priority: 30
   - plugin_id: conversation
     name: Conversation
     description: Basic conversation handler
@@ -55,19 +38,7 @@ plugins:
 # security configuration
 security:
   enabled: true   # Authentication enabled for full template
-  type: api_key   # Options: 'api_key', 'bearer', 'oauth2'
-  api_key:
-    header_name: X-API-Key
-    location: header  # Options: 'header', 'query', 'cookie'
-    keys:
-      # Generated API keys - replace with your own
-      - "{{ generate_api_key() }}"
-      - "{{ generate_api_key() }}"
-  bearer:
-    jwt_secret: '{{ generate_jwt_secret() }}'
-    algorithm: HS256
-    issuer: your-agent
-    audience: a2a-clients
+  type: oauth2   # Options: 'api_key', 'bearer', 'oauth2'
   oauth2:
     token_url: '${OAUTH_TOKEN_URL:/oauth/token}'
     client_id: '${OAUTH_CLIENT_ID:your-client-id}'
@@ -146,8 +117,6 @@ cache:
 {% endif %}
 {% endif %}
 
-# External services configuration - Full enterprise setup (LLM configuration moved to ai_provider section)
-services: {}
 
 # Model Context Protocol configuration - Full enterprise setup
 mcp:
@@ -159,11 +128,7 @@ mcp:
         command: npx
         args: ['-y', '@modelcontextprotocol/server-filesystem', '/']
         env: {}
-      - name: github
-        command: npx
-        args: ['-y', '@modelcontextprotocol/server-github']
-        env:
-          GITHUB_PERSONAL_ACCESS_TOKEN: '${GITHUB_TOKEN}'
+  # Expose as an MCP server for external access
   server:
     enabled: true
     name: {{ project_name }}-mcp-server

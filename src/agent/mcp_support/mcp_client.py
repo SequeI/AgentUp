@@ -117,7 +117,6 @@ class MCPClientService:
                 tool_names = [tool["name"] for tool in self._available_tools.values() if tool["server"] == server_name]
                 logger.info(f"Available tools from {server_name}: {', '.join(tool_names)}")
 
-
     async def get_available_tools(self) -> list[dict[str, Any]]:
         """Get all available tools from connected MCP servers."""
         tools = []
