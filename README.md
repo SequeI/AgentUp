@@ -9,21 +9,63 @@
 
 ## Core Philosophy
 
-AgentUp is a configuration-driven framework for building AI agents that comply with the A2A specification for agent-to-agent communication, capability discovery, and task orchestration. Through declarative configuration files and a modular architecture supporting custom plugins via Python entry points, AgentUp enables dynamic component loading, simplified maintenance, and consistent behavior across deployment environments while maintaining alignment with open standards and evolving protocol enhancements.
+AgentUp is an Agent framework that empowers developers to build any AI agent they require through a configuration-driven architecture that isolates custom functionality from the core engine, allowing seamless framework upgrades without breaking your agents. With a vibrant open community contributing plugins, developers can leverage shared components or roll their own, all while maintaining consistency across deployments. By decoupling configuration, plugins, and core functionality, AgentUp accelerates development of scalable, maintainable AI agents that evolve with your needs.
 
-## Feature Overview
+## Feature-Rich, Out of the Box
 
-The framework includes pluggable middleware for rate limiting, caching, input validation, and authentication to either the core engine or individual plugins. 
+AgentUp provides everything you need to build production-ready AI agents without the guesswork. Its middleware handles rate limiting, caching, input validation, authentication, and more—so you can focus on your Agent's unique capabilities instead of reinventing common patterns.
 
-State management provides persistent conversation tracking with configurable TTL and history. A customizable backend allows for file, database, or cache-based storage such as Redis or Valkey.
+### Core Features
 
-Security encompasses authentication, authorization, and secure communication patterns.
+**Plugin System**
+- Build anything with our flexible plugin architecture:
+  - Create custom capabilities without modifying core code
+  - Leverage community plugins from the open ecosystem (system tools, image processing, etc.)
+  - Install plugins with `pip install / uv add <name>` (pin versions if needed!)
+  - Version plugins independently from the core framework
+  - All plugins are gated by capabilities scopes, ensuring secure access control
 
-AgentUp leveragges scope hierarchy allows granular control over plugin capabilities, enabling fine-tuned access management, using scopes to define permissions for each capability, making it easy to integrate with OAuth2 and other scope-based bearer token systems.
+**State Management**
+- Track conversations persistently with configurable TTL and history
+- Choose your storage backend to match your infrastructure:
+  - File system for simple deployments
+  - Database for structured queries
+  - Redis or Valkey for high-performance caching
 
-Additional capabilities include asynchronous task management with state tracking, push notifications for real-time updates, agent discovery through A2A Agent Cards. AI provider support includes OpenAI, Anthropic, and local models through OpenAI-compatible APIs (Ollama).
+**Security & Access Control**
+- Built-in authentication, authorization, and secure communication patterns
+- Granular permission management through scope hierarchy:
+  - Control exactly what each plugin can access
+  - Seamless integration with OAuth2 and bearer token systems
+  - Fine-tune capabilities at every level
 
-MCP client and server support to allow your Agent to leverage the growing ecosystem of MCP servers for file storage, GitHub integration, and more, or expose your Agent's capabilities through a custom MCP endpoint.
+**Asynchronous Operations**
+- Manage long-running tasks with built-in state tracking
+- Push notifications for real-time updates
+- Non-blocking execution for better performance
+
+**Agent Discovery**
+- Enable agent-to-agent communication through A2A Agent Cards
+- Make your agents discoverable and interoperable
+- Build multi-agent systems with ease
+
+**AI Provider Flexibility**
+- Connect to multiple AI providers without changing your code:
+  - OpenAI for GPT models
+  - Anthropic for Claude
+  - Local models through OpenAI-compatible APIs (Ollama)
+
+**MCP Integration**
+- Leverage the growing MCP ecosystem as a client:
+  - All MCP servers are gated by capabilities scopes
+  - Easily add AgentUp Authentication
+  - Expose AgentUp capabilities as MCP endpoints
+
+**CLI-Driven Development**
+- Scaffold, develop, and deploy agents entirely from the command line:
+  - `agentup agent create` - Create new agents from templates
+  - `agentup agent serve` - Start a local development server
+  - `agentup plugin` - Generate, install, and cookiecutter new plugin projects
 
 ## Project Status
 
