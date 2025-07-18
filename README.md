@@ -4,26 +4,40 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/AgentUp.svg)](https://pypi.org/project/AgentUp/)
 
 <p align="center">
-  <img src="assets/agentup_logo.png" alt="AgentUp Logo" width="400"/>
+  <img src="assets/compie-wide.png" alt="Compie Logo" width="400"/>
 </p>
 
 ## Core Philosophy
 
-AgentUp is an Agent framework that empowers developers to build any AI agent they require through a configuration-driven architecture that isolates custom functionality from the core engine, allowing seamless framework upgrades without breaking your agents. With a vibrant open community contributing plugins, developers can leverage shared components or roll their own, all while maintaining consistency across deployments. By decoupling configuration, plugins, and core functionality, AgentUp accelerates development of scalable, maintainable AI agents that evolve with your needs.
+AgentUp combines the speed of a configuration‑driven framework with the flexibility of a plugin ecosystem - giving you the best of both worlds. With AgentUp, you:
+
+* **Spin up agents in minutes**
+  Define behavior, data sources and workflows entirely through configuration, no boilerplate, no deep dives into framework internals.
+
+* **Extend on demand**
+  Install community‑built plugins or author your own to unlock new capabilities - custom logic lives outside the core engine, yet inherits all of AgentUp’s middleware and security controls.
+
+* **Stay consistent at scale**
+  Because your agents share the same core and configuration patterns, deployments remain predictable and 'config-as-code' like, across teams and environments. Plugins can be versioned independently, and pinned as dependencies, allowing you to automate updates within your CI/CD pipeline.
+
+AgentUp gets you moving fast today, yet able to evolve and adapt tomorrow.
+
 
 ## Feature-Rich, Out of the Box
 
-AgentUp provides everything you need to build production-ready AI agents without the guesswork. Its middleware handles rate limiting, caching, input validation, authentication, and more—so you can focus on your Agent's unique capabilities instead of reinventing common patterns.
+AgentUp aims to provide everything you need to build production-ready AI agents
+without the guesswork. Its middleware handles rate limiting, caching, authentication, and more.
 
 ### Core Features
 
 **Plugin System**
-- Build anything with our flexible plugin architecture:
+- Build AgentUp's plugin architecture:
   - Create custom capabilities without modifying core code
   - Leverage community plugins from the open ecosystem (system tools, image processing, etc.)
   - Install plugins with `pip install / uv add <name>` (pin versions if needed!)
   - Version plugins independently from the core framework
   - All plugins are gated by capabilities scopes, ensuring secure access control
+  - No more back port hell , version migration, or breaking change nightmares!
 
 **State Management**
 - Track conversations persistently with configurable TTL and history
@@ -70,13 +84,15 @@ AgentUp provides everything you need to build production-ready AI agents without
 ## Project Status
 
 AgentUp is in active development and not yet ready for production use. There will be lots of bugs,
-Types need 'tightening up', and the API is still evolving.
+Types need 'tightening up', and the API is still evolving. Lot's of help is appreciated, and I welcome
+.......
 
-## Contributing
+## Contributions
 
-I could do with lots of help, so if you are interested in contributing, please get in touch! I always
-value contributions, whether they are code, documentation, or just feedback on the project, and wil
-do my best to make all feel welcome.
+AgentUp is an open-source project, and contributions are welcome! Whether you're a developer, designer, or just someone who loves AI agents, your input can help shape the future of this framework.
+
+I could do with lots of help, so if you are interested in helping, please get in touch! I always
+value contributions, whether they are code, documentation, or just feedback on the project.
 
 ## ⭐ Show Your Support
 
