@@ -76,6 +76,14 @@ def create_agent_card(extended: bool = False) -> AgentCard:
     agent_info = config.get("agent", {})
     plugins = config.get("plugins", [])
 
+    # Debug: Log plugins to understand the validation error
+    import logging
+
+    logger = logging.getLogger(__name__)
+    logger.info(f"Loaded {len(plugins)} plugins from config")
+    for i, plugin in enumerate(plugins):
+        logger.info(f"Plugin {i}: id={plugin.get('plugin_id')}, desc={plugin.get('description')}")
+
     # Convert plugins to A2A Skill format based on visibility
     agent_skills = []
     has_extended_plugins = False
