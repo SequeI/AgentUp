@@ -15,10 +15,10 @@ AgentUp combines the speed of a configuration‑driven framework with the flexib
   Define behavior, data sources and workflows entirely through configuration, no boilerplate, no deep dives into framework internals.
 
 * **Extend on demand**
-  Install community‑built plugins or author your own to unlock new capabilities - custom logic lives outside the core engine, yet inherits all of AgentUp’s middleware and security controls.
+  Install community‑built plugins or author your own to introduce new capabilities - custom logic lives outside the core engine, yet inherits all of AgentUp’s middleware and features.
 
 * **Stay consistent at scale**
-  Because your agents share the same core and configuration patterns, deployments remain predictable and 'config-as-code' like, across teams and environments. Plugins can be versioned independently, and pinned as dependencies, allowing you to automate updates within your CI/CD pipeline.
+  Because your agents share the same core and configuration patterns, deployments remain predictable and 'config-as-code' portable across teams and environments. Plugins can be versioned independently, and pinned as dependencies, allowing you to automate updates within your CI/CD pipeline.
 
 AgentUp gets you moving fast today, yet able to evolve and adapt tomorrow.
 
@@ -98,7 +98,7 @@ value contributions, whether they are code, documentation, or just feedback on t
 
 If you find this project useful or interesting, please consider giving it a star! It helps me know that people are finding value in this work and motivates me to keep improving it.
 
-[![GitHub stars](https://img.shields.io/github/stars/RedDotRocker/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocker/AgentUp)
+[![GitHub stars](https://img.shields.io/github/stars/RedDotRocket/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocket/AgentUp)
 
 ## Quick Start
 
