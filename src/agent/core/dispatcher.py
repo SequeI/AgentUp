@@ -163,7 +163,9 @@ class FunctionRegistry:
 
                     # Filter MCP tools based on scopes
                     for tool_name, tool_schema in self._mcp_tools.items():
-                        required_scopes = tool_scopes.get(tool_name, ["mcp:access"])  # Default to mcp:access
+                        # Get the original name (with colon) to check scopes
+                        original_name = tool_schema.get("original_name", tool_name)
+                        required_scopes = tool_scopes.get(original_name, ["mcp:access"])  # Default to mcp:access
 
                         # Check if user has all required scopes for this MCP tool
                         if all(user_has_scope_with_hierarchy(scope) for scope in required_scopes):

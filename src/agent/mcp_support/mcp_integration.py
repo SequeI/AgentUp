@@ -226,20 +226,27 @@ async def _register_mcp_tools_as_capabilities(mcp_client, available_tools, serve
 
         # Register each tool as a capability with scope enforcement
         for tool in available_tools:
-            tool_name = tool.get("name", "unknown")
-            required_scopes = tool_scopes.get(tool_name)
+            original_tool_name = tool.get("name", "unknown")
+            required_scopes = tool_scopes.get(original_tool_name)
 
             # SECURITY: Require explicit scope configuration
             if required_scopes is None:
-                logger.error(f"MCP tool '{tool_name}' requires explicit scope configuration in agent_config.yaml")
+                logger.error(
+                    f"MCP tool '{original_tool_name}' requires explicit scope configuration in agent_config.yaml"
+                )
                 raise ValueError(
-                    f"MCP tool '{tool_name}' requires explicit scope configuration. "
+                    f"MCP tool '{original_tool_name}' requires explicit scope configuration. "
                     f"Add 'tool_scopes' configuration with required scopes for this tool."
                 )
 
-            # Register using the design pattern
-            register_mcp_tool_as_capability(tool_name, mcp_client, required_scopes)
-            logger.debug(f"Registered MCP tool as capability: '{tool_name}' with scopes: {required_scopes}")
+            # Convert MCP tool names to valid capability names (replace colons with underscores)
+            sanitized_tool_name = original_tool_name.replace(":", "_")
+
+            # Register using the design pattern with sanitized name
+            register_mcp_tool_as_capability(sanitized_tool_name, mcp_client, required_scopes)
+            logger.debug(
+                f"Registered MCP tool as capability: '{original_tool_name}' -> '{sanitized_tool_name}' with scopes: {required_scopes}"
+            )
 
     except Exception as e:
         logger.error(f"Failed to register MCP tools as capabilities: {e}")
@@ -256,19 +263,24 @@ async def _register_mcp_tools_with_scopes(registry, mcp_client, available_tools,
 
         # Register each tool with scope enforcement
         for tool in available_tools:
-            tool_name = tool.get("name", "unknown")
-            required_scopes = tool_scopes.get(tool_name)
+            original_tool_name = tool.get("name", "unknown")
+            required_scopes = tool_scopes.get(original_tool_name)
 
             # SECURITY: Require explicit scope configuration - no automatic assignment
             if required_scopes is None:
-                logger.error(f"MCP tool '{tool_name}' requires explicit scope configuration in agent_config.yaml")
+                logger.error(
+                    f"MCP tool '{original_tool_name}' requires explicit scope configuration in agent_config.yaml"
+                )
                 raise ValueError(
-                    f"MCP tool '{tool_name}' requires explicit scope configuration. "
+                    f"MCP tool '{original_tool_name}' requires explicit scope configuration. "
                     f"Add 'tool_scopes' configuration with required scopes for this tool."
                 )
 
+            # Convert MCP tool names to valid function names (replace colons with underscores)
+            sanitized_tool_name = original_tool_name.replace(":", "_")
+
             # Create scope-enforced wrapper for the MCP tool
-            def create_mcp_tool_wrapper(client, tool_name, scopes):
+            def create_mcp_tool_wrapper(client, original_name, sanitized_name, scopes):
                 async def scope_enforced_mcp_tool(*args, **kwargs):
                     # Get current authentication context
                     from agent.security.context import create_capability_context, get_current_auth
@@ -279,30 +291,38 @@ async def _register_mcp_tools_with_scopes(registry, mcp_client, available_tools,
                         from types import SimpleNamespace
 
                         mock_task = SimpleNamespace()
-                        mock_task.id = f"mcp-{tool_name}"
+                        mock_task.id = f"mcp-{sanitized_name}"
 
                         context = create_capability_context(mock_task, auth_result)
 
                         # Check required scopes
                         for scope in scopes:
                             if not context.has_scope(scope):
-                                raise PermissionError(f"MCP tool {tool_name} requires scope: {scope}")
+                                raise PermissionError(f"MCP tool {sanitized_name} requires scope: {scope}")
 
-                    # All scopes passed, call the MCP tool
-                    return await client.call_tool(tool_name, *args, **kwargs)
+                    # All scopes passed, call the MCP tool with original name
+                    return await client.call_tool(original_name, *args, **kwargs)
 
                 return scope_enforced_mcp_tool
 
             # Wrap the tool with scope enforcement
-            wrapped_tool = create_mcp_tool_wrapper(mcp_client, tool_name, required_scopes)
+            wrapped_tool = create_mcp_tool_wrapper(mcp_client, original_tool_name, sanitized_tool_name, required_scopes)
 
-            # Register the wrapped tool with the registry
-            await registry.register_mcp_tool(tool_name, wrapped_tool, tool)
-            logger.debug(f"Registered MCP tool '{tool_name}' with scope enforcement: {required_scopes}")
+            # Update tool schema to use sanitized name
+            sanitized_tool = tool.copy()
+            sanitized_tool["name"] = sanitized_tool_name
+            sanitized_tool["original_name"] = original_tool_name
+
+            # Register the wrapped tool with the registry using sanitized name
+            await registry.register_mcp_tool(sanitized_tool_name, wrapped_tool, sanitized_tool)
+            logger.debug(
+                f"Registered MCP tool '{original_tool_name}' -> '{sanitized_tool_name}' with scope enforcement: {required_scopes}"
+            )
 
     except Exception as e:
         logger.error(f"Failed to register MCP tools with scope enforcement: {e}")
-        # Fallback to standard registration without scope enforcement
+        # DO NOT fallback to registration without scope enforcement for security
+        # Instead, register with dispatcher only (which uses sanitized names)
         await registry.register_mcp_client(mcp_client)
 
 
