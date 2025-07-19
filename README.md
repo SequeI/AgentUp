@@ -4,18 +4,19 @@
   <img src="assets/compie-wide.png" alt="Compie Logo" width="400"/>
 </p>
 
-[![PyPI Version](https://img.shields.io/pypi/v/AgentUp.svg)](https://pypi.org/project/AgentUp/)
-[![CI](https://github.com/RedDotRocket/AgentUp/actions/workflows/run-on-push.yml/badge.svg?event=push)](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml)
+
+[![CI](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml/badge.svg)](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml)
 |
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache2.0-brightgreen.svg?style=flat)](https://opensource.org/licenses/Apache-2.0)
 |
-[discord-img]: https://img.shields.io/discord/1384081906773131274?style=flat&logo=discord&logoColor=white&label=Discord
-[discord]: https://discord.gg/pPcjYzGvbS
-
+[![Discord][badge-discord-img]][badge-discord-url]
 |
-[Website](https://agentip.dev) | [Documentation](https://docs.agentup.dev) |
-| 
-[Discord](https://discord.com/invite/pPcjYzGvbS)
+[![GitHub Stars](https://img.shields.io/github/stars/RedDotRocket/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocket/AgentUp/stargazers)
+|
+[![PyPI Version](https://img.shields.io/pypi/v/AgentUp.svg)](https://pypi.org/project/AgentUp/)
+|
+[![Downloads](https://static.pepy.tech/badge/agentup)](https://pepy.tech/project/agentup)
+
 
 ## Core Philosophy
 
@@ -150,4 +151,8 @@ This project is licensed under the Apache 2.0 License.
 
 Report bugs and request features through [GitHub issues](https://github.com/RedDotRocket/AgentUp/issues). 
 
-Join the discussion on [Discord](https://discord.gg/your-discord-link).
+Join the discussion on [Discord](https://discord.gg/pPcjYzGvbS).
+
+
+[badge-discord-img]: https://img.shields.io/discord/1384081906773131274?label=Join%20the%20Discord%20server!&logo=discord
+[badge-discord-url]: https://discord.gg/pPcjYzGvbS
