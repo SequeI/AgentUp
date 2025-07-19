@@ -28,8 +28,13 @@ class PluginManager:
     # Hook implementation marker - shared across all plugin instances
     hookimpl = pluggy.HookimplMarker("agentup")
 
-    def __init__(self):
-        """Initialize the plugin manager."""
+    def __init__(self, config: dict[str, Any] | None = None):
+        """Initialize the plugin manager.
+
+        Args:
+            config: Optional configuration dictionary. If not provided,
+                   will be loaded when needed.
+        """
         self.pm = pluggy.PluginManager("agentup")
         self.pm.add_hookspecs(CapabilitySpec)
 
@@ -39,6 +44,21 @@ class PluginManager:
 
         # Track plugin hooks for each capability
         self.capability_hooks: dict[str, Any] = {}
+
+        # Store configuration
+        self._config = config
+
+    @property
+    def config(self) -> dict[str, Any]:
+        """Get configuration, loading if necessary."""
+        if self._config is None:
+            try:
+                from agent.config import load_config
+                self._config = load_config(configure_logging=False)
+            except ImportError:
+                logger.warning("Could not load configuration, using empty config")
+                self._config = {}
+        return self._config
 
     def discover_plugins(self) -> None:
         """Discover and load all available plugins."""
@@ -105,31 +125,73 @@ class PluginManager:
         except Exception as e:
             logger.error(f"Error loading entry point plugins: {e}")
 
+    def _should_load_filesystem_plugins(self) -> bool:
+        """Check if filesystem plugin loading is enabled in development configuration.
+
+        Returns:
+            True if filesystem plugins should be loaded, False otherwise (default).
+        """
+        # Check if development mode is enabled
+        dev_config = self.config.get("development", {})
+        if not dev_config.get("enabled", False):
+            return False
+
+        # Check if filesystem plugins specifically enabled
+        fs_plugins = dev_config.get("filesystem_plugins", {})
+        if not fs_plugins.get("enabled", False):
+            return False
+
+        # Log security warning
+        logger.warning(
+            "SECURITY WARNING: Filesystem plugin loading is enabled. "
+            "This allows execution of arbitrary code from the filesystem. "
+            "Only use in trusted development environments!"
+        )
+
+        return True
+
     def _load_installed_plugins(self) -> None:
-        # TODO: Document this method
-        """Load plugins from installed plugins directory."""
-        installed_dir = Path.home() / ".agentup" / "plugins"
-        if not installed_dir.exists():
-            logger.debug("No installed plugins directory found")
+        """Load plugins from installed plugins directory only if explicitly enabled in config."""
+        # Check if filesystem plugin loading is enabled
+        if not self._should_load_filesystem_plugins():
+            logger.debug("Filesystem based plugin loading disabled (secure default)")
             return
 
-        for plugin_dir in installed_dir.iterdir():
-            if plugin_dir.is_dir():
-                try:
-                    # Check for plugin.py or __init__.py
-                    if (plugin_dir / "plugin.py").exists():
-                        self._load_installed_plugin(plugin_dir, "plugin.py")
-                    elif (plugin_dir / "__init__.py").exists():
-                        self._load_installed_plugin(plugin_dir, "__init__.py")
-                except Exception as e:
-                    logger.error(f"Failed to load installed plugin from {plugin_dir}: {e}")
+        # Get allowed directories from config
+        dev_config = self.config.get("development", {})
+        fs_config = dev_config.get("filesystem_plugins", {})
+        allowed_dirs = fs_config.get("allowed_directories", ["~/.agentup/plugins"])
+
+        for dir_path in allowed_dirs:
+            # Expand user home directory
+            expanded_path = Path(dir_path).expanduser()
+
+            if not expanded_path.exists():
+                logger.debug(f"Filesystem plugin directory not found: {expanded_path}")
+                continue
+
+            if not expanded_path.is_dir():
+                logger.warning(f"Filesystem plugin path is not a directory: {expanded_path}")
+                continue
+
+            logger.info(f"Loading filesystem plugins from: {expanded_path}")
+
+            for plugin_dir in expanded_path.iterdir():
+                if plugin_dir.is_dir():
+                    try:
+                        # Check for plugin.py or __init__.py
+                        if (plugin_dir / "plugin.py").exists():
+                            self._load_installed_plugin(plugin_dir, "plugin.py")
+                        elif (plugin_dir / "__init__.py").exists():
+                            self._load_installed_plugin(plugin_dir, "__init__.py")
+                    except Exception as e:
+                        logger.error(f"Failed to load installed plugin from {plugin_dir}: {e}")
 
     def _load_installed_plugin(self, plugin_dir: Path, entry_file: str) -> None:
         """Load a single installed plugin."""
         plugin_name = f"installed_{plugin_dir.name}"
         plugin_file = plugin_dir / entry_file
 
-        # We'll log with capability count after registering
 
         # Similar to local plugin loading
         spec = importlib.util.spec_from_file_location(plugin_name, plugin_file)
@@ -400,7 +462,15 @@ def get_plugin_manager() -> PluginManager:
     """Get the global plugin manager instance."""
     global _plugin_manager
     if _plugin_manager is None:
-        _plugin_manager = PluginManager()
+        # Try to load configuration for the plugin manager
+        config = None
+        try:
+            from agent.config import load_config
+            config = load_config(configure_logging=False)
+        except ImportError:
+            logger.debug("Could not load configuration for plugin manager")
+
+        _plugin_manager = PluginManager(config)
         _plugin_manager.discover_plugins()
     return _plugin_manager
 
