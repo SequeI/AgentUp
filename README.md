@@ -4,14 +4,11 @@
   <img src="assets/compie-wide.png" alt="Compie Logo" width="400"/>
 </p>
 
-
-[![CI](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml/badge.svg)](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml)
-|
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache2.0-brightgreen.svg?style=flat)](https://opensource.org/licenses/Apache-2.0)
 |
-[![Discord][badge-discord-img]][badge-discord-url]
+[![CI](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml/badge.svg)](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml)
 |
-[![GitHub Stars](https://img.shields.io/github/stars/RedDotRocket/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocket/AgentUp/stargazers)
+[![Discord][badge-discord-img]][badge-discord-url]
 |
 [![PyPI Version](https://img.shields.io/pypi/v/AgentUp.svg)](https://pypi.org/project/AgentUp/)
 |
