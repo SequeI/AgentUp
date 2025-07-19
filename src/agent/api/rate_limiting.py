@@ -203,6 +203,7 @@ class NetworkRateLimitMiddleware(BaseHTTPMiddleware):
 
         # Add rate limit headers to successful responses
         # IMPORTANT: Get the same bucket reference that _is_rate_limited used
+        # This caused me untold pain when I use a different bucket reference
         bucket = self.client_buckets[client_id][endpoint_path]
         remaining_tokens = int(bucket.get("tokens", 0))
         response.headers["X-RateLimit-Limit"] = str(rpm)

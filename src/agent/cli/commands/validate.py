@@ -586,7 +586,7 @@ def display_results(errors: list[str], warnings: list[str], strict: bool = False
             click.echo(f"  • {error}")
 
     if warnings:
-        click.echo(f"\n{click.style('⚠️  Warnings:', fg='yellow', bold=True)}")
+        click.echo(f"\n{click.style('  Warnings:', fg='yellow', bold=True)}")
         for warning in warnings:
             click.echo(f"  • {warning}")
 

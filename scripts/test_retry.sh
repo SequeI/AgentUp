@@ -143,7 +143,7 @@ create_retry_test_handler() {
     done
     
     if [[ -z "$handler_file" ]]; then
-        echo -e "${YELLOW}⚠️  Could not find handler file - using existing handlers only${NC}"
+        echo -e "${YELLOW}  Could not find handler file - using existing handlers only${NC}"
         return 1
     fi
     
@@ -199,7 +199,7 @@ async def handle_retry_test(task: Task) -> str:
 EOF
 
     echo -e "${GREEN}✓ Retry test handler added${NC}"
-    echo -e "${YELLOW}⚠️  Please restart your server to load the new handler${NC}"
+    echo -e "${YELLOW}  Please restart your server to load the new handler${NC}"
     echo
     return 0
 }
@@ -320,10 +320,10 @@ response=$(curl -s --max-time 5 -X POST "$SERVER_URL/" \
     }' 2>/dev/null)
 
 if echo "$response" | grep -q "Method not found\|skill.*not.*found" -i; then
-    echo -e "${YELLOW}⚠️  Retry test handler not available${NC}"
+    echo -e "${YELLOW}  Retry test handler not available${NC}"
     echo -e "${BLUE}Creating retry test handler for better testing...${NC}"
     create_retry_test_handler
-    echo -e "${YELLOW}⚠️  Please restart your server and run this script again for full retry testing${NC}"
+    echo -e "${YELLOW}  Please restart your server and run this script again for full retry testing${NC}"
 else
     echo -e "${GREEN}✓ Retry test handler is available${NC}"
     

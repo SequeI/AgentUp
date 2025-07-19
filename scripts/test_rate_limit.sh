@@ -38,7 +38,7 @@ validate_json_response() {
     local description="$2"
     
     if ! echo "$response" | python3 -m json.tool > /dev/null 2>&1; then
-        echo -e "${RED}⚠️  Invalid JSON response for $description${NC}"
+        echo -e "${RED}  Invalid JSON response for $description${NC}"
         echo "Response: $response"
         return 1
     fi

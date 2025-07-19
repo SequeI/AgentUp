@@ -1,9 +1,3 @@
-"""Refactored FastAPI application using service-oriented architecture.
-
-This module provides a clean, minimal FastAPI application that delegates
-all initialization and management to the service layer.
-"""
-
 import os
 from contextlib import asynccontextmanager
 
@@ -29,8 +23,10 @@ logger = structlog.get_logger()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Simplified lifespan manager using service layer."""
+    """FastAPI lifespan manager using service layer."""
     # Initialize services using bootstrapper
+    # This is where we set up the agent's services and capabilities
+    logger.debug("Starting application lifespan with services")
     bootstrapper = AgentBootstrapper()
 
     try:

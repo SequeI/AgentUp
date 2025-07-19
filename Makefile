@@ -108,7 +108,7 @@ agent-test: ## Test a generated agent
 	@if [ -d "./test-agents/minimal" ]; then \
 		echo "Testing minimal agent..."; \
 		cd ./test-agents/minimal && \
-		uv run python -m pytest tests/ -v 2>/dev/null || echo "⚠️ Tests not available"; \
+		uv run python -m pytest tests/ -v 2>/dev/null || echo "Tests not available"; \
 		echo "Agent test completed"; \
 	else \
 		echo "✗ No test agent found. Run 'make agent-create-minimal' first"; \

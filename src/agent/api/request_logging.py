@@ -30,7 +30,6 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request with logging."""
-        # Get logger instance
         logger = get_logger()
 
         # Generate correlation ID

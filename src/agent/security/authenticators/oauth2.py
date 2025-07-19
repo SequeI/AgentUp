@@ -194,17 +194,14 @@ class OAuth2Authenticator(BaseAuthenticator):
             # Use basic auth with httpx directly instead of AsyncOAuth2Client
             import httpx
             import base64
-            
+
             auth = base64.b64encode(f"{self.client_id}:{self.client_secret}".encode()).decode()
-            
+
             async with httpx.AsyncClient() as client:
                 response = await client.post(
                     self.introspection_endpoint,
-                    headers={
-                        "Authorization": f"Basic {auth}",
-                        "Content-Type": "application/json"
-                    },
-                    json={"access_token": token}
+                    headers={"Authorization": f"Basic {auth}", "Content-Type": "application/json"},
+                    json={"access_token": token},
                 )
                 response.raise_for_status()
 

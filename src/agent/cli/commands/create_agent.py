@@ -246,7 +246,7 @@ def create_agent(
                 click.echo(f"{click.style('Git repository initialized', fg='green')}")
             else:
                 click.echo(
-                    f"{click.style('⚠️  Warning: Could not initialize git repository (git not found or failed)', fg='yellow')}"
+                    f"{click.style('  Warning: Could not initialize git repository (git not found or failed)', fg='yellow')}"
                 )
 
         click.echo(f"\n{click.style('✓ Project created successfully!', fg='green', bold=True)}")

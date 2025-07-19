@@ -31,9 +31,9 @@ async def check_server_health(base_url: str) -> bool:
                     print(f"✓ Server health check passed (status: {health_response.status_code})")
                     return True
                 else:
-                    print(f"⚠️  Server responded but health check failed (status: {health_response.status_code})")
+                    print(f"  Server responded but health check failed (status: {health_response.status_code})")
             except Exception:
-                print("⚠️  Health endpoint not available, checking root...")
+                print("  Health endpoint not available, checking root...")
 
             # Test root endpoint
             try:
@@ -84,11 +84,11 @@ async def check_mcp_endpoint(server_url: str) -> bool:
                         else:
                             print(f"✗ protocolVersion missing! Response: {result}")
                 except Exception as e:
-                    print(f"⚠️  Could not parse response as JSON: {e}")
+                    print(f"  Could not parse response as JSON: {e}")
 
                 return True
             else:
-                print(f"⚠️  MCP endpoint exists but returned status: {response.status_code}")
+                print(f"  MCP endpoint exists but returned status: {response.status_code}")
                 print(f"Response: {response.text[:200]}...")
                 return True  # Endpoint exists, might just be protocol issue
 
