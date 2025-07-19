@@ -1,11 +1,21 @@
 # AgentUp
 
-[![Tests](https://github.com/RedDotDocket/AgentUp/actions/workflows/ci.yml/badge.svg)](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml)
-[![Python Version](https://img.shields.io/pypi/pyversions/AgentUp.svg)](https://pypi.org/project/AgentUp/)
-
 <p align="center">
   <img src="assets/compie-wide.png" alt="Compie Logo" width="400"/>
 </p>
+
+[![PyPI Version](https://img.shields.io/pypi/v/AgentUp.svg)](https://pypi.org/project/AgentUp/)
+[![CI](https://github.com/RedDotRocket/AgentUp/actions/workflows/run-on-push.yml/badge.svg?event=push)](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml)
+|
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache2.0-brightgreen.svg?style=flat)](https://opensource.org/licenses/Apache-2.0)
+|
+[discord-img]: https://img.shields.io/discord/1384081906773131274?style=flat&logo=discord&logoColor=white&label=Discord
+[discord]: https://discord.gg/pPcjYzGvbS
+
+|
+[Website](https://agentip.dev) | [Documentation](https://docs.agentup.dev) |
+| 
+[Discord](https://discord.com/invite/pPcjYzGvbS)
 
 ## Core Philosophy
 
@@ -85,14 +95,15 @@ without the guesswork. Its middleware handles rate limiting, caching, authentica
 
 AgentUp is in active development and not yet ready for production use. There will be lots of bugs,
 Types need 'tightening up', and the API is still evolving. Lot's of help is appreciated, and I welcome
-.......
+...
 
 ## Contributions
 
 AgentUp is an open-source project, and contributions are welcome! Whether you're a developer, designer, or just someone who loves AI agents, your input can help shape the future of this framework.
 
 I could do with lots of help, so if you are interested in helping, please get in touch! I always
-value contributions, whether they are code, documentation, or just feedback on the project.
+value contributions, whether they are code, documentation, or just feedback on the project. You can also
+show your support by starring the project on GitHub...
 
 ## ⭐ Show Your Support
 
@@ -137,6 +148,6 @@ This project is licensed under the Apache 2.0 License.
 
 ## Community
 
-Report bugs and request features through GitHub issues. Community support and development discussions are available through project channels. The documentation provides comprehensive guides and API reference materials along with sample agents and plugins for common use cases.
+Report bugs and request features through [GitHub issues](https://github.com/RedDotRocket/AgentUp/issues). 
 
-AgentUp provides a practical approach to AI agent development, balancing functionality with developer productivity. The standards-based design ensures compatibility with the A2A ecosystem while maintaining flexibility for custom implementations.
+Join the discussion on [Discord](https://discord.gg/your-discord-link).
