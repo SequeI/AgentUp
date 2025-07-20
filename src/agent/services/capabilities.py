@@ -260,7 +260,6 @@ class CapabilityRegistry(Service):
         )
         self.register("echo", echo_executor, CapabilityMetadata("echo", description="Echo test capability"))
 
-
     def _wrap_with_auth(self, executor: Callable, metadata: CapabilityMetadata) -> Callable:
         """Wrap executor with authentication/authorization checks."""
         from functools import wraps

@@ -7,10 +7,7 @@ from mcp.client.stdio import stdio_client  # noqa: F401
 logger = structlog.get_logger(__name__)
 
 
-
-
 async def initialize_mcp_integration(config: dict[str, Any]) -> None:
-
     mcp_config = config.get("mcp", {})
 
     if not mcp_config.get("enabled", False):
@@ -36,8 +33,6 @@ async def initialize_mcp_integration(config: dict[str, Any]) -> None:
 
 
 async def _initialize_mcp_client(services, client_config: dict[str, Any]) -> None:
-
-
     # Check if we have HTTP servers configured
     servers = client_config.get("servers", [])
     http_servers = [s for s in servers if s.get("type") == "http"]
@@ -121,7 +116,6 @@ async def _initialize_mcp_client(services, client_config: dict[str, Any]) -> Non
 
 
 async def _initialize_mcp_server(services, server_config: dict[str, Any]) -> None:
-
     try:
         from .mcp_server import MCPServerComponent
     except ImportError as e:
@@ -304,9 +298,9 @@ async def _register_mcp_tools_with_scopes(registry, mcp_client, available_tools,
         # Instead, register with dispatcher only (which uses sanitized names)
         await registry.register_mcp_client(mcp_client)
 
+
 async def _start_mcp_server_background(mcp_server, port: int) -> None:
     """Start MCP server in background task."""
-
 
     try:
         await mcp_server.start_server(port=port)
@@ -315,7 +309,6 @@ async def _start_mcp_server_background(mcp_server, port: int) -> None:
 
 
 async def shutdown_mcp_integration() -> None:
-
     from agent.services import get_services
 
     services = get_services()

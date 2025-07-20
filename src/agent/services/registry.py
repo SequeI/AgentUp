@@ -88,7 +88,6 @@ class CacheService(Service):
 
 
 class WebAPIService(Service):
-
     def __init__(self, name: str, config: dict[str, Any]):
         super().__init__(name, config)
         self.base_url = config.get("base_url", "")

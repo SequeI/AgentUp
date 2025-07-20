@@ -17,7 +17,6 @@ class MCPClientService:
         self._initialized = False
 
     async def initialize(self) -> None:
-
         servers_config = self.config.get("servers", [])
 
         for server_config in servers_config:
