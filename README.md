@@ -27,7 +27,7 @@
 
 **Configuration Over Code** — Define complex agent behaviors, data sources, and workflows through YAML configuration. No boilerplate, no framework internals, no lengthy development cycles. Your agents are portable, versionable, and maintainable.
 
-**Security by Design** — Every capability is protected by AgentUp's fine-grained scope-based access control system. Fine-grained permissions ensure your plugins and MCP servers only access what they need, when they need it and only if granted so by you. Built-in authentication for OAuth2, JWT, and API keys integrates with your existing identity providers.
+**Security by Design** — Tools / MCP servers (Plugins!) are protected with AgentUp's fine-grained scope-based access control system. Fine-grained permissions ensure your plugins and MCP servers only access what they need, when they need it and only if granted so by you. Built-in authentication for OAuth2, JWT, and API keys integrates with your existing identity providers.
 
 **Plugin Ecosystem** — Extend functionality through a growing ecosystem of community plugins, or build your own. Plugins inherit all of AgentUp's middleware, security, and operational features automatically. Version plugins independently and integrate seamlessly with your existing CI/CD pipeline.
 
@@ -48,17 +48,18 @@ AgentUp is designed with production deployment in mind, featuring architecture p
 
 **Zero-Friction Development** — Create custom capabilities without touching core code. Plugins automatically inherit AgentUp's middleware stack, security model, and operational features. Use your existing package manager (pip, uv, poetry) for dependency management and distribution.
 
-**Community Ecosystem** — Discover and install plugins through the [AgentUp Plugin Registry](https://agentup.dev) or publish your own. Browse plugins for system tools, image processing, data analysis, and specialized capabilities. Install using your preferred Python tools (pip, uv, poetry) or publish with twine. Each plugin is independently versioned and can be updated without affecting other components. Every plugin published to the registry is automatically scanned for security vulnerabilities, , insecure coding patterns and malware - ensuring a safe ecosystem.
+**Community Ecosystem** — Discover and install plugins through the [AgentUp Plugin Registry](https://agentup.dev) or publish your own. Browse plugins for system tools, image processing, data analysis, and specialized capabilities. Install using your preferred Python tools (pip, uv, poetry) or publish with twine. Each plugin is independently versioned and can be updated without affecting other components. Every plugin published to the registry is automatically scanned for security vulnerabilities, insecure coding patterns and malware - ensuring a safe ecosystem.
 
-**MCP Integration** — Leverage the expanding Model Context Protocol ecosystem. All MCP servers are automatically secured through AgentUp's scope system, and you can expose your own capabilities as MCP endpoints for other systems to consume.
+**MCP Integration** — Leverage the expanding Model Context Protocol ecosystem. All MCP servers are automatically secured through AgentUp's scope system, and you can expose your own Agent capabilities as MCP streamable endpoints for other systems to consume!
 
 ### Flexible Infrastructure
 
 **Multi-Provider AI Support** — Connect to OpenAI, Anthropic, or local models through OpenAI-compatible APIs (Ollama). Switch providers without code changes, and use multiple providers simultaneously for different capabilities.
 
-**Configurable State Management** — Choose your storage backend to match your infrastructure needs. File system for development, databases for structured queries, or Redis/Valkey for high-performance distributed caching. Built-in conversation tracking with configurable TTL and history management.
+**Configurable State Management** — Choose your storage backend to match your needs. File system / Memory for development, databases for structured queries, or Redis/Valkey for high-performance distributed caching. Built-in conversation tracking with configurable TTL and history management.
 
-**Agent-to-Agent Communication** — Build  multi-agent systems through A2A (Agent-to-Agent) protocol compliance. Agents can discover and communicate with each other securely, enabling complex workflows and distributed processing.
+**Agent-to-Agent Communication** — Build multi-agent systems through A2A (Agent-to-Agent) protocol compliance. Agents can discover and communicate with each other securely, enabling complex workflows and distributed processing. AgentUp
+is built on the A2A (Agent-to-Agent) specification, and the maintainer is actively involved in the A2A community.
 
 ### Developer Experience
 
@@ -83,11 +84,10 @@ pip install agentup
 Generate a new agent project with interactive configuration:
 
 ```bash
-agentup agent create my-intelligent-agent
-cd my-intelligent-agent
+agentup agent create
 ```
 
-Choose from available templates and configure your agent's capabilities, authentication, and AI provider settings through the interactive prompts.
+Choose from available options and configure your agent's capabilities, authentication, and AI provider settings through the interactive prompts.
 
 ### Start Development
 
@@ -97,15 +97,16 @@ Launch the development server and begin building:
 agentup agent serve
 ```
 
-Your agent is now running at `http://localhost:8000` with a full A2A-compliant API, security middleware, and all configured capabilities available.
+Your agent is now running at `http://localhost:8000` with a full A2A-compliant 
+JSON RPC API, security middleware, and all configured capabilities available.
 
 ### Next Steps
 
-Explore the comprehensive [documentation](https://agentup.readthedocs.io/en/latest/) to learn about advanced features like custom plugins, multi-agent systems, and production deployment strategies. The documentation includes tutorials, API references, and real-world examples to get you building  agents quickly.
+Explore the comprehensive [documentation](https://docs.agentup.dev) to learn about advanced features, tutorials, API references, and real-world examples to get you building agents quickly.
 
 ## Open Source and Community-Driven
 
-AgentUp is Apache 2.0 licensed and built on open standards. The framework implements the A2A (Agent-to-Agent) specification for interoperability and follows the MCP (Model Context Protocol) for seamless integration with the broader AI tooling ecosystem.
+AgentUp is Apache 2.0 licensed and built on open standards. The framework implements the A2A (Agent-to-Agent) specification for interoperability and follows the MCP (Model Context Protocol) for integration with the broader AI tooling ecosystem.
 
 **Contributing** — Whether you're fixing bugs, adding features, or improving documentation, contributions are welcome. Join the growing community of developers building the future of AI agent infrastructure.
 
@@ -113,7 +114,7 @@ AgentUp is Apache 2.0 licensed and built on open standards. The framework implem
 
 ## Show Your Support
 
-If AgentUp is helping you build better AI agents, consider giving it a star to help others discover the project.
+If AgentUp is helping you build better AI agents, consider giving it a star to help others discover the project and it let's me know it's worth continuing to invest time into this framework!
 
 [![GitHub stars](https://img.shields.io/github/stars/RedDotRocket/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocket/AgentUp)
 
