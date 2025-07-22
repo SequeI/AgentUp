@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  AgentUp accelerates AI agent development without compromising on fundamentals. Built with security, scalability, and extensibility at its core, it eliminates boilerplate through configuration-driven architecture while a growing plugin ecosystem extends functionality instantly. Ship agents faster, build them to last.
+  AgentUp accelerates AI agent development without compromising on fundamentals. Built with security, scalability, and extensibility at its core, it eliminates boilerplate through configuration-driven architecture while a growing plugin ecosystem extends functionality instantly. Build fast, extend when needed.
 </p>
 <p align="center">
   Built by the creator of <a href="https://sigstore.dev">Sigstore</a> and many other OSS projects.
