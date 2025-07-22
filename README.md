@@ -1,156 +1,122 @@
 # AgentUp
 
 <p align="center">
-  <img src="assets/compie-wide.png" alt="Compie Logo" width="400"/>
+  <img src="assets/compie.png" alt="Compie Logo" width="200"/>
 </p>
 
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache2.0-brightgreen.svg?style=flat)](https://opensource.org/licenses/Apache-2.0)
-|
-[![CI](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml/badge.svg)](https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml)
-|
-[![Discord][badge-discord-img]][badge-discord-url]
-|
-[![PyPI Version](https://img.shields.io/pypi/v/AgentUp.svg)](https://pypi.org/project/AgentUp/)
-|
-[![Downloads](https://static.pepy.tech/badge/agentup)](https://pepy.tech/project/agentup)
+<p align="center">
+  <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache2.0-brightgreen.svg?style=flat" alt="License: Apache 2.0"/></a>
+  |
+  <a href="https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml"><img src="https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
+  |
+  <a href="https://discord.gg/pPcjYzGvbS"><img src="https://img.shields.io/discord/1384081906773131274?label=Discord&logo=discord" alt="Discord"/></a>
+  |
+  <a href="https://pypi.org/project/AgentUp/"><img src="https://img.shields.io/pypi/v/AgentUp.svg" alt="PyPI Version"/></a>
+  |
+  <a href="https://pepy.tech/project/agentup"><img src="https://static.pepy.tech/badge/agentup" alt="Downloads"/></a>
+</p>
+
+<p align="center">
+  AgentUp is a comprehensive framework for building AI agents with middleware, security and scalability features - all built in. While still in active development, AgentUp already provides the foundation for secure, maintainable agents through its unique configuration-driven architecture and extensible community plugin system.
+</p>
+
+## Why AgentUp?
+
+**Configuration Over Code** — Define complex agent behaviors, data sources, and workflows through YAML configuration. No boilerplate, no framework internals, no lengthy development cycles. Your agents are portable, versionable, and maintainable.
+
+**Security by Design** — Every capability is protected by AgentUp's fine-grained scope-based access control system. Fine-grained permissions ensure your plugins and MCP servers only access what they need, when they need it and only if granted so by you. Built-in authentication for OAuth2, JWT, and API keys integrates with your existing identity providers.
+
+**Plugin Ecosystem** — Extend functionality through a growing ecosystem of community plugins, or build your own. Plugins inherit all of AgentUp's middleware, security, and operational features automatically. Version plugins independently and integrate seamlessly with your existing CI/CD pipeline.
 
 
-## Core Philosophy
+## Advanced Architecture with Production Aspirations
 
-AgentUp combines the speed of a configuration‑driven framework with the flexibility of a plugin ecosystem - giving you the best of both worlds. With AgentUp, you:
+AgentUp is designed with production deployment in mind, featuring architecture patterns that will scale as the framework matures. While currently in alpha, the core security and extensibility features provide a solid foundation for building serious AI agents.
 
-* **Spin up agents in minutes**
-  Define behavior, data sources and workflows entirely through configuration, no boilerplate, no deep dives into framework internals.
+### Advanced Security Model
 
-* **Extend on demand**
-  Install community‑built plugins or author your own to introduce new capabilities - custom logic lives outside the core engine, yet inherits all of AgentUp’s middleware and features.
+**Scope-Based Access Control** — AgentUp's permission system controls exactly what each plugin, MCP server, and capability can access. Create hierarchical scope policies that scale from simple setups to complex requirements. Built-in OAuth2, JWT, and API key authentication provide flexible integration options.
 
-* **Stay consistent at scale**
-  Because your agents share the same core and configuration patterns, deployments remain predictable and 'config-as-code' portable across teams and environments. Plugins can be versioned independently, and pinned as dependencies, allowing you to automate updates within your CI/CD pipeline.
+**Comprehensive Audit Logging** — Every action is logged with sanitized audit trails. Security events are automatically classified by risk level, making it easy to monitor agent behavior. Configurable data retention policies support various compliance requirements.
 
-AgentUp gets you moving fast today, yet able to evolve and adapt tomorrow.
+**Security-First Design** — AgentUp follows security-first principles with fail-closed access control, input sanitization, and comprehensive error handling. The framework is designed to protect against privilege escalation, injection attacks, and information disclosure.
 
+### Scalable Plugin System
 
-## Feature-Rich, Out of the Box
+**Zero-Friction Development** — Create custom capabilities without touching core code. Plugins automatically inherit AgentUp's middleware stack, security model, and operational features. Use your existing package manager (pip, uv, poetry) for dependency management and distribution.
 
-AgentUp aims to provide everything you need to build production-ready AI agents
-without the guesswork. Its middleware handles rate limiting, caching, authentication, and more.
+**Community Ecosystem** — Discover and install plugins through the [AgentUp Plugin Registry](https://agentup.dev) or publish your own. Browse plugins for system tools, image processing, data analysis, and specialized capabilities. Install using your preferred Python tools (pip, uv, poetry) or publish with twine. Each plugin is independently versioned and can be updated without affecting other components. Every plugin published to the registry is automatically scanned for security vulnerabilities, , insecure coding patterns and malware - ensuring a safe ecosystem.
 
-### Core Features
+**MCP Integration** — Leverage the expanding Model Context Protocol ecosystem. All MCP servers are automatically secured through AgentUp's scope system, and you can expose your own capabilities as MCP endpoints for other systems to consume.
 
-**Plugin System**
-- Build AgentUp's plugin architecture:
-  - Create custom capabilities without modifying core code
-  - Leverage community plugins from the open ecosystem (system tools, image processing, etc.)
-  - Manage plugins with your existing package manager (pip, uv, poetry, etc.)
-  - All plugins are gated by capabilities scopes, ensuring secure access control using domain-specific permissions
-  - No more back port hell , version migration, or breaking change nightmares!
+### Flexible Infrastructure
 
-**Security & Access Control**
-- Built-in authentication, authorization, and secure communication patterns
-- Granular permission management through scope hierarchy:
-  - Control exactly what each plugin can access
-  - Seamless integration with OAuth2 and bearer token systems
-  - Fine-tune capabilities at every level
+**Multi-Provider AI Support** — Connect to OpenAI, Anthropic, or local models through OpenAI-compatible APIs (Ollama). Switch providers without code changes, and use multiple providers simultaneously for different capabilities.
 
-**State Management**
-- Track conversations persistently with configurable TTL and history
-- Choose your storage backend to match your infrastructure:
-  - File system for simple deployments
-  - Database for structured queries
-  - Redis or Valkey for high-performance caching
+**Configurable State Management** — Choose your storage backend to match your infrastructure needs. File system for development, databases for structured queries, or Redis/Valkey for high-performance distributed caching. Built-in conversation tracking with configurable TTL and history management.
 
-**Asynchronous Operations**
-- Manage long-running tasks with built-in state tracking
-- Push notifications for real-time updates
-- Non-blocking execution for better performance
+**Agent-to-Agent Communication** — Build  multi-agent systems through A2A (Agent-to-Agent) protocol compliance. Agents can discover and communicate with each other securely, enabling complex workflows and distributed processing.
 
-**Agent Discovery**
-- Enable agent-to-agent communication through A2A Agent Cards
-- Make your agents discoverable and interoperable
-- Build multi-agent systems with ease
+### Developer Experience
 
-**AI Provider Flexibility**
-- Connect to multiple AI providers without changing your code:
-  - OpenAI for GPT models
-  - Anthropic for Claude
-  - Local models through OpenAI-compatible APIs (Ollama)
+**CLI-First Workflow** — Everything you need is available through the command line. Create new agents from templates, start development servers, manage plugins, and deploy to production using intuitive commands that integrate with your existing toolchain.
 
-**MCP Integration**
-- Leverage the growing MCP ecosystem as a client:
-  - All MCP servers are gated by capabilities scopes
-  - Easily add AgentUp Authentication
-  - Expose AgentUp capabilities as MCP endpoints
+**Configuration as Code** — Agent behavior, data sources, and workflows are defined through version-controlled YAML configuration. No framework internals to learn, no boilerplate to maintain. Your agents are portable across environments and teams.
 
-**CLI-Driven Development**
-- Scaffold, develop, and deploy agents entirely from the command line:
-  - `agentup agent create` - Create new agents from templates
-  - `agentup agent serve` - Start a local development server
-  - `agentup plugin` - Generate, install, and cookiecutter new plugin projects
+**Real-Time Operations** — Built-in support for streaming responses, asynchronous operations, and push notifications. Monitor agent performance and behavior through comprehensive logging and configurable metrics collection.
 
-**Open Standards**
-- AgentUp is built inline with the A2A (Agent-to-Agent) specification.
-- Follows the MCP (Model Context Protocol) standard for MCP server and client protocols.
-- Apache 2.0 licensed, so you can use it in your projects without restrictions.
-
-## Project Status
-
-AgentUp is in active development and not yet ready for production use. There will be lots of bugs, Type based coverage needs improvement, and the API is still evolving. Lot's of help is appreciated, and I welcome...
-
-## Contributions
-
-AgentUp is an open-source project, and contributions are welcome! Whether you're a developer, designer, or just someone who loves AI agents, your input can help shape the future of this framework.
-
-I could do with lots of help, so if you are interested in helping, please get in touch! I always
-value contributions, whether they are code, documentation, or just feedback on the project. You can also
-show your support by starring the project on GitHub...
-
-## ⭐ Show Your Support
-
-If you find this project useful or interesting, please consider giving it a star! It helps me know that people are finding value in this work and motivates me to keep improving it.
-
-[![GitHub stars](https://img.shields.io/github/stars/RedDotRocket/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocket/AgentUp)
-
-## Quick Start
+## Get Started in Minutes
 
 ### Installation
 
-Install AgentUp using pip:
+Install AgentUp using your preferred Python package manager:
+
 ```bash
 pip install agentup
 ```
 
-### Creating Agents
+### Create Your First Agent
 
 Generate a new agent project with interactive configuration:
+
 ```bash
-agentup agent create my-agent
-cd my-agent
+agentup agent create my-intelligent-agent
+cd my-intelligent-agent
 ```
 
-Select from available options.
+Choose from available templates and configure your agent's capabilities, authentication, and AI provider settings through the interactive prompts.
 
-### Starting Development
+### Start Development
 
-Launch the development server:
+Launch the development server and begin building:
+
 ```bash
 agentup agent serve
 ```
 
-Your agent runs at `http://localhost:8000`
+Your agent is now running at `http://localhost:8000` with a full A2A-compliant API, security middleware, and all configured capabilities available.
 
-From here, you really should read the [documentation](https://agentup.readthedocs.io/en/latest/) to understand how to configure your agent, add plugins, and customize its behavior, there are lots of examples and guides to help you get started!
+### Next Steps
 
+Explore the comprehensive [documentation](https://agentup.readthedocs.io/en/latest/) to learn about advanced features like custom plugins, multi-agent systems, and production deployment strategies. The documentation includes tutorials, API references, and real-world examples to get you building  agents quickly.
 
-## License
+## Open Source and Community-Driven
 
-This project is licensed under the Apache 2.0 License.
+AgentUp is Apache 2.0 licensed and built on open standards. The framework implements the A2A (Agent-to-Agent) specification for interoperability and follows the MCP (Model Context Protocol) for seamless integration with the broader AI tooling ecosystem.
 
-## Community
+**Contributing** — Whether you're fixing bugs, adding features, or improving documentation, contributions are welcome. Join the growing community of developers building the future of AI agent infrastructure.
 
-Report bugs and request features through [GitHub issues](https://github.com/RedDotRocket/AgentUp/issues). 
+**Community Support** — Report issues, request features, and get help through [GitHub Issues](https://github.com/RedDotRocket/AgentUp/issues). Join real-time discussions and connect with other developers on [Discord](https://discord.gg/pPcjYzGvbS).
 
-Join the discussion on [Discord](https://discord.gg/pPcjYzGvbS).
+## Show Your Support
+
+If AgentUp is helping you build better AI agents, consider giving it a star to help others discover the project.
+
+[![GitHub stars](https://img.shields.io/github/stars/RedDotRocket/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocket/AgentUp)
+
+---
+
+**License** — Apache 2.0
 
 
 [badge-discord-img]: https://img.shields.io/discord/1384081906773131274?label=Discord&logo=discord
