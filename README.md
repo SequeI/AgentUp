@@ -17,7 +17,10 @@
 </p>
 
 <p align="center">
-  AgentUp is a comprehensive framework for building AI agents with middleware, security and scalability features - all built in. While still in active development, AgentUp already provides the foundation for secure, maintainable agents through its unique configuration-driven architecture and extensible community plugin system.
+  AgentUp accelerates AI agent development without compromising on fundamentals. Built with security, scalability, and extensibility at its core, it eliminates boilerplate through configuration-driven architecture while a growing plugin ecosystem extends functionality instantly. Ship agents faster, build them to last.
+</p>
+<p align="center">
+  Built by the creator of <a href="https://sigstore.dev">Sigstore</a> and many other OSS projects.
 </p>
 
 ## Why AgentUp?
