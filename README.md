@@ -1,7 +1,7 @@
 # AgentUp
 
 <p align="center">
-  <img src="assets/compie.png" alt="Compie Logo" width="200"/>
+  <img src="assets/compie.png" alt="Compie Logo" width="300"/>
 </p>
 
 <p align="center">
