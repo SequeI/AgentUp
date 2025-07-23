@@ -1,12 +1,4 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 site_name: AgentUp Docs
-=======
-site_name: AgentUp Documentation
->>>>>>> f7ff86d (Docs progress)
-=======
-site_name: AgentUp Docs
->>>>>>> c75854e (Docs progress)
 site_description: Documentation for AgentUp, a framework for building AI agents.
 site_url: https://github.com/RedDotRocket/agentup
 repo_url: https://github.com/RedDotRocket/agentup
@@ -25,29 +17,13 @@ theme:
     - navigation.instant
     - navigation.prune
     - navigation.sections
-<<<<<<< HEAD
-<<<<<<< HEAD
     - navigation.tabs
     - navigation.tabs.sticky
-=======
-    - navigation.integrate
->>>>>>> f7ff86d (Docs progress)
-=======
-    - navigation.tabs
-    - navigation.tabs.sticky
->>>>>>> c75854e (Docs progress)
     - search.highlight
     - search.share
     - search.suggest
     - toc.integrate
-<<<<<<< HEAD
-<<<<<<< HEAD
     - toc.follow
-=======
->>>>>>> f7ff86d (Docs progress)
-=======
-    - toc.follow
->>>>>>> c75854e (Docs progress)
     - content.code.copy
     - content.code.annotate
     - content.tooltips
@@ -74,14 +50,7 @@ extra_css:
 
 markdown_extensions:
   - attr_list
-<<<<<<< HEAD
-<<<<<<< HEAD
   - md_in_html
-=======
->>>>>>> f7ff86d (Docs progress)
-=======
-  - md_in_html
->>>>>>> c75854e (Docs progress)
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
@@ -107,8 +76,6 @@ nav:
   - Getting Started: 
     - getting-started/index.md
     - Installation: getting-started/installation.md
-<<<<<<< HEAD
-<<<<<<< HEAD
     - First Agent: getting-started/first-agent.md
     - AI Agent: getting-started/ai-agent.md
     - Core Concepts: getting-started/core-concepts.md
@@ -118,32 +85,5 @@ nav:
     - State Management: configuration/state-management.md
     - Routing: configuration/routing.md
 
-=======
-    - Quick Start: getting-started/quickstart.md
-    - First Agent: getting-started/first-agent.md
-    - AI Agent: getting-started/ai-agent.md
-    - Core Concepts: getting-started/core-concepts.md
-  - User Guide:
-    - Creating Agents: user-guide/creating-agents.md
-    - Package Management: user-guide/packages.md
-    - Security: user-guide/security.md
-  - API Reference:
-    - Core API: api/core.md
-    - Registry API: api/registry.md
-  - About:
-    - License: license.md
-    - Contributing: contributing.md
->>>>>>> f7ff86d (Docs progress)
-=======
-    - First Agent: getting-started/first-agent.md
-    - AI Agent: getting-started/ai-agent.md
-    - Core Concepts: getting-started/core-concepts.md
-  - Configuration:
-    - Logging: configuration/logging.md
-    - Middleware: configuration/middleware.md
-    - State Management: configuration/state-management.md
-    - Routing: configuration/routing.md
-
->>>>>>> c75854e (Docs progress)
 
 copyright: Copyright &copy; 2025 Red Dot Rocket
