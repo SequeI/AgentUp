@@ -35,8 +35,8 @@ env/
 *.swp
 *.swo
 .tool-versions
-CLAUDE.md
 .claude/
+.serena/
 
 # Logs
 logs/
