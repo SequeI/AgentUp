@@ -28,11 +28,6 @@
 > This project is currently **unstable** and subject to frequent changes. Features may be added, removed, or modified without notice.
 > Contributions are welcome, but please be aware that the codebase may change rapidly, although we will minimise breaking changes when we can.
 
-## Show Your Support
-
-If AgentUp is helping you build better AI agents, or you want to encourage development, please consider giving it a star to help others discover the project and it let's me know it's worth continuing to invest time into this framework!
-
-[![GitHub stars](https://img.shields.io/github/stars/RedDotRocket/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocket/AgentUp)
 
 ## Why AgentUp?
 
@@ -122,6 +117,12 @@ AgentUp is Apache 2.0 licensed and built on open standards. The framework implem
 **Contributing** - Whether you're fixing bugs, adding features, or improving documentation, contributions are welcome. Join the growing community of developers building the future of AI agent infrastructure.
 
 **Community Support** - Report issues, request features, and get help through [GitHub Issues](https://github.com/RedDotRocket/AgentUp/issues). Join real-time discussions and connect with other developers on [Discord](https://discord.gg/pPcjYzGvbS).
+
+## Show Your Support ⭐
+
+If AgentUp is helping you build better AI agents, or you want to encourage development, please consider giving it a star to help others discover the project and it let's me know it's worth continuing to invest time into this framework!
+
+[![GitHub stars](https://img.shields.io/github/stars/RedDotRocket/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocket/AgentUp)
 
 ---
 
