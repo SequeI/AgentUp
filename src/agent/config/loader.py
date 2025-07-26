@@ -2,8 +2,11 @@ import os
 from pathlib import Path
 from typing import Any
 
+import structlog
 import yaml
 from dotenv import load_dotenv
+
+logger = structlog.get_logger(__name__)
 
 
 def load_config(config_path: str = "agentup.yml", configure_logging: bool = True) -> dict[str, Any]:
@@ -21,6 +24,10 @@ def load_config(config_path: str = "agentup.yml", configure_logging: bool = True
 
     with open(path) as f:
         config = yaml.safe_load(f)
+
+    # Handle empty files - yaml.safe_load returns None for empty files
+    if config is None:
+        config = {}
 
     # Process environment variables
     config = _process_env_vars(config)
@@ -57,7 +64,8 @@ def _process_env_vars(config: Any) -> Any:
         # Get value from environment or use default
         value = os.getenv(var_name, default)
         if value is None:
-            raise ValueError(f"Environment variable {var_name} not set and no default provided")
+            logger.warning(f"Environment variable {var_name} not set and no default provided, using empty value")
+            return ""
 
         return value
     else:
