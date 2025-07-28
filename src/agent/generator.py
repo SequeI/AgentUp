@@ -12,13 +12,10 @@ from .config.model import AgentConfig, MiddlewareConfig
 logger = structlog.get_logger(__name__)
 
 # Default values from configuration models
-_default_agent_config = AgentConfig()
-_default_middleware_config = MiddlewareConfig()
-
 DEFAULT_AUTH_TYPE = "api_key"
-DEFAULT_CACHE_BACKEND = _default_middleware_config.caching["backend"]
+DEFAULT_CACHE_BACKEND = MiddlewareConfig.model_fields["caching"].default_factory()["backend"]
 DEFAULT_STATE_BACKEND = DEFAULT_CACHE_BACKEND  # Use same default as cache
-DEFAULT_ENVIRONMENT = _default_agent_config.environment
+DEFAULT_ENVIRONMENT = AgentConfig.model_fields["environment"].default
 
 
 class ProjectGenerator:
