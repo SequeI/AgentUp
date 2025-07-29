@@ -236,13 +236,52 @@ class RateLimiter:
 
 
 # Global instances
+# Global shared cache configuration
+_global_cache_config: CacheConfig | None = None
+
+
+def get_global_cache_config() -> CacheConfig:
+    """Get or create the global shared cache configuration."""
+    global _global_cache_config
+    if _global_cache_config is None:
+        try:
+            from agent.config import load_config
+
+            config = load_config(configure_logging=False)
+            middleware_config = config.get("middleware", {})
+
+            cache_params = {}
+            if isinstance(middleware_config, dict) and middleware_config.get("caching", {}).get("enabled", False):
+                caching_section = middleware_config.get("caching", {})
+                cache_params = {
+                    "backend_type": caching_section.get("backend", "memory"),
+                    "default_ttl": caching_section.get("default_ttl", 300),
+                    "max_size": caching_section.get("max_size", 1000),
+                }
+
+            _global_cache_config = CacheConfig(**cache_params)
+            logger.debug(f"Created global cache config: {_global_cache_config}")
+        except FileNotFoundError as e:
+            logger.warning(f"Could not load global cache config, falling back to default config: {e}")
+            _global_cache_config = CacheConfig()
+
+    return _global_cache_config
+
+
+def reset_global_cache_config():
+    """Reset the global cache configuration (useful for testing or config reloading)."""
+    global _global_cache_config
+    _global_cache_config = None
+    logger.debug("Reset global cache configuration")
+
+
 _cache_backends: dict[str, CacheBackend] = {}
 _rate_limiters: dict[str, RateLimiter] = {}
 
 
 def get_cache_backend(config: CacheConfig) -> CacheBackend:
     """Get or create cache backend."""
-    cache_key = f"{config.backend_type}:{config.key_prefix}"
+    cache_key = f"{config.backend_type}:{config.key_prefix}:{config.default_ttl}:{config.max_size}"
     if cache_key not in _cache_backends:
         if config.backend_type == CacheBackendType.MEMORY:
             _cache_backends[cache_key] = MemoryCache(config)
@@ -331,7 +370,7 @@ def rate_limited(config: RateLimitConfig | None = None, requests_per_minute: int
 def cached(config: CacheConfig | None = None, ttl: int | None = None):
     """Caching middleware decorator."""
     if config is None:
-        config = CacheConfig()
+        config = get_global_cache_config()
 
     def decorator(func: Callable) -> Callable:
         cache_backend = get_cache_backend(config)
@@ -343,9 +382,19 @@ def cached(config: CacheConfig | None = None, ttl: int | None = None):
 
             # Generate cache key
             cache_key_parts = [func.__name__]
+
+            # Skip Task objects in args since they contain unique IDs
             for arg in args:
+                # Check if this is a Task object (has 'id' attribute)
+                if hasattr(arg, "id") and hasattr(arg, "status"):
+                    # Skip Task objects - they have unique IDs that prevent caching
+                    continue
                 cache_key_parts.append(str(arg))
+
             for key, value in kwargs.items():
+                # Skip context objects that might contain unique data
+                if key == "context" and hasattr(value, "user_id"):
+                    continue
                 cache_key_parts.append(f"{key}={value}")
 
             key_data = ":".join(cache_key_parts)
@@ -427,7 +476,10 @@ def with_middleware(middleware_configs: list[dict[str, Any]]):
                 rate_config = RateLimitConfig(**params) if params else RateLimitConfig()
                 wrapped_func = rate_limited(rate_config)(wrapped_func)
             elif middleware_name == "cached":
-                cache_config = CacheConfig(**params) if params else CacheConfig()
+                if params:
+                    cache_config = CacheConfig(**params)
+                else:
+                    cache_config = get_global_cache_config()
                 wrapped_func = cached(cache_config)(wrapped_func)
             elif middleware_name == "retryable":
                 retry_config = RetryConfig(**params) if params else RetryConfig()
@@ -520,9 +572,16 @@ def apply_caching(handler: Callable, config: CacheConfig | None = None, ttl: int
     """Apply caching to a handler."""
     if config is None:
         if ttl is not None:
-            config = CacheConfig(default_ttl=ttl)
+            global_config = get_global_cache_config()
+            config = CacheConfig(
+                enabled=global_config.enabled,
+                backend_type=global_config.backend_type,
+                default_ttl=ttl,
+                max_size=global_config.max_size,
+                key_prefix=global_config.key_prefix,
+            )
         else:
-            config = CacheConfig()
+            config = get_global_cache_config()
     return cached(config)(handler)
 
 
@@ -540,7 +599,7 @@ def apply_retry(handler: Callable, config: RetryConfig | None = None, max_attemp
 async def clear_cache_async(config: CacheConfig | None = None) -> None:
     """Clear all cached data (async version)."""
     if config is None:
-        config = CacheConfig()
+        config = get_global_cache_config()
     cache_backend = get_cache_backend(config)
     await cache_backend.clear()
 
@@ -548,7 +607,7 @@ async def clear_cache_async(config: CacheConfig | None = None) -> None:
 def clear_cache(config: CacheConfig | None = None) -> None:
     """Clear all cached data (sync version for backward compatibility)."""
     if config is None:
-        config = CacheConfig()
+        config = get_global_cache_config()
     cache_backend = get_cache_backend(config)
 
     try:
@@ -562,7 +621,7 @@ def clear_cache(config: CacheConfig | None = None) -> None:
 async def get_cache_stats_async(config: CacheConfig | None = None) -> dict[str, Any]:
     """Get cache statistics (async version)."""
     if config is None:
-        config = CacheConfig()
+        config = get_global_cache_config()
     cache_backend = get_cache_backend(config)
 
     if isinstance(cache_backend, MemoryCache):
@@ -601,7 +660,7 @@ async def get_cache_stats_async(config: CacheConfig | None = None) -> dict[str, 
 def get_cache_stats(config: CacheConfig | None = None) -> dict[str, Any]:
     """Get cache statistics (sync version for backward compatibility)."""
     if config is None:
-        config = CacheConfig()
+        config = get_global_cache_config()
     cache_backend = get_cache_backend(config)
 
     if isinstance(cache_backend, MemoryCache):
