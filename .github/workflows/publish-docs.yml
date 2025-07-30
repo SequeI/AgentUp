@@ -8,6 +8,7 @@ on:
       - 'mkdocs.yml'
       - 'docker/docs/**'
       - '.github/workflows/publish-docs.yml'
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
