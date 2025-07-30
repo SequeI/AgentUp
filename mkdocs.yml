@@ -4,31 +4,35 @@ site_url: https://docs.agentup.dev
 site_author: AgentUp Team
 repo_url: https://github.com/RedDotRocket/AgentUp
 repo_name: RedDotRocket/AgentUp
+edit_uri: edit/main/docs/
 
 theme:
   name: material
   logo: images/compie.png
   favicon: images/favicon.ico
   features:
+    # Content
+    - content.tooltips
     - content.action.edit
     - content.action.view
     - content.code.annotate
     - content.code.copy
     - content.tabs.link
-    - content.tooltips
-    - navigation.tabs
+    - content.code.select
+    # Nav
+    - navigation.path
+    # - navigation.tabs
     - navigation.sections
     - navigation.footer
     - navigation.indexes
     - navigation.top
     - navigation.tracking
+    # Search
     - search.highlight
     - search.share
     - search.suggest
+    # Table of Contents
     - toc.follow
-    - content.code.copy
-    - content.code.annotate
-    - content.tooltips
 
   palette:
     - media: "(prefers-color-scheme: light)"

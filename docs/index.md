@@ -1,7 +1,7 @@
 # AgentUp Documentation
 
 <p align="center">
-  <img src="images/compie.png" alt="AgentUp Logo" width="150"/>
+  <img src="images/compie.png" alt="AgentUp Logo" width="200"/>
 </p>
 
 <p align="center">
@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  Designed with security, scalability, and extensibility at its foundation, AgentUp streamlines development through a configuration-driven architecture.
+  Designed with security, scalability, and extensibility at its foundation, AgentUp streamlines development through a configuration-driven architecture, with the ability to extend as much as you need via a rich plugin ecosystem.
 </p>
 
 ## Welcome to the AgentUp documentation! 
