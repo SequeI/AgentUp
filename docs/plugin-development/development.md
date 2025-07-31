@@ -51,7 +51,7 @@ them up to date using standard approaches such as dependabot etc.
 
 | Hook | Purpose | Return Type | Required |
 |------|---------|-------------|----------|
-| `register_skill` | Provide plugin metadata | `PluginInfo` | ✓ Yes |
+| `register_skill` | Provide plugin metadata | `PluginDefinition` | ✓ Yes |
 | `can_handle_task` | Routing decision | `bool` or `float` | ✓ Yes |
 | `execute_skill` | Main skill logic | `SkillResult` | ✓ Yes |
 | `validate_config` | Config validation | `ValidationResult` | ✗ No |
@@ -67,7 +67,7 @@ Let's build a comprehensive weather plugin that demonstrates all major features:
 ### Step 1: Project Setup
 
 ```bash
-agentup plugin create weather-skill --template advanced
+agentup plugin create weather-skill --template ai
 cd weather-skill
 ```
 
