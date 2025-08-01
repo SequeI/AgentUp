@@ -1,173 +1,165 @@
 """
-Belongs in tree as used for unit tests
+Example plugin for testing and demonstration purposes.
+
+This plugin shows how to create a basic AgentUp plugin using the decorator-based system.
 """
 
-import pluggy
+from typing import Any
 
-from .models import (
+from agent.plugins.base import Plugin
+from agent.plugins.decorators import capability
+from agent.plugins.models import (
     AIFunction,
     CapabilityContext,
     CapabilityDefinition,
     CapabilityResult,
-    CapabilityType,
     PluginValidationResult,
 )
 
-# Hook implementation marker
-hookimpl = pluggy.HookimplMarker("agentup")
 
+class ExamplePlugin(Plugin):
+    """Example plugin demonstrating the plugin system capabilities."""
 
-class ExamplePlugin:
     def __init__(self):
-        self.name = "example"
-        self.llm_service = None
+        super().__init__()
+        self.plugin_id = "example"
+        self.greeting = "Hello"
+        self.excited = False
 
-    @hookimpl
+    def configure(self, config: dict[str, Any]) -> None:
+        """Configure the plugin with settings."""
+        self.greeting = config.get("greeting", "Hello")
+        self.excited = config.get("excited", False)
+
     def register_capability(self) -> CapabilityDefinition:
-        return CapabilityDefinition(
-            id="example",
-            name="Example Capability",
-            version="1.0.0",
-            description="A simple example capability demonstrating the plugin system",
-            capabilities=[CapabilityType.TEXT, CapabilityType.AI_FUNCTION],
-            tags=["example", "demo", "test"],
-            config_schema={
-                "type": "object",
-                "properties": {
-                    "greeting": {"type": "string", "default": "Hello", "description": "Greeting to use"},
-                    "excited": {"type": "boolean", "default": False, "description": "Whether to add excitement"},
-                },
-            },
-        )
+        """Register capability and return definition."""
+        # This is needed for backward compatibility with tests
+        # The decorator already registered the capability, so we just return the definition
+        for cap_def in self.get_capability_definitions():
+            if cap_def.id == "example":
+                return cap_def
+        raise ValueError("Example capability not found")
 
-    @hookimpl
-    def validate_config(self, config: dict) -> PluginValidationResult:
-        errors = []
-        warnings = []
-
-        # Check greeting length
-        greeting = config.get("greeting", "Hello")
-        if len(greeting) > 50:
-            errors.append("Greeting is too long (max 50 characters)")
-        elif len(greeting) < 2:
-            warnings.append("Greeting is very short")
-
-        return PluginValidationResult(valid=len(errors) == 0, errors=errors, warnings=warnings)
-
-    @hookimpl
-    def can_handle_task(self, context: CapabilityContext) -> float:
-        # Get the task content
-        content = ""
-        if hasattr(context.task, "history") and context.task.history:
-            last_msg = context.task.history[-1]
-            if hasattr(last_msg, "parts") and last_msg.parts:
-                content = last_msg.parts[0].text if hasattr(last_msg.parts[0], "text") else ""
-
-        # Simple keyword matching for demonstration
-        keywords = ["example", "demo", "test", "hello", "greet"]
-        content_lower = content.lower()
-
-        # Calculate confidence based on keyword matches
-        matches = sum(1 for keyword in keywords if keyword in content_lower)
-        confidence = min(matches * 0.3, 1.0)
-
-        return confidence
-
-    @hookimpl
     def execute_capability(self, context: CapabilityContext) -> CapabilityResult:
-        # Get configuration
-        config = context.config
-        greeting = config.get("greeting", "Hello")
-        excited = config.get("excited", False)
+        """Synchronous wrapper for execute_capability - for backward compatibility with tests."""
+        import asyncio
 
-        # Get user input
-        user_input = self._extract_user_input(context)
+        loop = asyncio.new_event_loop()
+        try:
+            return loop.run_until_complete(super().execute_capability("example", context))
+        finally:
+            loop.close()
 
-        # Generate response
-        response = f"{greeting}, you said: {user_input}"
-        if excited:
-            response += "!!!"
+    @capability(
+        id="example",
+        name="Example Capability",
+        description="A simple example capability that greets users",
+        ai_function=True,
+    )
+    async def example_capability(self, context: CapabilityContext) -> CapabilityResult:
+        """Execute the example capability."""
+        # Extract task content
+        task_content = self._extract_task_content(context)
 
-        return CapabilityResult(
-            content=response, success=True, metadata={"capability": "example", "processed_by": "example_plugin"}
-        )
+        # Create response
+        response = f"{self.greeting}, you said: {task_content}"
+        if self.excited:
+            response += "!"
 
-    @hookimpl
-    def get_ai_functions(self) -> list[AIFunction]:
+        return CapabilityResult(content=response, success=True, metadata={"processed_by": "example_plugin"})
+
+    def can_handle_task(self, capability_id: str, context: CapabilityContext) -> bool | float:
+        """Check if this plugin can handle the task."""
+        if capability_id != "example":
+            return False
+
+        task_content = self._extract_task_content(context)
+
+        # Check for keywords that indicate this plugin should handle the task
+        keywords = ["example", "test", "demo", "greeting", "hello"]
+        task_lower = task_content.lower()
+
+        for keyword in keywords:
+            if keyword in task_lower:
+                return 1.0  # High confidence
+
+        return 0.0  # Cannot handle
+
+    def get_ai_functions(self, capability_id: str | None = None) -> list[AIFunction]:
+        """Get AI functions for this capability."""
+        if capability_id and capability_id != "example":
+            return []
+
         return [
             AIFunction(
                 name="greet_user",
-                description="Greet the user with a custom message",
+                description="Greet a user with a custom message",
                 parameters={
                     "type": "object",
                     "properties": {
-                        "name": {"type": "string", "description": "Name of the person to greet"},
+                        "name": {"type": "string", "description": "The name of the user to greet"},
                         "style": {
                             "type": "string",
                             "enum": ["formal", "casual", "excited"],
-                            "description": "Greeting style",
+                            "description": "The greeting style",
                         },
                     },
                     "required": ["name"],
                 },
-                handler=self._greet_user,
             ),
             AIFunction(
                 name="echo_message",
-                description="Echo a message back to the user",
+                description="Echo back a message with the configured greeting",
                 parameters={
                     "type": "object",
-                    "properties": {
-                        "message": {"type": "string", "description": "Message to echo"},
-                        "uppercase": {"type": "boolean", "description": "Whether to convert to uppercase"},
-                    },
+                    "properties": {"message": {"type": "string", "description": "The message to echo"}},
                     "required": ["message"],
                 },
-                handler=self._echo_message,
             ),
         ]
 
-    async def _greet_user(self, task, context: CapabilityContext) -> CapabilityResult:
-        # Extract parameters from task metadata
-        params = context.metadata.get("parameters", {})
-        name = params.get("name", "Friend")
-        style = params.get("style", "casual")
+    def validate_config(self, config: dict[str, Any]) -> PluginValidationResult:
+        """Validate plugin configuration."""
+        errors = []
+        warnings = []
 
-        # Generate greeting based on style
-        if style == "formal":
-            greeting = f"Good day, {name}. How may I assist you?"
-        elif style == "excited":
-            greeting = f"Hey {name}!!! So great to see you!!!"
-        else:  # casual
-            greeting = f"Hi {name}, how's it going?"
+        # Check greeting length
+        greeting = config.get("greeting", "")
+        if len(greeting) > 50:
+            errors.append("Greeting must be 50 characters or less")
 
-        return CapabilityResult(content=greeting, success=True)
+        # Check excited is boolean
+        excited = config.get("excited")
+        if excited is not None and not isinstance(excited, bool):
+            errors.append("Excited must be a boolean value")
 
-    async def _echo_message(self, task, context: CapabilityContext) -> CapabilityResult:
-        params = context.metadata.get("parameters", {})
-        message = params.get("message", "")
-        uppercase = params.get("uppercase", False)
+        return PluginValidationResult(valid=len(errors) == 0, errors=errors, warnings=warnings)
 
-        result = message.upper() if uppercase else message
-        return CapabilityResult(content=f"Echo: {result}", success=True)
+    def get_middleware_config(self) -> list[dict[str, Any]]:
+        """Get middleware configuration for this plugin."""
+        return [
+            {"type": "rate_limit", "config": {"requests_per_minute": 60, "burst_size": 10}},
+            {"type": "logging", "config": {"log_level": "INFO"}},
+        ]
 
-    @hookimpl
-    def configure_services(self, services: dict) -> None:
-        # Store reference to LLM service if available
-        if "llm" in services:
-            self.llm_service = services["llm"]
+    async def get_health_status(self) -> dict[str, Any]:
+        """Get plugin health status."""
+        return {
+            "status": "healthy",
+            "version": "1.0.0",
+            "has_llm": hasattr(self, "_llm") and self._llm is not None,
+            "capabilities": ["example"],
+            "configured": True,
+        }
 
-    @hookimpl
-    def get_middleware_config(self) -> list[dict]:
-        return [{"type": "rate_limit", "requests_per_minute": 100}, {"type": "logging", "level": "INFO"}]
-
-    @hookimpl
-    def get_health_status(self) -> dict:
-        return {"status": "healthy", "version": "1.0.0", "has_llm": self.llm_service is not None}
-
-    def _extract_user_input(self, context: CapabilityContext) -> str:
-        if hasattr(context.task, "history") and context.task.history:
-            last_msg = context.task.history[-1]
-            if hasattr(last_msg, "parts") and last_msg.parts:
-                return last_msg.parts[0].text if hasattr(last_msg.parts[0], "text") else ""
-        return ""
+    def _extract_task_content(self, context: CapabilityContext) -> str:
+        """Extract content from task in context."""
+        task = context.task
+        if hasattr(task, "content"):
+            return task.content
+        elif hasattr(task, "messages") and task.messages:
+            return task.messages[0].content
+        elif hasattr(task, "message"):
+            return task.message
+        else:
+            return str(task)
