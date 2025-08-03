@@ -3,7 +3,9 @@
 </p>
 
 <p align="center"><strong>
-  Designed with security, scalability, and extensibility at its foundation, AgentUp streamlines development through a configuration-driven architecture. It removes boilerplate and offers a growing ecosystem of community plugins to expand functionality as needed. Move fast, extend when needed.</strong>
+  The Agent Operating System<br>
+  Designed with security, scalability, and extensibility at its foundation
+  </strong>
 </p>
 <p align="center">
   Built by the creator of <a href="https://sigstore.dev">Sigstore</a>.
