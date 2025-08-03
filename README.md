@@ -1,46 +1,63 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/RedDotRocket/AgentUp/main/assets/logo.png" alt="Project Logo" width="500"/>
-</p>
-
-<p align="center"><strong>
-  The Agent Operating System<br>
-  Designed with security, scalability, and extensibility at its foundation
-  </strong>
-</p>
-<p align="center">
-  Built by the creator of <a href="https://sigstore.dev">Sigstore</a>.
-</p>
-
-<p align="center">
-  <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache2.0-brightgreen.svg?style=flat" alt="License: Apache 2.0"/></a>
-  |
-  <a href="https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml"><img src="https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
-  |
-  <a href="https://discord.gg/pPcjYzGvbS"><img src="https://img.shields.io/discord/1384081906773131274?label=Discord&logo=discord" alt="Discord"/></a>
-  |
-  <a href="https://pypi.org/project/AgentUp/"><img src="https://img.shields.io/pypi/v/AgentUp.svg" alt="PyPI Version"/></a>
-  |
-  <a href="https://pepy.tech/project/agentup"><img src="https://static.pepy.tech/badge/agentup" alt="Downloads"/></a>
-</p>
-
-
-
 <div align="center">
+  <img src="https://raw.githubusercontent.com/RedDotRocket/AgentUp/main/assets/logo.png" alt="AgentUp Logo" width="400"/>
+  <h3>The Operating System for AI Agents</h3>
+  <p><em>Security, scalability, and extensibility at its core</em></p>
+  <p>Built by the creator of <a href="https://sigstore.dev">Sigstore</a></p>
 
-### 🚧 Project Status: In Active Development 🚧
+  <br/>
 
-Join the future of AI Agent Engineering! We're actively building **AgentUp** and looking for contributors.
+  <!-- Badges -->
+  <p>
+    <a href="https://opensource.org/licenses/Apache-2.0">
+      <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"/>
+    </a>
+    <a href="https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml">
+      <img src="https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml/badge.svg" alt="CI Status"/>
+    </a>
+    <a href="https://pypi.org/project/AgentUp/">
+      <img src="https://img.shields.io/pypi/v/AgentUp.svg" alt="PyPI Version"/>
+    </a>
+    <a href="https://pepy.tech/project/agentup">
+      <img src="https://static.pepy.tech/badge/agentup" alt="Downloads"/>
+    </a>
+    <a href="https://discord.gg/pPcjYzGvbS">
+      <img src="https://img.shields.io/discord/1384081906773131274?color=7289da&label=Discord&logo=discord&logoColor=white" alt="Discord"/>
+    </a>
+  </p>
 
-[![Good First Issues](https://img.shields.io/github/issues/RedDotRocket/AgentUp/good%20first%20issue?style=for-the-badge)](https://github.com/RedDotRocket/AgentUp/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
+  <br/>
 
-Connect with our growing community on [Discord](https://discord.gg/pPcjYzGvbS) to discuss ideas, get help, and find a mentor to help you contribute to the project.
+  <!-- Status Box -->
+  <div>
+    <table>
+      <tr>
+        <td align="center">
+          <strong>🚀 Project Status: Active Development</strong>
+          <br/>
+          <sub>Join us in building the future of AI Agent Engineering!</sub>
+        </td>
+      </tr>
+    </table>
+  </div>
 
+  <br/>
+
+  <!-- CTA Buttons -->
+  <p>
+    <a href="https://github.com/RedDotRocket/AgentUp/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
+      <img src="https://img.shields.io/badge/Contribute-Good%20First%20Issues-green?style=for-the-badge&logo=github" alt="Good First Issues"/>
+    </a>
+    &nbsp;
+    <a href="https://discord.gg/pPcjYzGvbS">
+      <img src="https://img.shields.io/badge/Chat-Join%20Discord-7289da?style=for-the-badge&logo=discord&logoColor=white" alt="Join Discord"/>
+    </a>
+  </p>
 </div>
 
 
 ## Why AgentUp?
 
-**Operating System for AI Agents** - Built on operating system principles, AgentUp provides a robust foundation for creating AI agents through its highly extensible architecture. Its pluggable design lets you customize and add functionality without touching core code—giving you the flexibility to build exactly what you need while maintaining system stability, and ensuring your agents are portable and maintainable.
+**Operating System for AI Agents** - Built on operating system principles, AgentUp provides a robust foundation for creating AI agents through its highly extensible architecture. Its pluggable design lets you customize and add functionality without touching core code - giving you the flexibility to build exactly what you need while maintaining system stability, and ensuring your agents are portable and maintainable.
 
 **Configuration Over Code** - Define complex agent behaviors, data sources, and workflows through rich configuration. No weeks writing boilerplate, figuring out framework internals. Your agents are portable, versionable, and maintainable, with contracts that define their capabilities and interactions.
 
