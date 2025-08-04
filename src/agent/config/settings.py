@@ -1,5 +1,5 @@
 import os
-from functools import lru_cache
+from functools import cache, lru_cache
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -212,6 +212,26 @@ def get_settings() -> Settings:
     return Settings()
 
 
-# Create global Config instance - this loads configuration immediately
-# when the module is imported, ensuring logging is configured early
-Config = get_settings()
+# Create global Config instance only when accessed
+# This avoids loading configuration when importing the module
+
+
+@cache
+def get_config() -> Settings:
+    """Get the global configuration instance, loading it if necessary."""
+    return get_settings()
+
+
+# For backward compatibility, provide Config as a property-like access
+class ConfigProxy:
+    def __getattr__(self, name):
+        return getattr(get_config(), name)
+
+    def __getitem__(self, key):
+        return get_config()[key]
+
+    def get(self, key, default=None):
+        return get_config().get(key, default)
+
+
+Config = ConfigProxy()
