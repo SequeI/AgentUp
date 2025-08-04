@@ -35,20 +35,76 @@ async def initialize_mcp_integration(config: dict[str, Any]) -> None:
         logger.info("MCP integration disabled in configuration")
         return
 
+    logger.info("Initializing MCP service")
+
     # Get service registry
     from agent.services import get_services
 
     services = get_services()
+    client_initialized = False
+    server_initialized = False
 
     # Initialize MCP client if enabled (using flattened config structure)
     if mcp_config.get("client_enabled", False):
         logger.info("Initializing MCP client")
         await _initialize_mcp_client(services, mcp_config)
 
+        # Check if client initialization was successful
+        mcp_client = services.get_mcp_client()
+        if mcp_client and mcp_client.is_initialized and len(mcp_client.list_servers()) > 0:
+            client_initialized = True
+
     # Initialize MCP server if enabled (using flattened config structure)
     if mcp_config.get("server_enabled", False):
         logger.info("Initializing MCP server")
         await _initialize_mcp_server(services, mcp_config)
+
+        # Check if server initialization was successful
+        mcp_server = services.get_mcp_server()
+        if mcp_server:
+            server_initialized = True
+
+    # Report overall integration status
+    components_enabled = []
+    if mcp_config.get("client_enabled", False):
+        components_enabled.append(f"client ({'✓' if client_initialized else '✗'})")
+    if mcp_config.get("server_enabled", False):
+        components_enabled.append(f"server ({'✓' if server_initialized else '✗'})")
+
+    if components_enabled:
+        components_status = ", ".join(components_enabled)
+
+        # Create structured logging context
+        log_context = {
+            "client_enabled": mcp_config.get("client_enabled", False),
+            "client_initialized": client_initialized,
+            "server_enabled": mcp_config.get("server_enabled", False),
+            "server_initialized": server_initialized,
+        }
+
+        # Add client details if applicable
+        if mcp_config.get("client_enabled", False):
+            mcp_client = services.get_mcp_client()
+            if mcp_client:
+                log_context.update(
+                    {
+                        "connected_servers": len(mcp_client.list_servers()),
+                        "available_tools": len(mcp_client.list_tools()),
+                        "available_resources": len(mcp_client.list_resources()),
+                    }
+                )
+
+        if (not mcp_config.get("client_enabled", False) or client_initialized) and (
+            not mcp_config.get("server_enabled", False) or server_initialized
+        ):
+            logger.info(f"MCP integration initialization complete: {components_status}", extra=log_context)
+        else:
+            logger.warning(f"MCP integration partially initialized: {components_status}", extra=log_context)
+    else:
+        logger.warning(
+            "MCP integration enabled but no components configured",
+            extra={"client_enabled": False, "server_enabled": False},
+        )
 
 
 async def _initialize_mcp_client(services, mcp_config: dict[str, Any]) -> None:
@@ -68,7 +124,7 @@ async def _initialize_mcp_client(services, mcp_config: dict[str, Any]) -> None:
 
         # Register with service registry
         services._services["mcp_client"] = mcp_client
-        logger.info("Registered unified MCP client with service registry")
+        logger.debug("Registered unified MCP client with service registry")
 
         # Register MCP tools with AI orchestrator
         try:
@@ -77,7 +133,12 @@ async def _initialize_mcp_client(services, mcp_config: dict[str, Any]) -> None:
             registry = get_function_registry()
 
             available_tools = await mcp_client.get_available_tools()
-            logger.info(f"MCP tools available across all transports: {len(available_tools)}")
+            if not len(available_tools):
+                logger.warning("No MCP tools available across configured transports")
+            else:
+                # Log available tools for debugging
+                tool_names = [tool.get("name", "unknown") for tool in available_tools]
+                logger.debug(f"MCP tools available across all transports: {', '.join(tool_names)}")
 
             if available_tools:
                 # Register MCP tools with scope enforcement
@@ -93,15 +154,12 @@ async def _initialize_mcp_client(services, mcp_config: dict[str, Any]) -> None:
 
     except Exception as e:
         logger.error(f"Failed to initialize unified MCP client: {e}")
+        # Still register the failed client so we don't break the service registry
+        if "mcp_client" in locals():
+            services._services["mcp_client"] = mcp_client
 
-    # Log transport summary
-    connected_servers = mcp_client.list_servers() if "mcp_client" in locals() else []
-    transport_summary = {}
-    for server_config in servers:
-        transport = server_config.get("transport", "unknown")
-        transport_summary[transport] = transport_summary.get(transport, 0) + 1
-
-    logger.info(f"MCP client initialized with {len(connected_servers)} servers: {transport_summary}")
+    # The MCP client will now log its own detailed status during initialization
+    # We don't need to duplicate that logging here
 
 
 async def _initialize_mcp_server(services, mcp_config: dict[str, Any]) -> None:
