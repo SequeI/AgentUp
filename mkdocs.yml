@@ -122,5 +122,4 @@ nav:
     - Push Notifications: advanced/push-notifications.md
     - Streaming: advanced/streaming.md
   - Reference:
-    - CLI Reference: reference/cli-reference.md
     - Configuration: reference/configuration.md
