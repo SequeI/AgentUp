@@ -12,6 +12,7 @@ theme:
   favicon: images/favicon.ico
   features:
     # Content
+    - navigation.tabs  # Enables tabbed navigation
     - content.tooltips
     - content.action.edit
     - content.action.view
@@ -19,19 +20,21 @@ theme:
     - content.code.copy
     - content.tabs.link
     - content.code.select
-    # Nav
+    # # Nav
+    - navigation.instant  # Enables mobile hamburger menu
+    - navigation.expand  # Expand all sections by default
     - navigation.path
-    # - navigation.tabs
+    - navigation.tabs
     - navigation.sections
     - navigation.footer
     - navigation.indexes
-    - navigation.top
+    # - navigation.top
     - navigation.tracking
-    # Search
+    # # Search
     - search.highlight
     - search.share
     - search.suggest
-    # Table of Contents
+    # # Table of Contents
     - toc.follow
 
   palette:
@@ -40,7 +43,7 @@ theme:
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
-      primary: custom
+      primary: teal
       accent: custom
 
     # Dark Mode (Retro Comic Dark)
@@ -71,8 +74,8 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed:
-      alternate_style: true
+  # - pymdownx.tabbed:
+  #     alternate_style: true
   - admonition
   - pymdownx.details
 copyright: Copyright &copy; 2025 Red Dot Rocket
