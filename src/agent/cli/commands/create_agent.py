@@ -201,6 +201,7 @@ def create_agent(
         click.echo(f"  1. cd {output_dir.name}")
         click.echo("  2. uv sync                    # Install dependencies")
         click.echo("  3. agentup agent serve        # Start development server")
+        click.echo("  4. pip install agentup-brave --extra-index-url https://api.agentup.dev/simple # for plugins")
 
     except Exception as e:
         click.echo(f"{click.style('✗ Error:', fg='red')} {str(e)}")
