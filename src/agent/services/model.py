@@ -57,10 +57,14 @@ class ServiceRegistration(BaseModel):
     @field_validator("version")
     @classmethod
     def validate_version(cls, v: str) -> str:
-        import re
+        import semver
 
-        if not re.match(r"^\d+\.\d+\.\d+(-[\w\.-]+)?(\+[\w\.-]+)?$", v):
-            raise ValueError("Version must follow semantic versioning (e.g., 1.0.0)")
+        try:
+            semver.Version.parse(v)
+        except ValueError:
+            raise ValueError(
+                "Version must follow semantic versioning (e.g., 1.0.0, 1.2.3-alpha.1, 1.0.0+build.123)"
+            ) from None
         return v
 
     @field_validator("name")
@@ -167,6 +171,36 @@ class ServiceDependency(BaseModel):
         valid_types = {"required", "optional", "weak", "strong"}
         if v not in valid_types:
             raise ValueError(f"Dependency type must be one of {valid_types}")
+        return v
+
+
+class AgentRegistrationPayload(BaseModel):
+    """Payload for agent registration with an orchestrator."""
+
+    agent_url: str = Field(..., description="URL where this agent can be reached")
+    name: str = Field(..., description="Agent name")
+    version: str = Field(..., description="Agent version")
+    agent_card_url: str = Field(..., description="URL to agent's card endpoint")
+    description: str | None = Field(None, description="Agent description")
+
+    @field_validator("agent_url", "agent_card_url")
+    @classmethod
+    def validate_urls(cls, v: str) -> str:
+        if not v.startswith(("http://", "https://")):
+            raise ValueError("URL must start with http:// or https://")
+        return v
+
+    @field_validator("version")
+    @classmethod
+    def validate_version(cls, v: str) -> str:
+        import semver
+
+        try:
+            semver.Version.parse(v)
+        except ValueError:
+            raise ValueError(
+                "Version must follow semantic versioning (e.g., 1.0.0, 1.2.3-alpha.1, 1.0.0+build.123)"
+            ) from None
         return v
 
 
@@ -298,4 +332,5 @@ __all__ = [
     "ServiceMetrics",
     "ServiceDependency",
     "ServiceConfiguration",
+    "AgentRegistrationPayload",
 ]
