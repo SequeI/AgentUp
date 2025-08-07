@@ -48,7 +48,7 @@ router = APIRouter()
 
 # Configuration will be loaded when needed
 
-# Agent card caching
+# Agent card caching - Force cache invalidation for debugging
 _cached_agent_card: AgentCard | None = None
 _cached_extended_agent_card: AgentCard | None = None
 _cached_config_hash: str | None = None
@@ -90,6 +90,77 @@ def get_request_handler() -> DefaultRequestHandler:
     return _request_handler
 
 
+def _get_mcp_skills_for_agent_card() -> list[AgentSkill]:
+    """Convert registered MCP capabilities to AgentSkill objects.
+
+    Only includes MCP tools from servers with expose_as_skills: true.
+
+    Returns:
+        List of AgentSkill objects representing MCP tools
+    """
+    from agent.capabilities.manager import get_mcp_capabilities
+    from agent.services.config import ConfigurationManager
+
+    mcp_skills = []
+    try:
+        # Get MCP server configuration to check expose_as_skills flags
+        config_manager = ConfigurationManager()
+        config = config_manager.config
+
+        mcp_config = config.get("mcp", {})
+        if not mcp_config.get("enabled"):
+            return mcp_skills
+        servers = mcp_config.get("servers", [])
+
+        # Create a mapping of server names to expose_as_skills setting
+        server_expose_flags = {}
+        for server in servers:
+            # TODO: Pydantic validation for server config
+            server_name = server.get("name")
+            expose_flag = server.get("expose_as_skills", False)
+
+            server_expose_flags[server_name] = expose_flag
+
+        mcp_capabilities = get_mcp_capabilities()
+
+        for capability_id, capability_info in mcp_capabilities.items():
+            # Only include capabilities from servers with expose_as_skills: true
+            server_name = capability_info.server_name
+
+            # Add server name to capability ID for uniqueness
+            name = f"{server_name}:{capability_id}" if server_name else capability_id
+
+            if server_expose_flags.get(server_name, False):
+                logger.debug(
+                    f"Including capability '{capability_id}' in AgentCard (server '{server_name}' has expose_as_skills=true)"
+                )
+
+                # Convert MCPCapabilityInfo to AgentSkill
+                skill = AgentSkill(
+                    id=capability_id,
+                    name=name,
+                    description=capability_info.description,
+                    inputModes=["text"],
+                    outputModes=["text"],
+                    tags=["mcp", capability_info.server_name] if capability_info.server_name else ["mcp"],
+                )
+                mcp_skills.append(skill)
+            else:
+                logger.debug(
+                    f"Skipping capability '{capability_id}' (server '{server_name}' has expose_as_skills={server_expose_flags.get(server_name, False)})"
+                )
+
+        logger.debug(f"Added {len(mcp_skills)} MCP tools as AgentCard skills from servers with expose_as_skills=true")
+
+    except Exception as e:
+        logger.error(f"Failed to get MCP capabilities for AgentCard: {e}")
+        import traceback
+
+        logger.error(f"Traceback: {traceback.format_exc()}")
+
+    return mcp_skills
+
+
 def create_agent_card(extended: bool = False) -> AgentCard:
     """Create agent card with current configuration.
 
@@ -109,12 +180,20 @@ def create_agent_card(extended: bool = False) -> AgentCard:
     # Bandit issue: B324 - Using hashlib.md5() is acceptable here for caching purposes
     current_config_hash = hashlib.md5(config_str.encode()).hexdigest()  # nosec
 
+    logger.info(
+        f"DEBUG: create_agent_card called, current_hash: {current_config_hash[:8]}, cached_hash: {_cached_config_hash[:8] if _cached_config_hash else 'None'}"
+    )
+
+    # Temporarily disable caching for debugging MCP skills
     # Check if we can use cached version
-    if _cached_config_hash == current_config_hash:
-        if extended and _cached_extended_agent_card is not None:
-            return _cached_extended_agent_card
-        elif not extended and _cached_agent_card is not None:
-            return _cached_agent_card
+    # if _cached_config_hash == current_config_hash:
+    #     logger.info("DEBUG: Using cached AgentCard")
+    #     if extended and _cached_extended_agent_card is not None:
+    #         return _cached_extended_agent_card
+    #     elif not extended and _cached_agent_card is not None:
+    #         return _cached_agent_card
+    # else:
+    logger.info("DEBUG: Cache disabled - regenerating AgentCard")
 
     # Cache miss - regenerate agent card
     agent_info = config.get("agent", {})
@@ -126,6 +205,9 @@ def create_agent_card(extended: bool = False) -> AgentCard:
     # Convert plugins to A2A Skill format based on visibility
     agent_skills = []
     has_extended_plugins = False
+
+    # Add MCP tools as skills
+    agent_skills.extend(_get_mcp_skills_for_agent_card())
 
     # Try to get plugin information from the new system
     try:
@@ -279,7 +361,7 @@ def create_agent_card(extended: bool = False) -> AgentCard:
         name=agent_info.get("name", config.get("project_name", "Agent")),
         description=agent_info.get("description", config.get("description", "AI Agent")),
         url=agent_info.get("url", config.get("url", "http://localhost:8000")),
-        preferred_transport="JSONRPC",
+        preferred_transport="JSONRPC!",
         provider=AgentProvider(
             organization=agent_info.get("provider_organization", "AgentUp"),
             url=agent_info.get("provider_url", "http://localhost:8000"),
