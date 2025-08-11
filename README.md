@@ -5,6 +5,17 @@
 
   <br/>
 
+  <!-- CTA Buttons -->
+  <p>
+    <a href="https://github.com/RedDotRocket/AgentUp/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
+      <img src="https://img.shields.io/badge/Contribute-Good%20First%20Issues-green?style=for-the-badge&logo=github" alt="Good First Issues"/>
+    </a>
+    &nbsp;
+    <a href="https://discord.gg/pPcjYzGvbS">
+      <img src="https://img.shields.io/badge/Chat-Join%20Discord-7289da?style=for-the-badge&logo=discord&logoColor=white" alt="Join Discord"/>
+    </a>
+  </p>
+
   <!-- Badges -->
   <p>
     <a href="https://opensource.org/licenses/Apache-2.0">
@@ -24,6 +35,7 @@
     </a>
   </p>
   <br/>
+</div>
 
 <!-- Status Box -->
 <div align="center">
@@ -35,7 +47,7 @@
         <strong>🏃‍♂️ We are moving fast, things will break!</strong>
         <br/>
         <sub>Ship early, iterate quickly, learn constantly</sub>
-        <br/><br/>
+        <br/>
         <strong>🤝 Come and help, join in the fun!</strong>
         <br/>
         <sub>Grab a <a href="[../../labels/good%20first%20issue](https://github.com/RedDotRocket/AgentUp/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)">good-first-issue</a> and dive in</sub>
@@ -46,17 +58,7 @@
 
   <br/>
 
-  <!-- CTA Buttons -->
-  <p>
-    <a href="https://github.com/RedDotRocket/AgentUp/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
-      <img src="https://img.shields.io/badge/Contribute-Good%20First%20Issues-green?style=for-the-badge&logo=github" alt="Good First Issues"/>
-    </a>
-    &nbsp;
-    <a href="https://discord.gg/pPcjYzGvbS">
-      <img src="https://img.shields.io/badge/Chat-Join%20Discord-7289da?style=for-the-badge&logo=discord&logoColor=white" alt="Join Discord"/>
-    </a>
-  </p>
-</div>
+
 
 
 ## Why AgentUp?
