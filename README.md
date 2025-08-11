@@ -2,7 +2,6 @@
   <img src="https://raw.githubusercontent.com/RedDotRocket/AgentUp/main/assets/logo.png" alt="AgentUp Logo" width="400"/>
   <h3>The Operating System for AI Agents</h3>
   <p><em>Security, scalability, and extensibility at its core</em></p>
-  <p>Built by the creator of <a href="https://sigstore.dev">Sigstore</a></p>
 
   <br/>
 
@@ -24,21 +23,22 @@
       <img src="https://img.shields.io/discord/1384081906773131274?color=7289da&label=Discord&logo=discord&logoColor=white" alt="Discord"/>
     </a>
   </p>
-
   <br/>
 
-  <!-- Status Box -->
-  <div>
-    <table>
-      <tr>
-        <td align="center">
-          <strong>🚀 Project Status: Active Development</strong>
-          <br/>
-          <sub>Join us in building the future of AI Agent Engineering!</sub>
-        </td>
-      </tr>
-    </table>
-  </div>
+<!-- Status Box -->
+<div align="center">
+   <table>
+    <tr>
+      <td align="center">
+        <strong>🚀 Project Status: Active Development</strong>
+        <br/>
+        <strong>🏃‍♂️ We are moving fast, things will break!</strong>
+        <br/>
+        <sub>Ship early, iterate quickly, learn constantly</sub>
+      </td>
+    </tr>
+  </table>
+</div>
 
   <br/>
 
