@@ -44,9 +44,7 @@
       <td align="center">
         <strong>🚀 Active Development</strong>
         <br/>
-        <strong>🏃‍♂️ We are moving fast, things will break!</strong>
-        <br/>
-        <sub>Ship early, iterate quickly, learn constantly</sub>
+        <sub>🏃‍♂️ We are moving fast, things will break!</sub>
         <br/>
         <strong>🤝 Come and help, join in the fun!</strong>
         <br/>
