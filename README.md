@@ -46,9 +46,7 @@
         <br/>
         <sub>🏃‍♂️ We are moving fast, things will break!</sub>
         <br/>
-        <strong>🤝 Come and help, join in the fun!</strong>
-        <br/>
-        <sub>Grab a <a href="[../../labels/good%20first%20issue](https://github.com/RedDotRocket/AgentUp/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)">good-first-issue</a> and dive in</sub>
+        <sub>Contributions are welcome! Grab a <a href="[../../labels/good%20first%20issue](https://github.com/RedDotRocket/AgentUp/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)">good-first-issue</a> and dive in</sub>
       </td>
     </tr>
   </table>
