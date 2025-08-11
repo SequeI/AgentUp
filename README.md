@@ -30,7 +30,7 @@
    <table>
     <tr>
       <td align="center">
-        <strong>🚀 Project Status: Active Development</strong>
+        <strong>🚀 Active Development</strong>
         <br/>
         <strong>🏃‍♂️ We are moving fast, things will break!</strong>
         <br/>
