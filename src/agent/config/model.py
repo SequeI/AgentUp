@@ -19,6 +19,17 @@ from ..types import ConfigDict as ConfigDictType
 from ..types import FilePath, LogLevel, ModulePath, ServiceName, ServiceType, Version
 
 
+class BaseAgent(BaseModel):
+    model_config = {
+        "arbitrary_types_allowed": True,
+        "extra": "allow",
+    }
+
+    agent_name: str = Field(description="The name of the agent.")
+    description: str = Field(description="A brief description of the agent's purpose.")
+    content_types: list[str] = Field(description="Supported content types.")
+
+
 class EnvironmentVariable(BaseModel):
     name: str = Field(..., description="Environment variable name")
     default: str | None = Field(None, description="Default value if not set")
@@ -591,6 +602,7 @@ def expand_env_vars(value: Any) -> Any:
 # Re-export key models
 __all__ = [
     "AgentConfig",
+    "BaseAgent",
     "ServiceConfig",
     "LoggingConfig",
     "APIConfig",
