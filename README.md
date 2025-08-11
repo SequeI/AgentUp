@@ -1,8 +1,6 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/RedDotRocket/AgentUp/main/assets/logo.png" alt="AgentUp Logo" width="400"/>
   <h3>The Operating System for AI Agents</h3>
-  <p><em>Security, scalability, and extensibility at its core</em></p>
-
   <br/>
 
   <!-- CTA Buttons -->
