@@ -170,10 +170,6 @@ ai:
 {% endif %}
 
 
-# External services configuration
-services:{{ ' ' + services | tojson if services else ' {}' }}
-
-
 {%- if has_mcp %}
 
 
