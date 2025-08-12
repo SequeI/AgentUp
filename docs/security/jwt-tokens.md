@@ -78,7 +78,7 @@ print(token)
 
 ### Step 2: Configure Your Agent
 
-Add to your `agent_config.yaml`:
+Add to your `agentup.yml`:
 
 ```yaml
 security:
@@ -130,7 +130,7 @@ Bearer token authentication integrates with AgentUp's hierarchical scope system 
 The Agentup Security Framework system supports hierarchical scopes with automatic inheritance:
 
 ```yaml
-# Example scope hierarchy in agent_config.yaml
+# Example scope hierarchy in agentup.yml
 security:
   enabled: true
   type: "bearer"
@@ -490,7 +490,7 @@ if __name__ == "__main__":
 ### Secure Token Management
 
 ```yaml
-# agent_config.yaml (safe to commit)
+# agentup.yml (safe to commit)
 security:
   enabled: true
   type: "bearer"

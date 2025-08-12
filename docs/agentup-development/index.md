@@ -125,7 +125,7 @@ echo "
 skills:
   - plugin_id: weather_plugin
     routing_mode: ai
-" >> weather-test/agent_config.yaml
+" >> weather-test/agentup.yml
 
 # Test your plugin
 cd weather-test
@@ -226,8 +226,8 @@ pip install weather-plugin time-plugin
 # Install local development plugins
 pip install -e ~/my-plugins/custom-plugin
 
-# Configure in agent_config.yaml
-vim agent_config.yaml
+# Configure in agentup.yml
+vim agentup.yml
 ```
 
 ### Multi-Agent Development
@@ -255,7 +255,7 @@ AgentUp uses relative paths that work from any agent directory:
 
 ```bash
 # These paths are relative to agent working directory
-agent_config.yaml           # Always in agent root
+agentup.yml                 # Always in agent root
 ./skills/                   # Local skills directory
 ./conversation_states/      # State storage
 ./logs/                     # Log files
@@ -265,7 +265,7 @@ agent_config.yaml           # Always in agent root
 ### Configuration Management
 
 ```yaml
-# agent_config.yaml - paths relative to agent directory
+# agentup.yml - paths relative to agent directory
 state:
   backend: file
   storage_dir: ./conversation_states  # Relative to agent root
@@ -359,7 +359,7 @@ grep -r "from agentup" src/
 
 ```bash
 # ✗ Wrong - broken relative paths
-cd ~ && agentup agent serve --config /path/to/agent/agent_config.yaml
+cd ~ && agentup agent serve --config /path/to/agent/agentup.yml
 
 # ✓ Correct - relative paths work
 cd /path/to/agent && agentup agent serve
@@ -470,7 +470,7 @@ state:
 
 **Use environment variables for environment-specific paths:**
 ```yaml
-# agent_config.yaml
+# agentup.yml
 services:
   database:
     config:
@@ -525,7 +525,7 @@ agentup plugin validate my_plugin
 **Agent Development Cycle:**
 ```bash
 # 1. Update configuration
-vim agent_config.yaml
+vim agentup.yml
 
 # 2. Validate changes
 agentup agent validate
@@ -546,7 +546,7 @@ agentup agent create test-minimal --template minimal
 cd test-minimal
 
 # Add your plugin
-echo "skills: [{plugin_id: your_plugin}]" >> agent_config.yaml
+echo "skills: [{plugin_id: your_plugin}]" >> agentup.yml
 
 # Test specific scenarios
 curl -X POST http://localhost:8000/ \

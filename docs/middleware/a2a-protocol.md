@@ -147,7 +147,7 @@ AgentUp provides enterprise-grade plugin visibility control through the `visibil
 Configure plugins with different visibility levels:
 
 ```yaml
-# agent_config.yaml
+# agentup.yml
 plugins:
   # Public plugins - visible to everyone
   - plugin_id: "general_help"
@@ -259,7 +259,7 @@ This design allows:
 ### Enterprise Configuration
 
 ```yaml
-# agent_config.yaml
+# agentup.yml
 agent:
   name: "Enterprise Agent"
   description: "Production agent with tiered capabilities"

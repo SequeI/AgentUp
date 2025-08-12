@@ -69,7 +69,7 @@ AgentUp supports three storage backends, each optimized for different use cases:
 
 ### How It Works
 
-1. **Configure once** in `agent_config.yaml` with the new `state_management` section
+1. **Configure once** in `agentup.yml` with the new `state_management` section
 2. **All handlers automatically get state management** based on configuration
 3. **Per-skill overrides** available for custom behavior
 4. **Fallback gracefully** if state backend is unavailable
@@ -696,7 +696,7 @@ from .context import stateful
 
 2. **State Not Persisting**
    - Verify `@stateful` decorator is applied to handlers
-   - Check that state configuration is in `agent_config.yaml`
+   - Check that state configuration is in `agentup.yml`
    - Ensure backend is properly configured
 
 3. **Memory Usage Growing**
@@ -717,7 +717,7 @@ Use this script to validate your configuration:
 import yaml
 
 def validate_state_config():
-    with open('agent_config.yaml', 'r') as f:
+    with open('agentup.yml', 'r') as f:
         config = yaml.safe_load(f)
     
     state_cfg = config.get('state', {})
@@ -759,7 +759,7 @@ from src.agent.context import get_context_manager
 async def test_state():
     # Load your config
     import yaml
-    with open('agent_config.yaml', 'r') as f:
+    with open('agentup.yml', 'r') as f:
         config = yaml.safe_load(f)
     
     state_cfg = config['state']
@@ -843,7 +843,7 @@ state:
 
 If upgrading from AgentUp versions without state management:
 
-1. **Add state configuration** to `agent_config.yaml`
+1. **Add state configuration** to `agentup.yml`
 2. **Update handlers** to use `@stateful` decorator
 3. **Test with existing agent** to ensure compatibility
 
@@ -874,7 +874,7 @@ If upgrading from AgentUp versions without state management:
 ## Next Steps
 
 1. **Choose your backend** based on deployment needs
-2. **Configure agent_config.yaml** with explicit Valkey settings
+2. **Configure agentup.yml** with explicit Valkey settings
 3. **Apply @stateful decorator** to handlers that need memory
 4. **Test with provided scripts** to verify functionality
 5. **Monitor and optimize** based on usage patterns

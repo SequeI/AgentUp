@@ -464,7 +464,7 @@ cd ~/dev/agentup-workspace/agents/
 agentup agent create test-custom --template standard
 
 # Follow the prompts and verify the generated configuration
-cat test-custom/agent_config.yaml
+cat test-custom/agentup.yml
 ```
 
 ## Best Practices

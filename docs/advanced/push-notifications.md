@@ -757,7 +757,7 @@ push_notifications:
 
 ## Next Steps
 
-1. **Configure push notifications** in your `agent_config.yaml`
+1. **Configure push notifications** in your `agentup.yml`
 2. **Set up webhook endpoints** in your application
 3. **Test with sample tasks** to verify delivery
 4. **Implement proper security** with tokens and authentication

@@ -71,7 +71,7 @@ python -c "import secrets; print('sk-' + secrets.token_urlsafe(32))"
 
 ### Step 2: Configure Your Agent with Unified Security
 
-Add comprehensive security configuration to your `agent_config.yaml`:
+Add comprehensive security configuration to your `agentup.yml`:
 
 ```yaml
 # Unified security configuration
@@ -344,7 +344,7 @@ security:
 ### Configuration with Environment Variables
 
 ```yaml
-# agent_config.yaml (safe to commit)
+# agentup.yml (safe to commit)
 security:
   enabled: true
   type: "api_key"

@@ -1,10 +1,10 @@
 # Agent Configuration
 
-Master the `agent_config.yaml` file to customize your agent's behavior.
+Master the `agentup.yml` file to customize your agent's behavior.
 
 ## Overview
 
-AgentUp uses a single configuration file (`agentup.yaml`) to control all aspects of your agent. This configuration-driven approach makes it easy to customize behavior without writing code.
+AgentUp uses a single configuration file (`agentup.yml`) to control all aspects of your agent. This configuration-driven approach makes it easy to customize behavior without writing code.
 
 ## Basic Configuration Structure
 
@@ -300,13 +300,13 @@ Create different configurations for different environments:
 
 ```bash
 # Development
-cp config/development.yaml agent_config.yaml
+cp config/development.yaml agentup.yml
 
 # Production
-cp config/production.yaml agent_config.yaml
+cp config/production.yaml agentup.yml
 
 # Testing
-cp config/testing.yaml agent_config.yaml
+cp config/testing.yaml agentup.yml
 ```
 
 ## Advanced Configuration Patterns
