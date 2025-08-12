@@ -4,7 +4,7 @@ Master the `agentup.yml` file to customize your agent's behavior.
 
 ## Overview
 
-AgentUp uses a single configuration file (`agentup.yaml`) to control all aspects of your agent. This configuration-driven approach makes it easy to customize behavior without writing code.
+AgentUp uses a single configuration file (`agentup.yml`) to control all aspects of your agent. This configuration-driven approach makes it easy to customize behavior without writing code.
 
 ## Basic Configuration Structure
 
