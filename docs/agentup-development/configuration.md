@@ -1,6 +1,6 @@
 # Agent Configuration
 
-Master the `agent_config.yaml` file to customize your agent's behavior.
+Master the `agentup.yml` file to customize your agent's behavior.
 
 ## Overview
 
@@ -300,13 +300,13 @@ Create different configurations for different environments:
 
 ```bash
 # Development
-cp config/development.yaml agent_config.yaml
+cp config/development.yaml agentup.yml
 
 # Production
-cp config/production.yaml agent_config.yaml
+cp config/production.yaml agentup.yml
 
 # Testing
-cp config/testing.yaml agent_config.yaml
+cp config/testing.yaml agentup.yml
 ```
 
 ## Advanced Configuration Patterns

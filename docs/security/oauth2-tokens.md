@@ -262,7 +262,7 @@ JWT_SECRET=your-jwt-secret
 ```
 
 ```yaml
-# agent_config.yaml
+# agentup.yml
 security:
   enabled: true
   type: "oauth2"

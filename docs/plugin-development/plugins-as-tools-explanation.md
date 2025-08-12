@@ -71,7 +71,7 @@ async def handle_echo(task: Task) -> str:
 AgentUp agents can expose their skills as MCP (Model Context Protocol) tools, making them discoverable by other MCP clients:
 
 ```yaml
-# agent_config.yaml
+# agentup.yml
 mcp:
   enabled: true
   server:
@@ -87,7 +87,7 @@ When `expose_handlers: true`, AgentUp automatically creates MCP tool definitions
 AgentUp can also consume tools from external MCP servers:
 
 ```yaml
-# agent_config.yaml
+# agentup.yml
 mcp:
   enabled: true
   client:
@@ -141,7 +141,7 @@ Here's how it all works together:
 
 ### 1. Agent Configuration
 ```yaml
-# agent_config.yaml
+# agentup.yml
 mcp:
   enabled: true
   client:
@@ -211,7 +211,7 @@ skills:
 ### AI Routing Mode
 
 ```yaml
-# agent_config.yaml
+# agentup.yml
 routing:
   default_mode: ai  # Skills available as LLM tools
 

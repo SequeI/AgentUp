@@ -81,7 +81,7 @@ agentup plugin list
 
 ### Step 3: Register the Plugin
 
-To register the `sys_tools` plugin, we will modify our agent's configuration file (`agent_config.yaml`) to include the plugin and its capabilities.
+To register the `sys_tools` plugin, we will modify our agent's configuration file (`agentup.yml`) to include the plugin and its capabilities.
 
 
 ```yaml
@@ -124,7 +124,7 @@ plugins:
 
 ### Create an AI Provider
 
-To create an AI provider, we will modify our agent's configuration file (`agent_config.yaml`) to include the AI provider and its capabilities.
+To create an AI provider, we will modify our agent's configuration file (`agentup.yml`) to include the AI provider and its capabilities.
 
 ```yaml
 ai_provider:

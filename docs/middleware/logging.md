@@ -4,7 +4,7 @@ AgentUp provides a structured logging system built on top of `structlog` that su
 
 ## Quick Start
 
-Add logging configuration to your `agent_config.yaml`:
+Add logging configuration to your `agentup.yml`:
 
 ```yaml
 # Basic logging configuration
