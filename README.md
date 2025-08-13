@@ -149,6 +149,23 @@ AgentUp is Apache 2.0 licensed and built on open standards. The framework implem
 
 **Community Support** - Report issues, request features, and get help through [GitHub Issues](https://github.com/RedDotRocket/AgentUp/issues). Join real-time discussions and connect with other developers on [Discord](https://discord.gg/pPcjYzGvbS).
 
+## What is DCO Bot?
+
+We use the Developer Certificate of Origin (DCO) to keep our project legally sound and protect our community. Its very common in open source projects (The Linux Kernel, Kubernetes, Docker).
+
+The DCO prevents issues like accidentally including proprietary code and ensures all contributors have the right to submit their changes.
+
+This protects both contributors and users of the project.
+
+### How to sign commits
+Simply add the `-s` flag when committing:
+
+```bash
+git commit -s -m "Add awesome new feature"
+```
+
+This adds a "Signed-off-by" line certifying you wrote the code or have permission to contribute it under Apache 2.0. You keep ownership of your contributions - no paperwork required!
+
 ## Show Your Support ⭐
 
 If AgentUp is helping you build better AI agents, or you want to encourage development, please consider giving it a star to help others discover the project and it let's me know it's worth continuing to invest time into this framework!
