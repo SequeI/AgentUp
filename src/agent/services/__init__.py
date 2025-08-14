@@ -14,8 +14,6 @@ New Services:
 - PushNotificationService: Push notification handling
 
 Legacy Services (for backwards compatibility):
-- ServiceRegistry: External service integration
-- CacheService, WebAPIService: External service types
 - MultiModalProcessor: Multimodal processing
 """
 
@@ -31,13 +29,6 @@ from .mcp import MCPService
 from .middleware import MiddlewareManager
 from .multimodal import MultiModalProcessor
 from .push import PushNotificationService
-from .registry import (
-    CacheService,
-    ServiceError,
-    ServiceRegistry,
-    WebAPIService,
-    get_services,
-)
 from .security import SecurityService
 from .state import StateManager
 
@@ -54,13 +45,6 @@ __all__ = [
     "MCPService",
     "PushNotificationService",
     # Legacy services
-    "get_services",
-    "initialize_services",
-    "initialize_services_from_config",
-    "ServiceError",
-    "ServiceRegistry",
-    "CacheService",
-    "WebAPIService",
     "MultiModalProcessor",
     "Config",
 ]

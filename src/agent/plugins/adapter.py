@@ -6,7 +6,7 @@ from a2a.types import Task
 from agent.core.dispatcher import FunctionRegistry
 
 from .manager import PluginRegistry, get_plugin_registry
-from .models import CapabilityContext, CapabilityResult
+from .models import CapabilityResult
 
 if TYPE_CHECKING:
     from agent.config.settings import Settings
@@ -121,28 +121,6 @@ class PluginAdapter:
 
         return handler
 
-    def _create_capability_context(self, task: Task) -> CapabilityContext:
-        # Extract metadata and configuration
-        metadata = getattr(task, "metadata", {}) or {}
-
-        # Get services if available
-        try:
-            from agent.services import get_services
-
-            services = get_services()
-        except Exception:
-            services = None
-
-        # Get plugin configuration from agent config
-        plugin_config = self._get_plugin_config_for_task(task)
-
-        return CapabilityContext(
-            task=task,
-            config=plugin_config,
-            services=services,
-            metadata=metadata,
-        )
-
     def _get_plugin_config_for_task(self, task: Task) -> dict[str, Any]:
         """Get plugin configuration from agent config for a task.
 
@@ -189,28 +167,6 @@ class PluginAdapter:
         except Exception as e:
             logger.error(f"Failed to get function names for plugin '{plugin_id}': {e}")
             raise RuntimeError(f"Failed to retrieve function names for plugin '{plugin_id}': {e}") from e
-
-    def _create_capability_context_for_capability(self, task: Task, capability_id: str) -> CapabilityContext:
-        # Extract metadata
-        metadata = getattr(task, "metadata", {}) or {}
-
-        # Get services if available
-        try:
-            from agent.services import get_services
-
-            services = get_services()
-        except Exception:
-            services = None
-
-        # Get plugin configuration for the specific capability
-        plugin_config = self._get_plugin_config_for_capability(capability_id)
-
-        return CapabilityContext(
-            task=task,
-            config=plugin_config,
-            services=services,
-            metadata=metadata,
-        )
 
     def _get_plugin_config_for_capability(self, capability_id: str) -> dict[str, Any]:
         try:

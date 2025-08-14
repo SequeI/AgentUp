@@ -56,85 +56,6 @@ def _get_required_scopes_for_tool(tool_name: str, server_name: str, tool_scopes:
     return required_scopes
 
 
-async def initialize_mcp_integration(config: dict[str, Any]) -> None:
-    mcp_config = config.get("mcp", {})
-
-    if not mcp_config.get("enabled", False):
-        logger.info("MCP integration disabled in configuration")
-        return
-
-    logger.debug("Initializing MCP service")
-
-    # Get service registry
-    from agent.services import get_services
-
-    services = get_services()
-    client_initialized = False
-    server_initialized = False
-
-    # Initialize MCP client if enabled (using flattened config structure)
-    if mcp_config.get("client_enabled", False):
-        logger.debug("Initializing MCP client")
-        await _initialize_mcp_client(services, mcp_config)
-
-        # Check if client initialization was successful
-        mcp_client = services.get_mcp_client()
-        if mcp_client and mcp_client.is_initialized and len(mcp_client.list_servers()) > 0:
-            client_initialized = True
-
-    # Initialize MCP server if enabled (using flattened config structure)
-    if mcp_config.get("server_enabled", False):
-        logger.debug("Initializing MCP server")
-        await _initialize_mcp_server(services, mcp_config)
-
-        # Check if server initialization was successful
-        mcp_server = services.get_mcp_server()
-        if mcp_server:
-            server_initialized = True
-
-    # Report overall integration status
-    components_enabled = []
-    if mcp_config.get("client_enabled", False):
-        components_enabled.append(f"client ({'✓' if client_initialized else '✗'})")
-    if mcp_config.get("server_enabled", False):
-        components_enabled.append(f"server ({'✓' if server_initialized else '✗'})")
-
-    if components_enabled:
-        components_status = ", ".join(components_enabled)
-
-        # Create structured logging context
-        log_context = {
-            "client_enabled": mcp_config.get("client_enabled", False),
-            "client_initialized": client_initialized,
-            "server_enabled": mcp_config.get("server_enabled", False),
-            "server_initialized": server_initialized,
-        }
-
-        # Add client details if applicable
-        if mcp_config.get("client_enabled", False):
-            mcp_client = services.get_mcp_client()
-            if mcp_client:
-                log_context.update(
-                    {
-                        "connected_servers": len(mcp_client.list_servers()),
-                        "available_tools": len(mcp_client.list_tools()),
-                        "available_resources": len(mcp_client.list_resources()),
-                    }
-                )
-
-        if (not mcp_config.get("client_enabled", False) or client_initialized) and (
-            not mcp_config.get("server_enabled", False) or server_initialized
-        ):
-            logger.debug(f"MCP integration initialization complete: {components_status}", extra=log_context)
-        else:
-            logger.debug(f"MCP integration partially initialized: {components_status}", extra=log_context)
-    else:
-        logger.warning(
-            "MCP integration enabled but no components configured",
-            extra={"client_enabled": False, "server_enabled": False},
-        )
-
-
 async def _initialize_mcp_client(services, mcp_config: dict[str, Any]) -> None:
     """Initialize unified MCP client with support for all transport types."""
     servers = mcp_config.get("servers", [])
@@ -363,21 +284,3 @@ async def _start_mcp_server_background(mcp_server, port: int) -> None:
         await mcp_server.start_server(port=port)
     except Exception as e:
         logger.error(f"MCP server failed to start on port {port}: {e}")
-
-
-async def shutdown_mcp_integration() -> None:
-    from agent.services import get_services
-
-    services = get_services()
-
-    # Close MCP client
-    mcp_client = services.get_mcp_client()
-    if mcp_client:
-        await mcp_client.close()
-        logger.info("MCP client shut down")
-
-    # Close MCP server
-    mcp_server = services.get_mcp_server()
-    if mcp_server:
-        await mcp_server.close()
-        logger.info("MCP server shut down")

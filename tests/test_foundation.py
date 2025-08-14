@@ -3,10 +3,8 @@ from typing import Any
 
 import pytest
 
-from tests.utils.mock_services import MockLLMResponse, create_mock_services
 from tests.utils.test_helpers import (
     AgentConfigBuilder,
-    assert_config_has_service,
     build_minimal_config,
     build_standard_config,
     create_test_config,
@@ -84,14 +82,6 @@ class TestTestHelpers:
         assert config["features"] == ["services"]
         assert config["services"] == ["openai"]
 
-    def test_assert_config_has_service(self, sample_agent_config: dict[str, Any]):
-        # The sample config now has openai service with type="llm", so this should pass
-        assert_config_has_service(sample_agent_config, "openai", "llm")
-
-        # This should fail since the service doesn't exist
-        with pytest.raises(AssertionError):
-            assert_config_has_service(sample_agent_config, "nonexistent", "llm")
-
     def test_agent_config_builder(self):
         config = (
             AgentConfigBuilder()
@@ -123,79 +113,6 @@ class TestTestHelpers:
         assert standard["agent"]["name"] == "standard-test"
         assert standard["ai"]["enabled"] is True
         assert "openai" in standard["services"]
-
-
-class TestMockServices:
-    def test_mock_llm_response(self):
-        response = MockLLMResponse("Test response", {"total_tokens": 50})
-
-        assert response.content == "Test response"
-        assert response.usage["total_tokens"] == 50
-        assert str(response) == "Test response"
-        assert response.strip() == "Test response"
-
-    def test_mock_service_registry(self):
-        registry = create_mock_services()
-
-        # Test service registration
-        assert "openai" in registry.list_services()
-        assert "anthropic" in registry.list_services()
-        assert "ollama" in registry.list_services()
-        assert "valkey" in registry.list_services()
-
-        # Test service retrieval
-        openai_service = registry.get_llm("openai")
-        assert openai_service is not None
-
-        valkey_service = registry.get_cache("valkey")
-        assert valkey_service is not None
-
-    @pytest.mark.asyncio
-    async def test_mock_llm_services(self):
-        registry = create_mock_services()
-
-        # Test OpenAI service
-        openai = registry.get_llm("openai")
-        response = await openai.generate_response([{"role": "user", "content": "Hello"}])
-        assert isinstance(response, MockLLMResponse)
-        assert response.content == "Mock OpenAI response"
-
-        # Test Anthropic service
-        anthropic = registry.get_llm("anthropic")
-        response = await anthropic.generate_response([{"role": "user", "content": "Hello"}])
-        assert isinstance(response, MockLLMResponse)
-        assert response.content == "Mock Anthropic response"
-
-        # Test Ollama service
-        ollama = registry.get_llm("ollama")
-        response = await ollama.generate_response([{"role": "user", "content": "Hello"}])
-        assert isinstance(response, MockLLMResponse)
-        assert response.content == "Mock Ollama response"
-
-    @pytest.mark.asyncio
-    async def test_mock_valkey_service(self):
-        registry = create_mock_services()
-        valkey = registry.get_cache("valkey")
-
-        # Test basic operations
-        await valkey.set("test_key", "test_value")
-        value = await valkey.get("test_key")
-        assert value == "test_value"
-
-        # Test deletion
-        deleted = await valkey.delete("test_key")
-        assert deleted is True
-
-        value = await valkey.get("test_key")
-        assert value is None
-
-    def test_env_vars_fixture(self, set_env_vars):
-        import os
-
-        assert os.environ.get("OPENAI_API_KEY") == "test_openai_key"
-        assert os.environ.get("ANTHROPIC_API_KEY") == "test_anthropic_key"
-        assert os.environ.get("OLLAMA_BASE_URL") == "http://localhost:11434"
-        assert os.environ.get("VALKEY_URL") == "valkey://localhost:6379"
 
 
 # Template system removed - tests no longer needed

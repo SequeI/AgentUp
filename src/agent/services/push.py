@@ -1,5 +1,3 @@
-from typing import Any
-
 from .base import Service
 from .config import ConfigurationManager
 
@@ -54,49 +52,6 @@ class PushNotificationService(Service):
         client = httpx.AsyncClient()
         self._push_notifier = EnhancedPushNotifier(client=client)
         self.logger.debug("Using memory push notifier")
-
-    async def _setup_valkey_backend(self, push_config: dict[str, Any]) -> None:
-        try:
-            import httpx
-            import valkey.asyncio as valkey
-
-            from agent.push.notifier import ValkeyPushNotifier
-            from agent.services import get_services
-
-            # Get services and find cache service
-            services = get_services()
-            cache_service_name = None
-            services_config = self.config.get("services", {})
-
-            for service_name, service_config in services_config.items():
-                if service_config.get("type") == "cache":
-                    cache_service_name = service_name
-                    break
-
-            if cache_service_name:
-                valkey_service = services.get_cache(cache_service_name)
-                if valkey_service and hasattr(valkey_service, "url"):
-                    valkey_url = valkey_service.url
-                    valkey_client = valkey.from_url(valkey_url)
-
-                    # Create Valkey push notifier
-                    client = httpx.AsyncClient()
-                    self._push_notifier = ValkeyPushNotifier(
-                        client=client,
-                        valkey_client=valkey_client,
-                        key_prefix=push_config.get("key_prefix", "agentup:push:"),
-                        validate_urls=push_config.get("validate_urls", True),
-                    )
-                    self.logger.debug("Using Valkey push notifier")
-                    return
-
-            # Fallback to memory if Valkey setup fails
-            self.logger.warning("Valkey setup failed, falling back to memory push notifier")
-            await self._setup_memory_backend()
-
-        except Exception as e:
-            self.logger.warning(f"Failed to setup Valkey backend: {e}, using memory backend")
-            await self._setup_memory_backend()
 
     @property
     def push_notifier(self):

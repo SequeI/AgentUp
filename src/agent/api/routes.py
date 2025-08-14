@@ -93,28 +93,6 @@ async def health_check() -> JSONResponse:
     )
 
 
-@router.get("/services/health")
-async def services_health() -> JSONResponse:
-    try:
-        from agent.services import get_services
-
-        services = get_services()
-        health_results = await services.health_check_all()
-    except ImportError:
-        health_results = {"error": "Services module not available"}
-
-    all_healthy = all(result.get("status") == "healthy" for result in health_results.values())
-
-    return JSONResponse(
-        status_code=200 if all_healthy else 503,
-        content={
-            "status": "healthy" if all_healthy else "degraded",
-            "services": health_results,
-            "timestamp": datetime.now().isoformat(),
-        },
-    )
-
-
 # A2A AgentCard
 @router.get("/.well-known/agent-card.json", response_model=AgentCard)
 async def get_agent_discovery() -> AgentCard:

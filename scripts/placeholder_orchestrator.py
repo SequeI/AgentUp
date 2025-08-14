@@ -22,17 +22,12 @@ from fastapi.responses import JSONResponse
 from src.agent.services.model import AgentRegistrationPayload
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
-    title="Placeholder Orchestrator",
-    description="Simple orchestrator for testing agent registration",
-    version="1.0.0"
+    title="Placeholder Orchestrator", description="Simple orchestrator for testing agent registration", version="1.0.0"
 )
 
 # Store registrations for inspection
@@ -66,14 +61,14 @@ async def register_agent(payload: AgentRegistrationPayload) -> JSONResponse:
         "timestamp": timestamp,
         "payload": payload.model_dump(),
         "agent_card": None,
-        "fetch_status": "pending"
+        "fetch_status": "pending",
     }
 
     # Respond immediately to the agent
     response_data = {
         "status": "accepted",
         "message": f"Registration received for agent '{payload.name}'",
-        "timestamp": timestamp
+        "timestamp": timestamp,
     }
 
     # Append registration data first to get correct index
@@ -112,21 +107,21 @@ async def fetch_agent_card(agent_card_url: str, registration_index: int):
                 logger.info(f"Card Description: {agent_card.get('description')}")
 
                 # Log capabilities
-                capabilities = agent_card.get('capabilities', {})
+                capabilities = agent_card.get("capabilities", {})
                 logger.info(f"Streaming: {capabilities.get('streaming')}")
                 logger.info(f"Push Notifications: {capabilities.get('push_notifications')}")
                 logger.info(f"State Transition History: {capabilities.get('state_transition_history')}")
 
                 # Log skills
-                skills = agent_card.get('skills', [])
+                skills = agent_card.get("skills", [])
                 logger.info(f"Skills Count: {len(skills)}")
 
                 if skills:
                     logger.info("Available Skills:")
                     for skill in skills[:10]:  # Show first 10 skills
-                        skill_name = skill.get('name') or skill.get('id', 'Unknown')
-                        skill_desc = skill.get('description', 'No description')
-                        tags = skill.get('tags', [])
+                        skill_name = skill.get("name") or skill.get("id", "Unknown")
+                        skill_desc = skill.get("description", "No description")
+                        tags = skill.get("tags", [])
                         logger.info(f"  - {skill_name}: {skill_desc}")
                         if tags:
                             logger.info(f"    Tags: {tags}")
@@ -137,7 +132,7 @@ async def fetch_agent_card(agent_card_url: str, registration_index: int):
                     logger.info("No skills found in AgentCard")
 
                 # Log security schemes
-                security_schemes = agent_card.get('securitySchemes', {})
+                security_schemes = agent_card.get("securitySchemes", {})
                 if security_schemes:
                     logger.info(f"Security Schemes: {list(security_schemes.keys())}")
 
@@ -169,42 +164,45 @@ async def fetch_agent_card(agent_card_url: str, registration_index: int):
 @app.get("/registrations")
 async def list_registrations() -> JSONResponse:
     """List all received registrations."""
-    return JSONResponse(status_code=200, content={
-        "registrations": registrations,
-        "count": len(registrations)
-    })
+    return JSONResponse(status_code=200, content={"registrations": registrations, "count": len(registrations)})
 
 
 @app.get("/health")
 async def health_check() -> JSONResponse:
     """Health check endpoint."""
-    return JSONResponse(status_code=200, content={
-        "status": "healthy",
-        "service": "placeholder-orchestrator",
-        "registrations_received": len(registrations)
-    })
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "healthy",
+            "service": "placeholder-orchestrator",
+            "registrations_received": len(registrations),
+        },
+    )
 
 
 @app.get("/")
 async def root() -> JSONResponse:
     """Root endpoint with information."""
-    return JSONResponse(status_code=200, content={
-        "service": "Placeholder Orchestrator",
-        "purpose": "Testing agent registration",
-        "endpoints": {
-            "POST /agent/register": "Receive agent registration",
-            "GET /registrations": "List received registrations",
-            "GET /health": "Health check"
+    return JSONResponse(
+        status_code=200,
+        content={
+            "service": "Placeholder Orchestrator",
+            "purpose": "Testing agent registration",
+            "endpoints": {
+                "POST /agent/register": "Receive agent registration",
+                "GET /registrations": "List received registrations",
+                "GET /health": "Health check",
+            },
+            "registrations_received": len(registrations),
         },
-        "registrations_received": len(registrations)
-    })
+    )
 
 
 def main():
     """Run the placeholder orchestrator."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🎭 PLACEHOLDER ORCHESTRATOR")
-    print("="*60)
+    print("=" * 60)
     print("This server simulates an orchestrator for testing agent registration.")
     print("\n📋 What it does:")
     print("1. Receives agent registrations at POST /agent/register")
@@ -217,14 +215,9 @@ def main():
     print("  http://localhost:8050/health          (GET)")
     print("\n▶️  Starting server...")
     print("Press Ctrl+C to stop")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8050,
-        log_level="info"
-    )
+    uvicorn.run(app, host="0.0.0.0", port=8050, log_level="info")
 
 
 if __name__ == "__main__":

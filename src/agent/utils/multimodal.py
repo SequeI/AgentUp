@@ -8,17 +8,6 @@ logger = structlog.get_logger(__name__)
 
 class MultiModalHelper:
     @staticmethod
-    def get_multimodal_service():
-        try:
-            from agent.services.registry import get_services
-
-            services = get_services()
-            return services.get_multimodal()
-        except Exception as e:
-            logger.warning(f"Could not access multi-modal service: {e}")
-            return None
-
-    @staticmethod
     def has_images(task: Task) -> bool:
         if not task.history or not task.history[0].parts:
             return False

@@ -67,32 +67,6 @@ def load_test_config(file_path: Path) -> dict[str, Any]:
         return yaml.safe_load(f)
 
 
-def assert_config_has_service(config: dict[str, Any], service_name: str, service_type: str):
-    assert "services" in config, "Configuration missing services section"
-    assert service_name in config["services"], f"Service '{service_name}' not found in configuration"
-    assert config["services"][service_name]["type"] == service_type, (
-        f"Service '{service_name}' has wrong type. Expected '{service_type}', got '{config['services'][service_name]['type']}'"
-    )
-
-
-def assert_config_has_llm_service(config: dict[str, Any], service_name: str, provider: str, model: str):
-    assert_config_has_service(config, service_name, "llm")
-    service = config["services"][service_name]
-    assert service["provider"] == provider, (
-        f"LLM service provider mismatch. Expected '{provider}', got '{service['provider']}'"
-    )
-    assert service["model"] == model, f"LLM service model mismatch. Expected '{model}', got '{service['model']}'"
-
-    # Check AI section matches
-    if "ai" in config:
-        assert config["ai"]["llm_service"] == service_name, (
-            f"AI section llm_service mismatch. Expected '{service_name}', got '{config['ai']['llm_service']}'"
-        )
-        assert config["ai"]["model"] == model, (
-            f"AI section model mismatch. Expected '{model}', got '{config['ai']['model']}'"
-        )
-
-
 def assert_files_exist(base_path: Path, expected_files: list[str]):
     for file_path in expected_files:
         full_path = base_path / file_path
