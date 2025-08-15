@@ -12,6 +12,7 @@ Usage:
     python scripts/release.py --version 0.6.0 --dry-run
     python scripts/release.py --version 0.6.0 --confirm
 """
+
 import argparse
 import re
 import subprocess
@@ -29,7 +30,6 @@ src_dir = project_root / "src"
 sys.path.insert(0, str(src_dir))
 
 
-
 logger = structlog.get_logger(__name__)
 
 
@@ -43,7 +43,7 @@ class ReleaseManager:
     def get_current_version(self) -> str:
         """Get the current version from pyproject.toml."""
         try:
-            content = self.pyproject_path.read_text(encoding='utf-8')
+            content = self.pyproject_path.read_text(encoding="utf-8")
             match = re.search(r'^version = ["\']([^"\']+)["\']', content, re.MULTILINE)
             if match:
                 return match.group(1)
@@ -55,24 +55,23 @@ class ReleaseManager:
     def update_pyproject_version(self, new_version: str) -> bool:
         """Update version in pyproject.toml."""
         try:
-            content = self.pyproject_path.read_text(encoding='utf-8')
+            content = self.pyproject_path.read_text(encoding="utf-8")
             old_content = content
 
             # Update version line
             version_pattern = r'^(version = )["\']([^"\']+)["\']'
-            new_content = re.sub(
-                version_pattern,
-                f'\\1"{new_version}"',
-                content,
-                flags=re.MULTILINE
-            )
+            new_content = re.sub(version_pattern, f'\\1"{new_version}"', content, flags=re.MULTILINE)
 
             if new_content == old_content:
                 logger.warning("No version found to update in pyproject.toml")
                 return False
 
-            self.pyproject_path.write_text(new_content, encoding='utf-8')
-            logger.info("Updated pyproject.toml", old_version=re.search(r'^version = ["\']([^"\']+)["\']', old_content, re.MULTILINE).group(1), new_version=new_version)
+            self.pyproject_path.write_text(new_content, encoding="utf-8")
+            logger.info(
+                "Updated pyproject.toml",
+                old_version=re.search(r'^version = ["\']([^"\']+)["\']', old_content, re.MULTILINE).group(1),
+                new_version=new_version,
+            )
             return True
 
         except Exception as e:
@@ -103,17 +102,16 @@ class ReleaseManager:
         checks = [
             ["uv", "run", "ruff", "check", "--fix", "src/", "tests/"],
             ["uv", "run", "ruff", "format", "src/", "tests/"],
-            ["uv", "run", "bandit", "-r", "src/", "-ll"]
+            ["uv", "run", "bandit", "-r", "src/", "-ll"],
         ]
 
         for check in checks:
             try:
                 result = subprocess.run(check, capture_output=True, text=True, cwd=self.project_root)
                 if result.returncode != 0:
-                    logger.error("Quality check failed",
-                                command=" ".join(check),
-                                stdout=result.stdout,
-                                stderr=result.stderr)
+                    logger.error(
+                        "Quality check failed", command=" ".join(check), stdout=result.stdout, stderr=result.stderr
+                    )
                     return False
                 logger.debug("Quality check passed", command=" ".join(check))
             except Exception as e:
@@ -128,11 +126,22 @@ class ReleaseManager:
         logger.info("Running test suite")
 
         try:
-            result = subprocess.run([
-                "uv", "run", "pytest",
-                "tests/test_*.py", "tests/test_core/", "tests/test_cli/",
-                "-v", "-m", "not integration and not e2e and not performance"
-            ], capture_output=True, text=True, cwd=self.project_root)
+            result = subprocess.run(
+                [
+                    "uv",
+                    "run",
+                    "pytest",
+                    "tests/test_*.py",
+                    "tests/test_core/",
+                    "tests/test_cli/",
+                    "-v",
+                    "-m",
+                    "not integration and not e2e and not performance",
+                ],
+                capture_output=True,
+                text=True,
+                cwd=self.project_root,
+            )
 
             if result.returncode != 0:
                 logger.error("Tests failed", stdout=result.stdout, stderr=result.stderr)
@@ -156,8 +165,7 @@ class ReleaseManager:
         try:
             # Check if tag already exists
             result = subprocess.run(
-                ["git", "tag", "-l", tag_name],
-                capture_output=True, text=True, cwd=self.project_root
+                ["git", "tag", "-l", tag_name], capture_output=True, text=True, cwd=self.project_root
             )
 
             if result.stdout.strip():
@@ -165,14 +173,15 @@ class ReleaseManager:
                 return False
 
             # Create the tag
-            result = subprocess.run([
-                "git", "tag", "-a", tag_name,
-                "-m", f"Release version {version}"
-            ], capture_output=True, text=True, cwd=self.project_root)
+            result = subprocess.run(
+                ["git", "tag", "-a", tag_name, "-m", f"Release version {version}"],
+                capture_output=True,
+                text=True,
+                cwd=self.project_root,
+            )
 
             if result.returncode != 0:
-                logger.error("Failed to create git tag",
-                           tag=tag_name, stderr=result.stderr)
+                logger.error("Failed to create git tag", tag=tag_name, stderr=result.stderr)
                 return False
 
             logger.info("Created git tag", tag=tag_name)
@@ -186,8 +195,7 @@ class ReleaseManager:
         """Check if git working directory is clean."""
         try:
             result = subprocess.run(
-                ["git", "status", "--porcelain"],
-                capture_output=True, text=True, cwd=self.project_root
+                ["git", "status", "--porcelain"], capture_output=True, text=True, cwd=self.project_root
             )
 
             if result.stdout.strip():
@@ -201,11 +209,11 @@ class ReleaseManager:
             logger.error("Failed to check git status", error=str(e))
             return False
 
-    def prepare_release(self, new_version: str, dry_run: bool = False,
-                       skip_tests: bool = False, skip_quality: bool = False) -> bool:
+    def prepare_release(
+        self, new_version: str, dry_run: bool = False, skip_tests: bool = False, skip_quality: bool = False
+    ) -> bool:
         """Prepare a release with the specified version."""
-        logger.info("Starting release preparation",
-                   version=new_version, dry_run=dry_run)
+        logger.info("Starting release preparation", version=new_version, dry_run=dry_run)
 
         current_version = self.get_current_version()
         logger.info("Current version", version=current_version)
@@ -215,7 +223,7 @@ class ReleaseManager:
             return False
 
         # Validate version format
-        if not re.match(r'^\d+\.\d+\.\d+$', new_version):
+        if not re.match(r"^\d+\.\d+\.\d+$", new_version):
             logger.error("Invalid version format (must be x.y.z)", version=new_version)
             return False
 
@@ -230,8 +238,7 @@ class ReleaseManager:
             if not self.update_pyproject_version(new_version):
                 return False
         else:
-            logger.info("Would update pyproject.toml",
-                       old_version=current_version, new_version=new_version)
+            logger.info("Would update pyproject.toml", old_version=current_version, new_version=new_version)
 
         # Step 2: Sync all config files
         if not dry_run:
@@ -290,6 +297,7 @@ def main():
 
     # Configure logging
     import logging
+
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
     structlog.configure(
@@ -297,7 +305,7 @@ def main():
             structlog.stdlib.filter_by_level,
             structlog.stdlib.add_logger_name,
             structlog.stdlib.add_log_level,
-            structlog.dev.ConsoleRenderer()
+            structlog.dev.ConsoleRenderer(),
         ],
         wrapper_class=structlog.stdlib.BoundLogger,
         logger_factory=structlog.stdlib.LoggerFactory(),
@@ -313,10 +321,7 @@ def main():
 
     try:
         success = release_manager.prepare_release(
-            args.version,
-            dry_run=args.dry_run,
-            skip_tests=args.skip_tests,
-            skip_quality=args.skip_quality
+            args.version, dry_run=args.dry_run, skip_tests=args.skip_tests, skip_quality=args.skip_quality
         )
 
         if success:

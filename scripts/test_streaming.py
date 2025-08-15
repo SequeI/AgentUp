@@ -17,16 +17,14 @@ import structlog
 # Set up logging
 logger = structlog.get_logger(__name__)
 
+
 class StreamingTestClient:
-
-
     def __init__(self, base_url: str, auth_token: str | None = None):
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url.rstrip("/")
         self.auth_token = auth_token
         self.session_timeout = 30.0
 
     def _get_headers(self) -> dict[str, str]:
-
         headers = {
             "Content-Type": "application/json",
             "Accept": "text/event-stream",
@@ -39,9 +37,8 @@ class StreamingTestClient:
         return headers
 
     def _create_stream_request(self, message_text: str, message_id: str | None = None) -> dict:
-
         if not message_id:
-            message_id = f"msg-{int(time.time()*1000)}"
+            message_id = f"msg-{int(time.time() * 1000)}"
 
         return {
             "jsonrpc": "2.0",
@@ -51,14 +48,13 @@ class StreamingTestClient:
                     "role": "user",
                     "parts": [{"kind": "text", "text": message_text}],
                     "message_id": message_id,
-                    "kind": "message"
+                    "kind": "message",
                 }
             },
-            "id": f"req-{int(time.time()*1000)}"
+            "id": f"req-{int(time.time() * 1000)}",
         }
 
     async def test_stream_endpoint(self, message: str, show_raw: bool = False) -> bool:
-
         print(f"Testing streaming endpoint: {self.base_url}/")
         print(f"Message: {message}")
         print("Starting stream...\n")
@@ -73,12 +69,8 @@ class StreamingTestClient:
         try:
             async with httpx.AsyncClient(timeout=self.session_timeout) as client:
                 async with client.stream(
-                    "POST",
-                    f"{self.base_url}/",
-                    headers=self._get_headers(),
-                    json=request_data
+                    "POST", f"{self.base_url}/", headers=self._get_headers(), json=request_data
                 ) as response:
-
                     print(f"Response Status: {response.status_code}")
                     print(f"Content-Type: {response.headers.get('content-type', 'unknown')}")
                     print()
@@ -126,7 +118,6 @@ class StreamingTestClient:
             return False
 
     async def _process_stream_event(self, event_data: dict, event_num: int, show_raw: bool = False) -> None:
-
         print(f"Event {event_num}:")
 
         if show_raw:
@@ -189,7 +180,6 @@ class StreamingTestClient:
         print()
 
     async def test_authentication(self) -> bool:
-
         print("🔐 Testing authentication...")
 
         try:
@@ -198,7 +188,7 @@ class StreamingTestClient:
                 response = await client.post(
                     f"{self.base_url}/",
                     headers={"Content-Type": "application/json"},
-                    json={"jsonrpc": "2.0", "method": "status", "id": 1}
+                    json={"jsonrpc": "2.0", "method": "status", "id": 1},
                 )
 
                 if response.status_code == 401:
@@ -212,7 +202,7 @@ class StreamingTestClient:
                     auth_response = await client.post(
                         f"{self.base_url}/",
                         headers=self._get_headers(),
-                        json={"jsonrpc": "2.0", "method": "status", "id": 1}
+                        json={"jsonrpc": "2.0", "method": "status", "id": 1},
                     )
 
                     if auth_response.status_code == 200:
@@ -234,7 +224,6 @@ class StreamingTestClient:
             return False
 
     async def run_comprehensive_test(self, messages: list[str], show_raw: bool = False) -> None:
-
         print("🧪 Starting Comprehensive A2A Streaming Tests")
         print("=" * 50)
         print()
@@ -276,7 +265,6 @@ class StreamingTestClient:
 
 
 async def main():
-
     parser = argparse.ArgumentParser(
         description="Test A2A streaming endpoints",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -296,49 +284,28 @@ Examples:
 
   # Multiple test messages
   python test_streaming.py --url http://localhost:8000 --message "Hello" --message "How are you?" --message "Tell me about AI"
-        """
+        """,
     )
 
     parser.add_argument(
-        "--url",
-        default="http://localhost:8000",
-        help="Base URL of the server (default: http://localhost:8000)"
+        "--url", default="http://localhost:8000", help="Base URL of the server (default: http://localhost:8000)"
     )
 
-    parser.add_argument(
-        "--token",
-        help="Authentication token (Bearer token)"
-    )
+    parser.add_argument("--token", help="Authentication token (Bearer token)")
 
     parser.add_argument(
-        "--message",
-        action="append",
-        default=[],
-        help="Message to send (can be specified multiple times)"
+        "--message", action="append", default=[], help="Message to send (can be specified multiple times)"
     )
 
-    parser.add_argument(
-        "--raw",
-        action="store_true",
-        help="Show raw SSE data and JSON"
-    )
+    parser.add_argument("--raw", action="store_true", help="Show raw SSE data and JSON")
 
-    parser.add_argument(
-        "--timeout",
-        type=float,
-        default=30.0,
-        help="Request timeout in seconds (default: 30)"
-    )
+    parser.add_argument("--timeout", type=float, default=30.0, help="Request timeout in seconds (default: 30)")
 
     args = parser.parse_args()
 
     # Default messages if none provided
     if not args.message:
-        args.message = [
-            "Hello, this is a streaming test",
-            "Can you count from 1 to 5?",
-            "Tell me a short joke"
-        ]
+        args.message = ["Hello, this is a streaming test", "Can you count from 1 to 5?", "Tell me a short joke"]
 
     print(f"Target URL: {args.url}")
     print(f"Auth Token: {'Provided' if args.token else 'None'}")
