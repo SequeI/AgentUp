@@ -545,7 +545,7 @@ class TestCliOutput:
         assert "Next steps:" in result.output
         assert "cd output-test" in result.output  # Directory name preserves hyphens
         assert "uv sync" in result.output
-        assert "agentup agent serve" in result.output
+        assert "agentup run" in result.output
 
     def test_cli_cancel_output(self, runner, mock_questionary):
         mock_questionary.text.return_value.ask.return_value = None  # Cancel

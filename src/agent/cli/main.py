@@ -64,6 +64,8 @@ def setup_cli_logging():
 )
 @click.version_option(version=get_version(), prog_name="agentup")
 def cli():
+    # Set up logging for all CLI commands
+    setup_cli_logging()
     """Main entry point for the AgentUp CLI."""
     pass
 
@@ -77,5 +79,4 @@ cli.add_command(plugin)
 
 
 if __name__ == "__main__":
-    setup_cli_logging()
     cli()
