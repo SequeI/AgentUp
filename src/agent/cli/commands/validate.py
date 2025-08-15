@@ -15,7 +15,7 @@ import yaml
 @click.option("--check-handlers", "-h", is_flag=True, help="Check handler implementations")
 @click.option("--strict", "-s", is_flag=True, help="Strict validation (fail on warnings)")
 def validate(config: str, check_env: bool, check_handlers: bool, strict: bool):
-    """Validate your agent configuration.
+    """Validate your agent configuration and setup.
 
     Checks for:
     - Valid YAML syntax

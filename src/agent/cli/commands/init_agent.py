@@ -57,24 +57,17 @@ custom_style = Style(
 @click.option("--output-dir", "-o", type=click.Path(), help="Output directory")
 @click.option("--config", "-c", type=click.Path(exists=True), help="Use existing agentup.yml as template")
 @click.option("--no-git", is_flag=True, help="Skip git repository initialization")
-def create_agent(
+def init_agent(
     name: str | None,
     quick: bool,
     output_dir: str | None,
     config: str | None,
     no_git: bool,
 ):
-    """Create a new Agent project.
+    """Initializes a new Agent project.
 
     By default, this will initialize a git repository in the project directory
     with an initial commit. Use --no-git to skip git initialization.
-
-    Examples:
-        agentup agent create                    # Interactive mode with git init
-        agentup agent create my-agent           # Interactive with name
-        agentup agent create --quick my-agent   # Quick setup with minimal features
-        agentup agent create --no-git my-agent  # Skip git initialization
-        agentup agent create --quick my-chatbot
     """
     click.echo(click.style("-" * 40, fg="white", dim=True))
     click.echo(click.style("Create your AI agent:", fg="white", dim=True))

@@ -121,7 +121,7 @@ pip install agentup
 Generate a new agent project with interactive configuration:
 
 ```bash
-agentup agent create
+agentup init
 ```
 
 Choose from available options and configure your agent's capabilities, authentication, and AI provider settings through the interactive prompts.
@@ -131,7 +131,7 @@ Choose from available options and configure your agent's capabilities, authentic
 Launch the development server and begin building:
 
 ```bash
-agentup agent serve
+agentup run
 ```
 
 Your agent is now running at `http://localhost:8000` with a full A2A-compliant 

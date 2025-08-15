@@ -12,7 +12,6 @@ async def main():
     ):
         # Create a session using the client streams
         async with ClientSession(read_stream, write_stream) as session:
-
             await session.initialize()
             # Call a tool
             tool_result = await session.call_tool("echo", {"message": "hello"})
@@ -22,8 +21,10 @@ async def main():
             resources = await session.list_resources()
             print(f"Available resources: {resources}")
 
+
 if __name__ == "__main__":
     import asyncio
+
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
