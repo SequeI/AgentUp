@@ -13,6 +13,7 @@ try:
     import httpx
     from mcp import ClientSession
     from mcp.client.streamable_http import streamablehttp_client
+
     print("✓ MCP SDK available")
 except ImportError as e:
     print(f"✗ MCP SDK not available: {e}")
@@ -21,7 +22,6 @@ except ImportError as e:
 
 
 async def check_server_health(base_url: str) -> bool:
-
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             # Test basic server connectivity
@@ -50,7 +50,6 @@ async def check_server_health(base_url: str) -> bool:
 
 
 async def check_mcp_endpoint(server_url: str) -> bool:
-
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             # Try a basic POST to the MCP endpoint to see if it exists
@@ -58,17 +57,10 @@ async def check_mcp_endpoint(server_url: str) -> bool:
                 "jsonrpc": "2.0",
                 "method": "initialize",
                 "id": "test-123",
-                "params": {
-                    "capabilities": {},
-                    "clientInfo": {"name": "test-client", "version": "1.0.0"}
-                }
+                "params": {"capabilities": {}, "clientInfo": {"name": "test-client", "version": "1.0.0"}},
             }
 
-            response = await client.post(
-                server_url,
-                json=test_payload,
-                headers={"Content-Type": "application/json"}
-            )
+            response = await client.post(server_url, json=test_payload, headers={"Content-Type": "application/json"})
 
             if response.status_code == 200:
                 print(f"✓ MCP endpoint responding (status: {response.status_code})")
@@ -77,9 +69,9 @@ async def check_mcp_endpoint(server_url: str) -> bool:
                 try:
                     response_json = response.json()
                     print(f"Response structure: {list(response_json.get('result', {}).keys())}")
-                    if 'result' in response_json:
-                        result = response_json['result']
-                        if 'protocolVersion' in result:
+                    if "result" in response_json:
+                        result = response_json["result"]
+                        if "protocolVersion" in result:
                             print(f"✓ protocolVersion found: {result['protocolVersion']}")
                         else:
                             print(f"✗ protocolVersion missing! Response: {result}")
@@ -98,8 +90,6 @@ async def check_mcp_endpoint(server_url: str) -> bool:
 
 
 async def test_mcp_streamable_http():
-
-
     base_url = "http://localhost:8001"
     server_url = f"{base_url}/mcp"
     print(f"🔗 Testing MCP Streamable HTTP at: {server_url}")
@@ -144,7 +134,7 @@ async def test_mcp_streamable_http():
                 # Test 1: List available tools
                 print("\nListing available tools...")
                 tools_result = await session.list_tools()
-                tools = tools_result.tools if hasattr(tools_result, 'tools') else []
+                tools = tools_result.tools if hasattr(tools_result, "tools") else []
                 print(f"Found {len(tools)} tools:")
                 for tool in tools:
                     print(f"  • {tool.name}: {tool.description}")
@@ -159,7 +149,7 @@ async def test_mcp_streamable_http():
                 print("\n Listing available resources...")
                 try:
                     resources_result = await session.list_resources()
-                    resources = resources_result.resources if hasattr(resources_result, 'resources') else []
+                    resources = resources_result.resources if hasattr(resources_result, "resources") else []
                     print(f"Found {len(resources)} resources:")
                     for resource in resources:
                         print(f"  • {resource.name}: {resource.uri}")
@@ -205,6 +195,7 @@ async def test_mcp_streamable_http():
         print("  4. Ensure MCP server configuration is correct")
 
         import traceback
+
         print("\n🐛 Full traceback:")
         traceback.print_exc()
 
