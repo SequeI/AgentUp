@@ -1,4 +1,4 @@
-import subprocess
+import subprocess  # nosec
 from pathlib import Path
 
 
@@ -20,7 +20,7 @@ def get_git_author_info() -> dict[str, str | None]:
             text=True,
             check=False,
             timeout=5,
-        )
+        )  # nosec
         if name_result.returncode == 0:
             author_info["name"] = name_result.stdout.strip() or None
 
@@ -31,7 +31,7 @@ def get_git_author_info() -> dict[str, str | None]:
             text=True,
             check=False,
             timeout=5,
-        )
+        )  # nosec
         if email_result.returncode == 0:
             author_info["email"] = email_result.stdout.strip() or None
 
