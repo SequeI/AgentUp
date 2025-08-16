@@ -116,7 +116,7 @@ def _get_version_source() -> str:
         return "error"
 
 
-def to_version_case(version: str) -> str:
+def to_version_case(version: str) -> str | None:
     """Normalizes a version string into a standard format like v1.0.0."""
     if not version:
         return None
