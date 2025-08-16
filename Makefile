@@ -131,11 +131,11 @@ pre-commit: ## Run pre-commit hooks
 
 # Agent creation and testing
 agent-create: ## Create a test agent (interactive)
-	uv run agentup agent create --no-git
+	uv run agentup init --no-git
 
 agent-create-minimal: ## Create minimal test agent
 	@echo "Creating minimal test agent..."
-	uv run agentup agent create \
+	uv run agentup init \
 		--quick test-minimal \
 		--no-git \
 		--output-dir ./test-agents/minimal
@@ -143,7 +143,7 @@ agent-create-minimal: ## Create minimal test agent
 
 agent-create-advanced: ## Create advanced test agent
 	@echo "Creating advanced test agent..."
-	uv run agentup agent create \
+	uv run agentup init \
 		--quick test-advanced \
 		--no-git \
 		--output-dir ./test-agents/advanced
