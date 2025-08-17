@@ -68,7 +68,7 @@ preventing unauthorized Tools / MCP access, ensuring data protection. Security i
 
 **Configuration-Driven Architecture**: Define complex agent behaviors, data sources, and workflows through declarative configuration. Skip weeks of boilerplate and framework wrestling. Your agents become portable, versionable assets with clear contracts defining their capabilities and interactions.
 
-**Extensible Plugin Ecosystem**: Leverage community plugins or build custom extensions that automatically inherit AgentUp's middleware, security, and operational features. Independent plugin versioning integrates seamlessly with existing CI/CD pipelines, ensuring core platform updates don't break your implementations.
+**Extensible Ecosystem for customizations**: Need RAG, image processing, custom API logic? No problem. Leverage community plugins or build custom extensions that automatically inherit AgentUp's middleware, security, and operational features. Independent plugin versioning integrates seamlessly with existing CI/CD pipelines, ensuring core platform updates don't break your implementations. With AgentUp you get the immediate feedback of a running agent, along with the extensibility of a framework.
 
 **Agent-to-Agent Discovery**: Automatic A2A Agent Card generation exposes your agent's capabilities to other agents in the ecosystem, enabling seamless inter-agent communication and orchestration.
 
