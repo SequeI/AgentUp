@@ -65,10 +65,10 @@ AgentUp is built by engineers who've created open-source solutions powering miss
 
 AgentUp delivers enterprise-grade agent infrastructure built for professional developers who demand both power and simplicity.
 
-**Developer-First Operations**: Built by developers who understand real-world constraints. Each agent lives in its own repository with a single AgentUp configuration file. Clone, run `agentup run`, and all dependencies resolve during initialization—no environment setup headaches.
+**Developer-First Operations**: Built by developers who understand real-world constraints. Each agent lives in its own repository with a single AgentUp configuration file. Clone, run `agentup run`, and all dependencies resolve during initialization - no more environment setup headaches.
 
 **Secure by Design**: Fine-grained, scope-based access control with OAuth2, JWT, and API key authentication built-in,
-preventing unauthorized Tools / MCP access, ensuring data protection. Security isn't an afterthought—it's foundational architecture in AgentUp.
+preventing unauthorized Tools / MCP access, ensuring data protection. Security isn't an afterthought - it's foundational architecture in AgentUp.
 
 **Configuration-Driven Architecture**: Define complex agent behaviors, data sources, and workflows through declarative configuration. Skip weeks of boilerplate and framework wrestling. Your agents become portable, versionable assets with clear contracts defining their capabilities and interactions.
 
