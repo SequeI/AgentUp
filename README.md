@@ -1,6 +1,6 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/RedDotRocket/AgentUp/main/assets/logo.png" alt="AgentUp Logo" width="400"/>
-  <h3>The Operating System for AI Agents</h3>
+  <h3>Bringing to AI Agents, what Docker brought to containers</h3>
   <br/>
 
   <!-- CTA Buttons -->
@@ -44,7 +44,6 @@
         <br/>
         <sub>🏃‍♂️ We are moving fast, things will break!</sub>
         <br/>
-        <sub>Contributions are welcome! Grab a <a href="https://github.com/RedDotRocket/AgentUp/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">good-first-issue</a> and dive in</sub>
       </td>
     </tr>
   </table>
@@ -54,57 +53,35 @@
 
 ## Why AgentUp?
 
-**Operating System for AI Agents** - Built on operating system principles, AgentUp provides a robust foundation for creating AI agents through its highly extensible architecture. Its pluggable design lets you customize and add functionality without touching core code - giving you the flexibility to build exactly what you need while maintaining system stability, and ensuring your agents are portable and maintainable.
+The AI agent ecosystem is full of flashy demos and "one-off" scripts. The problem? Most break down when you need real-world reliability. They lack the engineering principles required for production: **security, scalability, extensibility, and manageability.** The result is brittle systems you can't trust with sensitive data or complex workflows.
 
-**Configuration Over Code** - Define complex agent behaviors, data sources, and workflows through rich configuration. No weeks writing boilerplate, figuring out framework internals. Your agents are portable, versionable, and maintainable, with contracts that define their capabilities and interactions.
+**AgentUp** brings to AI agents what Docker brought to containers—standardization, portability, and production-grade reliability.
 
-**Security by Design** - Tools / MCP servers (Plugins!) are protected with AgentUp's fine-grained scope-based access control system. Fine-grained permissions ensure your plugins and MCP servers only access what they need, when they need it and only if granted so by you (`file:write`, `api:read`, `db:write`). Built-in authentication for OAuth2, JWT, and API keys integrates with your existing identity providers.
+Just as Docker made applications immutable, reproducible, and ops-friendly, AgentUp does the same for AI agents. Define your agent with configuration, and it runs consistently anywhere. Share agents with teammates who can clone and run them instantly. Deploy to production with the same confidence you'd deploy a containerized application.
 
-**Plugin Ecosystem** - Extend functionality through a growing ecosystem of community plugins, or build your own. Plugins inherit all of AgentUp's middleware, security, and operational features automatically. Version plugins independently and integrate seamlessly with your existing CI/CD pipeline.
+AgentUp is built by engineers who've created open-source solutions powering mission-critical systems at **Google, GitHub, Nvidia, Red Hat, Shopify and more**. We understand what it takes to build stable, secure, scalable software—and we're applying those same principles to make AI agents truly production-ready.
+Stop rebuilding agent infrastructure from scratch. Start building agents that scale.
+
+## AgentUp: Developer-First Agent Framework
+
+AgentUp delivers enterprise-grade agent infrastructure built for professional developers who demand both power and simplicity.
+
+**Developer-First Operations**: Built by developers who understand real-world constraints. Each agent lives in its own repository with a single AgentUp configuration file. Clone, run `agentup run`, and all dependencies resolve during initialization—no environment setup headaches.
+
+**Secure by Design**: Fine-grained, scope-based access control with OAuth2, JWT, and API key authentication built-in,
+preventing unauthorized Tools / MCP access, ensuring data protection. Security isn't an afterthought—it's foundational architecture in AgentUp.
+
+**Configuration-Driven Architecture**: Define complex agent behaviors, data sources, and workflows through declarative configuration. Skip weeks of boilerplate and framework wrestling. Your agents become portable, versionable assets with clear contracts defining their capabilities and interactions.
+
+**Extensible Plugin Ecosystem**: Leverage community plugins or build custom extensions that automatically inherit AgentUp's middleware, security, and operational features. Independent plugin versioning integrates seamlessly with existing CI/CD pipelines, ensuring core platform updates don't break your implementations.
+
+**Agent-to-Agent Discovery**: Automatic A2A Agent Card generation exposes your agent's capabilities to other agents in the ecosystem, enabling seamless inter-agent communication and orchestration.
+
+**Asynchronous Task Architecture**: Message-driven task management supports long-running operations with callback-based notifications. Perfect for research agents, data processing workflows, and event-driven automation. State persistence across Redis and other backends ensures reliability at scale.
 
 ## Advanced Architecture with Production Aspirations
 
-AgentUp is designed with production deployment in mind, featuring architecture patterns that will scale as the framework matures. While currently in alpha, the core security and extensibility features provide a solid foundation for building serious AI agents.
-
-### Advanced Security Model
-
-**Scope-Based Access Control** - AgentUp's permission system controls exactly what each plugin, MCP server, and capability can access. Create hierarchical scope policies that scale from simple setups to complex requirements. Built-in OAuth2, JWT, and API key authentication provide flexible integration options.
-
-**Comprehensive Audit Logging** - Every action is logged with sanitized audit trails. Security events are automatically classified by risk level, making it easy to monitor agent behavior. Configurable data retention policies support various compliance requirements.
-
-**Security-First Design** - AgentUp follows security-first principles with fail-closed access control, input sanitization, and comprehensive error handling. The framework is designed to protect against privilege escalation, injection attacks, and information disclosure.
-
-### Scalable Plugin System
-
-**Zero-Friction Development** - Create custom capabilities without touching core code. Plugins automatically inherit AgentUp's middleware stack, security model, and operational features. Use your existing package manager (pip, uv, poetry) for dependency management and distribution.
-
-**Community Ecosystem** - Discover and install plugins through the [AgentUp Plugin Registry](https://agentup.dev) or publish your own. Browse plugins for system tools, image processing, data analysis, and specialized capabilities. Install using your preferred Python tools (pip, uv, poetry) or publish with twine. Each plugin is independently versioned and can be updated without affecting other components. Every plugin published to the registry is automatically scanned for security vulnerabilities, insecure coding patterns and malware - ensuring a safe ecosystem.
-
-**MCP Integration** - Leverage the expanding Model Context Protocol ecosystem. All MCP servers are automatically secured through AgentUp's scope system, and you can expose your own Agent capabilities as MCP streamable endpoints for other systems to consume!
-
-### Flexible Infrastructure
-
-**Multi-Provider AI Support** - Connect to OpenAI, Anthropic, or local models through OpenAI-compatible APIs (Ollama). Switch providers without code changes, and use multiple providers simultaneously for different capabilities.
-
-**Configurable State Management** - Choose your storage backend to match your needs. File system / Memory for development, databases for structured queries, or Redis/Valkey for high-performance distributed caching. Built-in conversation tracking with configurable TTL and history management.
-
-**Agent-to-Agent Communication** - Build multi-agent systems through A2A (Agent-to-Agent) protocol compliance. Agents can discover and communicate with each other securely, enabling complex workflows and distributed processing. AgentUp
-is built on the A2A (Agent-to-Agent) specification, and the maintainer is actively involved in the A2A community.
-
-### Developer Experience
-
-**CLI-First Workflow** - Everything you need is available through the command line. Create new agents from templates, start development servers, manage plugins, and deploy to production using intuitive commands that integrate with your existing toolchain.
-
-**Configuration as Code** - Agent behavior, data sources, and workflows are defined through version-controlled YAML configuration. No framework internals to learn, no boilerplate to maintain. Your agents are portable across environments and teams.
-
-**Real-Time Operations** - Built-in support for streaming responses, asynchronous operations, and push notifications. Monitor agent performance and behavior through comprehensive logging and configurable metrics collection.
-
-### Current Integrations
-
-AgentUp Agents are able to present themselves as Tools to different frameworks, which brings the advantage of ensuring all Tool usage
-is consistent and secure, tracked and traceable.
-
-- [CrewAI](https://crewai.com), see [documentation](docs/integrations/crewai.md) for details.
+AgentUp is designed with production deployment in mind, featuring architecture patterns that will scale as the framework matures. While currently in alpha, the core security and extensibility features already provide a solid foundation for building serious AI agents.
 
 ## Get Started in Minutes
 
@@ -126,7 +103,7 @@ agentup init
 
 Choose from available options and configure your agent's capabilities, authentication, and AI provider settings through the interactive prompts.
 
-### Start Development
+### Start your Agent
 
 Launch the development server and begin building:
 
@@ -134,12 +111,18 @@ Launch the development server and begin building:
 agentup run
 ```
 
-Your agent is now running at `http://localhost:8000` with a full A2A-compliant 
-JSON RPC API, security middleware, and all configured capabilities available.
+Your agent is now running at `http://localhost:8000` with a full A2A-compliant  JSON RPC API, security middleware, and all configured capabilities available.
 
 ### Next Steps
 
 Explore the comprehensive [documentation](https://docs.agentup.dev) to learn about advanced features, tutorials, API references, and real-world examples to get you building agents quickly.
+
+### Current Integrations
+
+AgentUp Agents are able to present themselves as Tools to different frameworks, which brings the advantage of ensuring all Tool usage
+is consistent and secure, tracked and traceable.
+
+- [CrewAI](https://crewai.com), see [documentation](docs/integrations/crewai.md) for details.
 
 ## Open Source and Community-Driven
 
