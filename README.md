@@ -53,11 +53,7 @@
 
 ## Why AgentUp?
 
-The AI agent ecosystem is full of flashy demos and "one-off" scripts. The problem? They get a lot of stars and hype, but most break down when you need real-world reliability. They lack the engineering principles required for production: **security, scalability, extensibility, and manageability.** The result is brittle systems you can't trust with sensitive data or complex workflows.
-
-**AgentUp** brings to AI agents what Docker brought to containers, portability, and production-grade reliability.
-
-Just as Docker made applications immutable, reproducible, and ops-friendly, AgentUp does the same for AI agents. Define your agent with configuration, and it runs consistently anywhere. Share agents with teammates who can clone and run them instantly. Deploy to production with the same confidence you'd deploy a containerized application.
+Just as Docker made applications immutable, reproducible, and ops-friendly, **AgentUp** does the same for AI agents. Define your agent with configuration, and it runs consistently anywhere. Share agents with teammates who can clone / fork and run them instantly. Deploy knowing your agent will behave identically across development, staging, and production environments.
 
 AgentUp is built by engineers who've created open-source solutions powering mission-critical systems at **Google, GitHub, Nvidia, Red Hat, Shopify and more**. We understand what it takes to build stable, secure, scalable software - and we're applying those same principles to make AI agents truly production-ready, secure and reliable.
 
