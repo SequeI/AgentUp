@@ -60,7 +60,10 @@ def sync_config_version(config_path: Path, version: str = None) -> bool:
                 lines[i] = new_line
                 updated = True
                 logger.info(
-                    "Updated version in config", path=str(config_path), old_version=old_version, new_version=version
+                    "Updated version in config",
+                    path=str(config_path),
+                    old_version=old_version,
+                    new_version=version,
                 )
                 break
 

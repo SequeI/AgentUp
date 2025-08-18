@@ -88,3 +88,6 @@ site/
 
 # misc
 .foam/
+
+# agentup stuff
+agentup.yml
