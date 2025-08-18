@@ -1,4 +1,8 @@
 <div align="center">
+English | <a href="README.cn.md">简体中文</a>
+</div>
+
+<div align="center">
   <img src="https://raw.githubusercontent.com/RedDotRocket/AgentUp/main/assets/logo.png" alt="AgentUp Logo" width="400"/>
   <h3>Bringing to AI Agents, what Docker brought to containers</h3>
   <br/>

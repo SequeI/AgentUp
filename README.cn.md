@@ -1,100 +1,107 @@
-# AgentUp
+<div align="center">
+<a href="README.md">English</a> | 简体中文
+</div>
 
-<p align="center">
-  <img src="assets/compie.png" alt="Compie Logo" width="200"/>
-</p>
+<div align="center">
+  <img src="https://raw.githubusercontent.com/RedDotRocket/AgentUp/main/assets/logo.png" alt="AgentUp Logo" width="400"/>
+  <h3>为AI智能体带来Docker对容器的革命性改变</h3>
+  <br/>
 
-<p align="center">
-  <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache2.0-brightgreen.svg?style=flat" alt="License: Apache 2.0"/></a>
-  |
-  <a href="https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml"><img src="https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
-  |
-  <a href="https://discord.gg/pPcjYzGvbS"><img src="https://img.shields.io/discord/1384081906773131274?label=Discord&logo=discord" alt="Discord"/></a>
-  |
-  <a href="https://pypi.org/project/AgentUp/"><img src="https://img.shields.io/pypi/v/AgentUp.svg" alt="PyPI Version"/></a>
-  |
-  <a href="https://pepy.tech/project/agentup"><img src="https://static.pepy.tech/badge/agentup" alt="Downloads"/></a>
-</p>
+  <!-- CTA 按钮 -->
+  <p>
+    <a href="https://github.com/RedDotRocket/AgentUp/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22">
+      <img src="https://img.shields.io/badge/贡献-新手友好问题-green?style=for-the-badge&logo=github" alt="新手友好问题"/>
+    </a>
+    &nbsp;
+    <a href="https://discord.gg/pPcjYzGvbS">
+      <img src="https://img.shields.io/badge/聊天-加入Discord-7289da?style=for-the-badge&logo=discord&logoColor=white" alt="加入Discord"/>
+    </a>
+  </p>
 
-<p align="center">
-  AgentUp 在设计时将安全性、可扩展性和可延展性作为其基础，通过配置驱动的架构简化开发流程。它消除了样板代码，并提供了一个不断增长的社区插件生态系统，以根据需要扩展功能。快速前进，按需扩展。
-</p>
-<p align="center">
-  由 <a href="https://sigstore.dev">Sigstore</a> 的创建者构建。
-</p>
+  <!-- 徽章 -->
+  <p>
+    <a href="https://opensource.org/licenses/Apache-2.0">
+      <img src="https://img.shields.io/badge/许可证-Apache%202.0-blue.svg" alt="许可证"/>
+    </a>
+    <a href="https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml">
+      <img src="https://github.com/RedDotRocket/AgentUp/actions/workflows/ci.yml/badge.svg" alt="CI状态"/>
+    </a>
+    <a href="https://pypi.org/project/AgentUp/">
+      <img src="https://img.shields.io/pypi/v/AgentUp.svg" alt="PyPI版本"/>
+    </a>
+    <a href="https://pepy.tech/project/agentup">
+      <img src="https://static.pepy.tech/badge/agentup" alt="下载量"/>
+    </a>
+    <a href="https://discord.gg/pPcjYzGvbS">
+      <img src="https://img.shields.io/discord/1384081906773131274?color=7289da&label=Discord&logo=discord&logoColor=white" alt="Discord"/>
+    </a>
+  </p>
+  <br/>
+</div>
 
-> ⚠️ **警告：此项目正在积极开发中**
->
-> 此项目目前**不稳定**，可能会频繁更改。功能可能会在没有通知的情况下被添加、删除或修改。
-> 欢迎贡献，但请注意代码库可能会快速变化，尽管我们会尽可能减少破坏性更改。
+<!-- 状态框 -->
+<div align="center">
+   <table>
+    <tr>
+      <td align="center">
+        <strong>🚀 积极开发中</strong>
+        <br/>
+        <sub>🏃‍♂️ 我们进展很快，可能会有变化！</sub>
+        <br/>
+      </td>
+    </tr>
+  </table>
+</div>
 
+  <br/>
 
-## 为什么选择 AgentUp？
+## 为什么选择AgentUp？
 
-**配置优于代码** - 通过 YAML 配置定义复杂的代理行为、数据源和工作流。无需样板代码，无需框架内部实现，无需冗长的开发周期。您的代理是可移植的、可版本化的和可维护的。
+正如Docker让应用程序变得不可变、可重现且运维友好，**AgentUp**为AI智能体带来了同样的革命。通过配置定义您的智能体，它可以在任何地方一致运行。与团队成员分享智能体，他们可以克隆/分叉并立即运行。部署时确信您的智能体在开发、测试和生产环境中都会表现一致。
 
-**设计即安全** - 工具 / MCP 服务器（插件！）受到 AgentUp 细粒度的基于作用域的访问控制系统保护。细粒度权限确保您的插件和 MCP 服务器只在需要时访问它们需要的内容，并且只有在您授权的情况下才能访问。内置的 OAuth2、JWT 和 API 密钥身份验证可与您现有的身份提供商集成。
+AgentUp由拥有丰富经验的工程师构建，他们曾为**Google、GitHub、Nvidia、Red Hat、Shopify等公司**的关键任务系统创建开源解决方案。我们深知构建稳定、安全、可扩展软件的要求，并将这些原则应用于让AI智能体真正做到生产就绪、安全可靠。
 
-**插件生态系统** - 通过不断增长的社区插件生态系统扩展功能，或构建您自己的插件。插件自动继承 AgentUp 的所有中间件、安全和操作功能。独立版本化插件，并与您现有的 CI/CD 管道无缝集成。
+## AgentUp：开发者优先的智能体框架
 
+AgentUp提供企业级智能体基础架构，专为需要强大功能与简洁性的专业开发者而设计。
 
-## 面向生产的高级架构
+**开发者优先的操作**：由了解现实约束的开发者构建。每个智能体都存在于自己的代码库中，仅需一个AgentUp配置文件。克隆、运行`agentup run`，所有依赖项在初始化期间解决——不再有环境设置的烦恼。
 
-AgentUp 在设计时考虑了生产部署，具有随着框架成熟而扩展的架构模式。虽然目前处于 alpha 阶段，但核心安全和可扩展性功能为构建严肃的 AI 代理提供了坚实的基础。
+**安全设计**：内置基于范围的细粒度访问控制，支持OAuth2、JWT和API密钥认证，防止未授权的工具/MCP访问，确保数据保护。安全不是事后考虑——它是AgentUp的基础架构。
 
-### 高级安全模型
+**配置驱动架构**：通过声明式配置定义复杂的智能体行为、数据源和工作流。跳过数周的样板代码和框架争夺。您的智能体成为可移植、可版本化的资产，具有清晰的契约定义其能力和交互。
 
-**基于作用域的访问控制** - AgentUp 的权限系统精确控制每个插件、MCP 服务器和功能可以访问的内容。创建从简单设置到复杂需求的分层作用域策略。内置的 OAuth2、JWT 和 API 密钥身份验证提供灵活的集成选项。
+**可扩展的定制生态系统**：需要RAG、图像处理、自定义API逻辑？没问题。利用社区插件或构建自动继承AgentUp中间件、安全和操作功能的自定义扩展。独立的插件版本控制与现有CI/CD管道无缝集成，确保核心平台更新不会破坏您的实现。使用AgentUp，您可以获得运行智能体的即时反馈，以及框架的可扩展性。
 
-**全面的审计日志** - 每个操作都记录有经过清理的审计跟踪。安全事件按风险级别自动分类，便于监控代理行为。可配置的数据保留策略支持各种合规要求。
+**智能体到智能体发现**：自动A2A智能体卡生成向生态系统中的其他智能体公开您的智能体能力，实现无缝的智能体间通信和编排。
 
-**安全优先设计** - AgentUp 遵循安全优先原则，具有故障关闭访问控制、输入清理和全面的错误处理。该框架旨在防止权限提升、注入攻击和信息泄露。
+**异步任务架构**：消息驱动的任务管理支持基于回调通知的长时间运行操作。非常适合研究智能体、数据处理工作流和事件驱动自动化。跨Redis和其他后端的状态持久化确保大规模可靠性。
 
-### 可扩展的插件系统
+## 面向生产的先进架构
 
-**零摩擦开发** - 无需触及核心代码即可创建自定义功能。插件自动继承 AgentUp 的中间件栈、安全模型和操作功能。使用您现有的包管理器（pip、uv、poetry）进行依赖管理和分发。
+AgentUp在设计时考虑了生产部署，具备随着框架成熟而扩展的架构模式。虽然目前仍在alpha阶段，但核心安全和可扩展性功能已经为构建严肃的AI智能体提供了坚实的基础。
 
-**社区生态系统** - 通过 [AgentUp 插件注册表](https://agentup.dev) 发现和安装插件，或发布您自己的插件。浏览系统工具、图像处理、数据分析和专业功能的插件。使用您喜欢的 Python 工具（pip、uv、poetry）安装或使用 twine 发布。每个插件都是独立版本化的，可以在不影响其他组件的情况下更新。发布到注册表的每个插件都会自动扫描安全漏洞、不安全的编码模式和恶意软件 - 确保生态系统的安全。
-
-**MCP 集成** - 利用不断扩展的模型上下文协议生态系统。所有 MCP 服务器都通过 AgentUp 的作用域系统自动保护，您可以将自己的代理功能作为 MCP 可流式端点公开，供其他系统使用！
-
-### 灵活的基础设施
-
-**多提供商 AI 支持** - 通过 OpenAI 兼容的 API（Ollama）连接到 OpenAI、Anthropic 或本地模型。无需代码更改即可切换提供商，并同时使用多个提供商实现不同的功能。
-
-**可配置的状态管理** - 选择您的存储后端以满足您的需求。用于开发的文件系统 / 内存，用于结构化查询的数据库，或用于高性能分布式缓存的 Redis/Valkey。内置的对话跟踪具有可配置的 TTL 和历史管理。
-
-**代理间通信** - 通过 A2A（代理对代理）协议合规性构建多代理系统。代理可以安全地相互发现和通信，实现复杂的工作流和分布式处理。AgentUp 建立在 A2A（代理对代理）规范之上，维护者积极参与 A2A 社区。
-
-### 开发者体验
-
-**CLI 优先的工作流** - 您需要的一切都可以通过命令行获得。从模板创建新代理、启动开发服务器、管理插件，并使用与您现有工具链集成的直观命令部署到生产环境。
-
-**配置即代码** - 代理行为、数据源和工作流通过版本控制的 YAML 配置定义。无需学习框架内部，无需维护样板代码。您的代理可在环境和团队之间移植。
-
-**实时操作** - 内置支持流式响应、异步操作和推送通知。通过全面的日志记录和可配置的指标收集监控代理性能和行为。
-
-## 几分钟内开始
+## 几分钟内开始使用
 
 ### 安装
 
-使用您喜欢的 Python 包管理器安装 AgentUp：
+使用您首选的Python包管理器安装AgentUp：
 
 ```bash
 pip install agentup
 ```
 
-### 创建您的第一个代理
+### 创建您的第一个智能体
 
-使用交互式配置生成新的代理项目：
+通过交互式配置生成新的智能体项目：
 
 ```bash
 agentup init
 ```
 
-从可用选项中选择，并通过交互式提示配置您的代理的功能、身份验证和 AI 提供商设置。
+从可用选项中选择，并通过交互式提示配置您的智能体能力、认证和AI提供商设置。
 
-### 开始开发
+### 启动您的智能体
 
 启动开发服务器并开始构建：
 
@@ -102,23 +109,46 @@ agentup init
 agentup run
 ```
 
-您的代理现在运行在 `http://localhost:8000`，具有完整的 A2A 兼容 JSON RPC API、安全中间件和所有配置的功能。
+您的智能体现在运行在`http://localhost:8000`，具有完整的A2A兼容JSON RPC API、安全中间件和所有配置的可用能力。
 
 ### 下一步
 
-探索全面的[文档](https://docs.agentup.dev)，了解高级功能、教程、API 参考和真实示例，帮助您快速构建代理。
+探索全面的[文档](https://docs.agentup.dev)以了解高级功能、教程、API参考和现实世界示例，帮助您快速构建智能体。
+
+### 当前集成
+
+AgentUp智能体能够将自己作为工具呈现给不同的框架，这带来了确保所有工具使用一致且安全、被跟踪和可追溯的优势。
+
+- [CrewAI](https://crewai.com)，详见[文档](docs/integrations/crewai.md)。
 
 ## 开源和社区驱动
 
-AgentUp 采用 Apache 2.0 许可证，基于开放标准构建。该框架实现了 A2A（代理对代理）规范以实现互操作性，并遵循 MCP（模型上下文协议）以与更广泛的 AI 工具生态系统集成。
+AgentUp采用Apache 2.0许可证，基于开放标准构建。该框架实现了A2A（智能体到智能体）规范以实现互操作性，并遵循MCP（模型上下文协议）与更广泛的AI工具生态系统集成。
 
-**贡献** - 无论您是修复错误、添加功能还是改进文档，我们都欢迎贡献。加入不断增长的开发者社区，共同构建 AI 代理基础设施的未来。
+**贡献** - 无论您是修复错误、添加功能还是改进文档，都欢迎贡献。加入不断增长的开发者社区，共同构建AI智能体基础设施的未来。
 
-**社区支持** - 通过 [GitHub Issues](https://github.com/RedDotRocket/AgentUp/issues) 报告问题、请求功能和获取帮助。在 [Discord](https://discord.gg/pPcjYzGvbS) 上加入实时讨论并与其他开发者联系。
+**社区支持** - 通过[GitHub Issues](https://github.com/RedDotRocket/AgentUp/issues)报告问题、请求功能和获取帮助。在[Discord](https://discord.gg/pPcjYzGvbS)上参与实时讨论并与其他开发者联系。
+
+## 什么是DCO Bot？
+
+我们使用开发者原创证书（DCO）来保持项目的法律健全性并保护我们的社区。这在开源项目中很常见（Linux内核、Kubernetes、Docker）。
+
+DCO防止意外包含专有代码等问题，并确保所有贡献者都有权提交他们的更改。
+
+这保护了项目的贡献者和用户。
+
+### 如何签署提交
+在提交时简单地添加`-s`标志：
+
+```bash
+git commit -s -m "添加很棒的新功能"
+```
+
+这会添加一行"Signed-off-by"，证明您编写了代码或有权限在Apache 2.0下贡献它。您保留对贡献的所有权——无需文书工作！
 
 ## 表达您的支持 ⭐
 
-如果 AgentUp 正在帮助您构建更好的 AI 代理，或者您想鼓励开发，请考虑给它一个星标，以帮助其他人发现该项目，并让我知道继续投入时间到这个框架是值得的！
+如果AgentUp正在帮助您构建更好的AI智能体，或者您想鼓励开发，请考虑给它一个星标，帮助其他人发现这个项目，也让我知道值得继续投入时间到这个框架中！
 
 [![GitHub stars](https://img.shields.io/github/stars/RedDotRocket/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocket/AgentUp)
 
