@@ -52,8 +52,8 @@ class OllamaProvider(BaseLLMService):
             if response.status_code != 200:
                 raise LLMProviderAPIError(f"Failed to check Ollama models: {response.status_code}")
 
-            data = response.json()
-            model_names = [model["name"].split(":")[0] for model in data.get("models", [])]
+            models = response.json().get("models", [])
+            model_names = [model["name"] for model in models]
 
             if self.model not in model_names:
                 logger.info(f"Model {self.model} not found locally, attempting to pull...")

@@ -488,5 +488,5 @@ curl -s http://localhost:8000/.well-known/agent.json |jq
     }
     ```
 
-The key points to note in the agent card, are how are plugin 'hello' is listed under `skills`, and the security scheme is defined under `securitySchemes`. This card provides a machine-readable description of your agent's capabilities and how to interact with it.
+Note the key points in the agent card, specifically how the 'hello' plugin is listed under `skills`, and the security scheme is defined under `securitySchemes`. This card provides a machine-readable description of your agent's capabilities and how to interact with it.
 ```bash
