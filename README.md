@@ -86,7 +86,7 @@ AgentUp is designed with production deployment in mind, featuring architecture p
 
 AgentUp development is moving at a fast pace 🏃‍♂️, for a great way to follow the project and to be instantly notified of new releases, **Star the repo**.
 
-<img src="/assets/star.gif" width="50%" height="50%"/>
+<img src="/assets/star.gif" width="40%" height="40%"/>
 
 ## Get Started in Minutes
 
