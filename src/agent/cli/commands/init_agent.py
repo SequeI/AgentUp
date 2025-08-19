@@ -3,25 +3,11 @@ from typing import Any
 
 import click
 import questionary
-from questionary import Style
 
+from agent.cli.style import custom_style, print_error, print_header, print_success_footer
 from agent.generator import ProjectGenerator
 from agent.templates import get_feature_choices
 from agent.utils.git_utils import get_git_author_info, initialize_git_repo
-
-custom_style = Style(
-    [
-        ("qmark", "fg:#5f819d bold"),
-        ("question", "bold"),
-        ("answer", "fg:#85678f bold"),
-        ("pointer", "fg:#5f819d bold"),
-        ("highlighted", "fg:#5f819d bold"),
-        ("selected", "fg:#85678f"),
-        ("separator", "fg:#cc6666"),
-        ("instruction", "fg:#969896"),
-        ("text", ""),
-    ]
-)
 
 
 @click.command()
@@ -44,9 +30,7 @@ def init_agent(
     By default, this will initialize a git repository in the project directory
     with an initial commit. Use --no-git to skip git initialization.
     """
-    click.echo(click.style("-" * 40, fg="white", dim=True))
-    click.echo(click.style("Create your AI agent:", fg="white", dim=True))
-    click.echo(click.style("-" * 40, fg="white", dim=True))
+    print_header("AgentUp Agent Creator", "Create your AI agent")
 
     project_config = {}
 
@@ -71,7 +55,9 @@ def init_agent(
             click.echo(f"Directory {output_dir} already exists. Continuing in quick mode...")
         else:
             if not questionary.confirm(
-                f"Directory {output_dir} already exists. Continue?", default=False, style=custom_style
+                f"Directory {output_dir} already exists. Continue?",
+                default=False,
+                style=custom_style,
             ).ask():
                 click.echo("Cancelled.")
                 return
@@ -173,9 +159,13 @@ def init_agent(
             else:
                 click.echo(f"{click.style(f'  Warning: Could not initialize git repository: {error}', fg='yellow')}")
 
-        click.echo(f"\n{click.style('✓ Project created successfully!', fg='green', bold=True)}")
-        click.echo(f"\nLocation: {output_dir}")
-        click.echo("\nNext steps:")
+        print_success_footer(
+            "✓ Project created successfully!",
+            location=str(output_dir),
+            docs_url="https://docs.agentup.dev/getting-started/first-agent/",
+        )
+
+        click.secho("\nNext steps:", fg="white", bold=True)
         click.echo(f"  1. cd {output_dir.name}")
         click.echo("  2. uv sync                # Install dependencies")
         click.echo("  3. uv add <plugin_name>   # Add AgentUp plugins")
@@ -183,7 +173,7 @@ def init_agent(
         click.echo("  5. agentup run            # Start development server")
 
     except Exception as e:
-        click.echo(f"{click.style('✗ Error:', fg='red')} {str(e)}")
+        print_error(str(e))
         return
 
 
@@ -270,14 +260,18 @@ def configure_features(features: list) -> dict[str, Any]:
         config["push_backend"] = push_backend_choice
 
         validate_urls = questionary.confirm(
-            "Enable webhook URL validation?", default=push_backend_choice == "valkey", style=custom_style
+            "Enable webhook URL validation?",
+            default=push_backend_choice == "valkey",
+            style=custom_style,
         ).ask()
 
         config["push_validate_urls"] = validate_urls
 
     if "development" in features:
         dev_enabled = questionary.confirm(
-            "Enable development features? (filesystem plugins, debug mode)", default=False, style=custom_style
+            "Enable development features? (filesystem plugins, debug mode)",
+            default=False,
+            style=custom_style,
         ).ask()
 
         config["development_enabled"] = dev_enabled
@@ -308,7 +302,9 @@ def configure_features(features: list) -> dict[str, Any]:
     if "deployment" in features:
         # Docker configuration
         docker_enabled = questionary.confirm(
-            "Generate Docker files? (Dockerfile, docker-compose.yml)", default=True, style=custom_style
+            "Generate Docker files? (Dockerfile, docker-compose.yml)",
+            default=True,
+            style=custom_style,
         ).ask()
 
         config["docker_enabled"] = docker_enabled
