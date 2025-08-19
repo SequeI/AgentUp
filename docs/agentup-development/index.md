@@ -47,7 +47,7 @@ When developing plugins while working on AgentUp source:
 ```bash
 # Create plugin in separate location
 cd ~/my-plugins  # Or any directory outside AgentUp source
-uv run --directory /path/to/AgentUp agentup plugin create my-plugin
+uv run --directory /path/to/AgentUp agentup plugin init my-plugin
 
 # Install plugin into AgentUp's venv for testing
 cd my-plugin
@@ -66,7 +66,7 @@ export AGENTUP_PLUGIN_PATHS="$HOME/my-plugins:./local-plugins"
 
 # Create and test plugins without installation
 mkdir -p local-plugins
-uv run agentup plugin create local-plugins/test-plugin
+uv run agentup plugin init local-plugins/test-plugin
 
 # Plugin auto-discovered from AGENTUP_PLUGIN_PATHS
 uv run agentup run
@@ -110,7 +110,7 @@ pip install agentup
 
 # Create plugin anywhere
 mkdir -p ~/my-plugins && cd ~/my-plugins
-agentup plugin create weather-plugin --template ai
+agentup plugin init weather-plugin --template ai
 cd weather-plugin
 
 # Install for development (same environment as AgentUp)
@@ -143,7 +143,7 @@ cd AgentUp && uv sync
 
 # Create plugin in separate directory
 cd ~/my-plugins
-uv run --directory /path/to/AgentUp agentup plugin create my-plugin
+uv run --directory /path/to/AgentUp agentup plugin init my-plugin
 cd my-plugin
 
 # Install into AgentUp's development environment

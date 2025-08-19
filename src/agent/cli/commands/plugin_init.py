@@ -8,6 +8,7 @@ import structlog
 from jinja2 import Environment, FileSystemLoader
 
 from agent.cli.style import custom_style, print_error, print_header, print_success_footer
+from agent.utils.git_utils import get_git_author_info
 from agent.utils.version import get_version
 
 logger = structlog.get_logger(__name__)
@@ -298,7 +299,7 @@ def _validate_plugin_name(name: str) -> tuple[bool, str]:
 @click.option("--template", "-t", type=click.Choice(["direct", "ai"]), default="ai", help="Plugin template")
 @click.option("--output-dir", "-o", type=click.Path(), help="Output directory for the plugin")
 @click.option("--no-git", is_flag=True, help="Skip git initialization")
-def create(
+def init(
     plugin_name: str | None,
     version: str | None,
     template: str,
@@ -342,33 +343,40 @@ def create(
     if not version:
         version = questionary.text("Version:", default="0.0.1", style=custom_style).ask()
 
-    author = questionary.text("Author name:").ask()
+    if not no_git:
+        author, email = get_git_author_info().values()
 
-    def validate_email(email: str) -> bool | str:
-        """Validator for questionary that returns True or error message."""
-        if not email.strip():
-            return True  # Allow empty email
+    if not author:
+        author = questionary.text("Author name:", default="").ask()
 
-        # Basic email validation
-        if " " in email:
-            return "Email cannot contain spaces"
-        if "@" not in email:
-            return "Email must contain @"
-        if email.count("@") != 1:
-            return "Email must contain exactly one @"
+    if not email:
 
-        parts = email.split("@")
-        if not parts[0] or not parts[1]:
-            return "Email must have text before and after @"
-        if "." not in parts[1]:
-            return "Email domain must contain a dot"
+        def validate_email(email_str: str) -> bool | str:
+            """Validator for questionary that returns True or error message."""
+            if not email.strip():
+                return True  # Allow empty email
 
-        return True
+            # Basic email validation
+            if " " in email:
+                return "Email cannot contain spaces"
+            if "@" not in email:
+                return "Email must contain @"
+            if email.count("@") != 1:
+                return "Email must contain exactly one @"
 
-    email = questionary.text(
-        "Author email (optional - press enter to skip):",
-        validate=validate_email,
-    ).ask()
+            parts = email.split("@")
+            if not parts[0] or not parts[1]:
+                return "Email must have text before and after @"
+            if "." not in parts[1]:
+                return "Email domain must contain a dot"
+
+            return True
+
+        email = questionary.text(
+            "Author email (optional - press enter to skip):",
+            default="",
+            validate=validate_email,
+        ).ask()
 
     capability_id = questionary.text(
         "Primary capability ID:",

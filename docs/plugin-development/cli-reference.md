@@ -18,7 +18,7 @@ The new CLI includes advanced security features:
 
 ## Important: Working Directory Context
 
-**Plugin Creation Commands** (`agentup plugin create`):
+**Plugin Creation Commands** (`agentup plugin init`):
 - Can be run from **any directory** on your system
 - Creates a new plugin project directory
 - Does **NOT** require an existing agent project
@@ -31,7 +31,7 @@ The new CLI includes advanced security features:
 ```bash
 # Plugin creation - run from anywhere
 cd ~/my-projects/
-agentup plugin create weather-plugin
+agentup plugin init weather-plugin
 
 # Plugin management - run from anywhere  
 agentup plugin install weather-plugin --require-trusted
@@ -375,14 +375,14 @@ Total Capabilities: 12
 
 ---
 
-### `agentup plugin create`
+### `agentup plugin init`
 
 Create a new plugin for development using the modern decorator system.
 
 #### Usage
 
 ```bash
-agentup plugin create [NAME] [OPTIONS]
+agentup plugin init [NAME] [OPTIONS]
 ```
 
 #### Arguments
@@ -403,7 +403,7 @@ agentup plugin create [NAME] [OPTIONS]
 
 **Interactive creation:**
 ```bash
-agentup plugin create
+agentup plugin init
 ```
 
 The CLI will prompt for:
@@ -415,12 +415,12 @@ The CLI will prompt for:
 
 **Quick creation with template:**
 ```bash
-agentup plugin create weather-plugin --template ai
+agentup plugin init weather-plugin --template ai
 ```
 
 **Specify output directory:**
 ```bash
-agentup plugin create my-plugin --output-dir ./plugins/my-plugin
+agentup plugin init my-plugin --output-dir ./plugins/my-plugin
 ```
 
 #### Generated Structure
@@ -593,7 +593,7 @@ agentup plugin refresh --plugin-id weather-plugin
 
 **1. Create a new plugin:**
 ```bash
-agentup plugin create my-awesome-plugin --template ai
+agentup plugin init my-awesome-plugin --template ai
 cd my-awesome-plugin
 ```
 
