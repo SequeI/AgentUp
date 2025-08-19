@@ -353,18 +353,18 @@ def init(
 
         def validate_email(email_str: str) -> bool | str:
             """Validator for questionary that returns True or error message."""
-            if not email.strip():
+            if not email_str.strip():
                 return True  # Allow empty email
 
             # Basic email validation
-            if " " in email:
+            if " " in email_str:
                 return "Email cannot contain spaces"
-            if "@" not in email:
+            if "@" not in email_str:
                 return "Email must contain @"
-            if email.count("@") != 1:
+            if email_str.count("@") != 1:
                 return "Email must contain exactly one @"
 
-            parts = email.split("@")
+            parts = email_str.split("@")
             if not parts[0] or not parts[1]:
                 return "Email must have text before and after @"
             if "." not in parts[1]:
