@@ -11,15 +11,15 @@ A root level middleware key is defined in your `agentup.yml`:
 ```yaml
 middleware:
   - name: timed
-    params: {}
+    config: {}
   - name: cached
-    params:
+    config:
       ttl: 300
   - name: rate_limited
-    params:
+    config:
       requests_per_minute: 60
   - name: retryable
-    params:
+    config:
       max_retries: 3
       backoff_factor: 2
 ```
@@ -47,7 +47,7 @@ When the agent starts:
 
 ## Per-Plugin Override
 
-Each Middleware feature can be overridden for specific plugins using the `middleware_override` field.
+Each Middleware feature can be overridden for specific plugins using the `plugin_override` field.
 
 This allows you to customize middleware behavior for individual plugins, dependig on their specific needs.
 
@@ -55,7 +55,7 @@ This can be achieved in two ways:
 
 1. **Complete Replacement**: Define a new set of middleware that replaces the global configuration for that plugin.
 2. **Selective Exclusion**: Specify only the middleware you want to apply, excluding others
-3. **Empty Override**: Use an empty `middleware_override` to disable all middleware for that plugin.
+3. **Empty Override**: Use an empty `plugin_override` to disable all middleware for that plugin.
 
 ### Example Configurations
 
@@ -65,13 +65,13 @@ Let's assume we have the following global middleware configuration:
 # Global middleware for all handlers
 middleware:
   - name: timed
-    params: {}
+    config: {}
   - name: cached
-    params: {ttl: 300}  # 5 minutes default
+    config: {ttl: 300}  # 5 minutes default
   - name: rate_limited
-    params: {requests_per_minute: 60}
+    config: {requests_per_minute: 60}
   - name: retryable
-    params: {max_retries: 3, backoff_factor: 2}
+    config: {max_retries: 3, backoff_factor: 2}
 ```
 
 For a specific plugin, you can override this behavior, for example, to disable caching and change the rate limit:
@@ -81,11 +81,11 @@ plugins:
   - plugin_id: expensive_operation
     name: Expensive Operation
     description: A resource-intensive operation
-    middleware_override:
+    plugin_override:
       - name: cached
-        params: {ttl: 3600}  # 1 hour for this specific plugin
+        config: {ttl: 3600}  # 1 hour for this specific plugin
       - name: rate_limited
-        params:
+        config:
           requests_per_minute: 120  # higher rate limit for this plugin
 ```
 
@@ -94,44 +94,44 @@ plugins:
 1. **Global middleware** is defined in the top-level `middleware` section
 2. **Per-plugin overrides** completely replace global middleware for that plugin
 3. **Order matters** - middleware in the override is applied in the specified order
-4. **Complete replacement** - if you use `middleware_override`, only those middleware are applied
-5. **Disable all middleware** - use an empty `middleware_override: []` to disable all middleware for a plugin
+4. **Complete replacement** - if you use `plugin_override`, only those middleware are applied
+5. **Disable all middleware** - use an empty `plugin_override: []` to disable all middleware for a plugin
 
 ### Use Cases for Per-Plugin Overrides
 
 1. **Different Cache TTLs**:
    ```yaml
    plugins:
-     - plugin_id: weather_api
-       middleware_override:
+     weather_api:
+       plugin_override:
          - name: cached
-           params: {ttl: 1800}  # 30 minutes for weather data
+           config: {ttl: 1800}  # 30 minutes for weather data
    ```
 
 2. **Disable Caching for Real-time Data**:
    ```yaml
    plugins:
-     - plugin_id: stock_ticker
-       middleware_override:
+     stock_ticker:
+       plugin_override:
          - name: timed
-           params: {}
+           config: {}
          # No caching middleware
    ```
 
 3. **Higher Rate Limits for Admin Functions**:
    ```yaml
    plugins:
-     - plugin_id: admin_panel
-       middleware_override:
+     admin_panel:
+       plugin_override:
          - name: rate_limited
-           params: {requests_per_minute: 300}  # Higher limit
+           config: {requests_per_minute: 300}  # Higher limit
    ```
 
 4. **Disable All Middleware**:
    ```yaml
    plugins:
-     - plugin_id: raw_performance
-       middleware_override: []  # Empty array disables all middleware
+     raw_performance:
+       plugin_override: []  # Empty array disables all middleware
    ```
 
 ### Selectively Excluding Middleware
@@ -139,56 +139,56 @@ plugins:
 ```yaml
 plugins:
   - plugin_id: no_cache_plugin
-    middleware_override:
+    plugin_override:
       - name: timed
-        params: {}
+        config: {}
       - name: rate_limited
-        params: {requests_per_minute: 60}
+        config: {requests_per_minute: 60}
       # Note: No caching middleware listed
 
   # This plugin gets ONLY logging
   - plugin_id: minimal_plugin
-    middleware_override:
+    plugin_override:
       - name: timed
-        params: {}
+        config: {}
 
   # This plugin gets NO middleware at all
   - plugin_id: bare_metal_plugin
-    middleware_override: []
+    plugin_override: []
 ```
 
-Since `middleware_override` completely replaces the global middleware, you can exclude specific
+Since `plugin_override` completely replaces the global middleware, you can exclude specific
 middleware by simply not including them:
 
 ```yaml
 # Global middleware
 middleware:
   - name: timed
-    params: {}
+    config: {}
   - name: cached
-    params: {ttl: 300}
+    config: {ttl: 300}
   - name: rate_limited
-    params: {requests_per_minute: 60}
+    config: {requests_per_minute: 60}
 
 plugins:
   # This skill gets everything EXCEPT caching
   - plugin_id: no_cache_skill
-    middleware_override:
+    plugin_override:
       - name: timed
-        params: {}
+        config: {}
       - name: rate_limited
-        params: {requests_per_minute: 60}
+        config: {requests_per_minute: 60}
       # Note: No caching middleware listed
 
   # This skill gets ONLY logging
   - plugin_id: minimal_skill
-    middleware_override:
+    plugin_override:
       - name: timed
-        params: {}
+        config: {}
 
   # This skill gets NO middleware at all
   - plugin_id: bare_metal_skill
-    middleware_override: []
+    plugin_override: []
 ```
 
 ## Validation
