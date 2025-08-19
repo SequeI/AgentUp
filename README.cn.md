@@ -85,7 +85,7 @@ AgentUp在设计时考虑了生产部署，具备随着框架成熟而扩展的�
 
 AgentUp 开发进展很快 🏃‍♂️，要跟进项目动态并第一时间收到新版本通知，请给仓库点星。
 
-<img src="/assets/star.gif" width="25%" height="25%"/>
+<img src="/assets/star.gif" width="50%" height="50%"/>
 
 ## 几分钟内开始使用
 
