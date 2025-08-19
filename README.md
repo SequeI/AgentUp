@@ -82,6 +82,12 @@ preventing unauthorized Tools / MCP access, ensuring data protection. Security i
 
 AgentUp is designed with production deployment in mind, featuring architecture patterns that will scale as the framework matures. While currently in alpha, the core security and extensibility features already provide a solid foundation for building serious AI agents.
 
+## Stay Updated
+
+AgentUp development is moving at a fast pace 🏃‍♂️, for a great way to follow the project and to be instantly notified of new releases, **Star the repo**.
+
+<img src="/assets/star.gif" width="25%" height="25%"/>
+
 ## Get Started in Minutes
 
 ### Installation
@@ -147,12 +153,6 @@ git commit -s -m "Add awesome new feature"
 ```
 
 This adds a "Signed-off-by" line certifying you wrote the code or have permission to contribute it under Apache 2.0. You keep ownership of your contributions - no paperwork required!
-
-## Show Your Support ⭐
-
-If AgentUp is helping you build better AI agents, or you want to encourage development, please consider giving it a star to help others discover the project and it let's me know it's worth continuing to invest time into this framework!
-
-[![GitHub stars](https://img.shields.io/github/stars/RedDotRocket/AgentUp.svg?style=social&label=Star)](https://github.com/RedDotRocket/AgentUp)
 
 ---
 
