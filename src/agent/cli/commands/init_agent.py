@@ -1,7 +1,9 @@
+import asyncio
 from pathlib import Path
 from typing import Any
 
 import click
+import httpx
 import questionary
 
 from agent.cli.style import custom_style, print_error, print_header, print_success_footer
@@ -145,6 +147,7 @@ def _prompt_for_features(project_config: dict[str, Any], quick: bool, no_git: bo
 
     # Configure AI provider
     if "ai_provider" in project_config.get("features", []):
+        print_header("AI Provider Configuration")
         ai_provider_choice = questionary.select(
             "Please select an AI Provider:",
             choices=[
@@ -157,8 +160,24 @@ def _prompt_for_features(project_config: dict[str, Any], quick: bool, no_git: bo
         if ai_provider_choice:
             project_config["ai_provider_config"] = {"provider": ai_provider_choice}
 
+            if ai_provider_choice == "ollama":
+                ollama_models = asyncio.run(get_ollama_models())
+                if not ollama_models:
+                    click.echo("No models found locally. Defaulting to 'llama3:latest'.", err=True)
+                    model_choice = "llama3"
+                else:
+                    model_choice = questionary.select(
+                        "Please select an Ollama model:",
+                        choices=ollama_models,
+                        style=custom_style,
+                    ).ask()
+
+                if model_choice:
+                    project_config["ai_provider_config"]["model"] = model_choice
+
     # Configure external services
     if "services" in project_config.get("features", []):
+        print_header("External Services Configuration")
         service_choices = [
             questionary.Choice("Valkey", value="valkey"),
             questionary.Choice("Custom API", value="custom"),
@@ -178,10 +197,36 @@ def _handle_git_initialization(output_dir: Path, no_git: bool):
             click.echo(f"{click.style(f'Warning: Could not initialize git repository: {error}', fg='yellow')}")
 
 
+async def get_ollama_models() -> list[str]:
+    """Pings the local Ollama API and returns a list of available model names.
+
+    This function is a standalone helper that doesn't rely on a class instance.
+    """
+    import os
+
+    base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    try:
+        async with httpx.AsyncClient(base_url=base_url) as client:
+            response = await client.get("/api/tags", timeout=5.0)
+            response.raise_for_status()  # Raise an exception for bad status codes
+
+            data = response.json()
+            models = data.get("models", [])
+            return [model["name"] for model in models]
+
+    except httpx.HTTPError as e:
+        click.echo(f"Warning: Could not connect to Ollama or retrieve models. Error: {e}", err=True)
+        return []
+    except KeyError:
+        click.echo("Warning: Ollama API response is missing the 'models' key.", err=True)
+        return []
+
+
 def configure_features(features: list) -> dict[str, Any]:
     config = {}
 
     if "middleware" in features:
+        print_header("Middleware Configuration")
         middleware_choices = [
             questionary.Choice("Rate Limiting", value="rate_limit", checked=True),
             questionary.Choice("Caching", value="cache", checked=True),
@@ -203,6 +248,7 @@ def configure_features(features: list) -> dict[str, Any]:
             config["cache_backend"] = cache_backend_choice
 
     if "state_management" in features:
+        print_header("State Management Configuration")
         state_backend_choice = questionary.select(
             "Select state management backend:",
             choices=[
@@ -215,6 +261,7 @@ def configure_features(features: list) -> dict[str, Any]:
         config["state_backend"] = state_backend_choice
 
     if "auth" in features:
+        print_header("Authentication Configuration")
         auth_choice = questionary.select(
             "Select authentication method:",
             choices=[
@@ -239,6 +286,7 @@ def configure_features(features: list) -> dict[str, Any]:
             config["oauth2_provider"] = oauth2_provider
 
     if "push_notifications" in features:
+        print_header("Push Notifications Configuration")
         push_backend_choice = questionary.select(
             "Select push notifications backend:",
             choices=[
@@ -256,6 +304,7 @@ def configure_features(features: list) -> dict[str, Any]:
         config["push_validate_urls"] = validate_urls
 
     if "development" in features:
+        print_header("Development Features Configuration")
         dev_enabled = questionary.confirm(
             "Enable development features? (filesystem plugins, debug mode)",
             default=False,
@@ -283,6 +332,7 @@ def configure_features(features: list) -> dict[str, Any]:
         config["mcp_filesystem_path"] = fs_path
 
     if "deployment" in features:
+        print_header("Deployment Configuration", "Configure deployment options for your agent")
         # Docker configuration
         docker_enabled = questionary.confirm(
             "Generate Docker files? (Dockerfile, docker-compose.yml)",

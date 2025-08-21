@@ -203,7 +203,7 @@ ai_provider:
   model: {{ ai_provider_config.model | default('claude-3-5-sonnet-20241022') }}
 {% elif ai_provider_config.provider == 'ollama' %}
   model: {{ ai_provider_config.model | default('llama3') }}
-  base_url: ${OLLAMA_BASE_URL:http://localhost:11434/v1}
+  base_url: ${OLLAMA_BASE_URL:http://localhost:11434}
 {% endif %}
   temperature: {{ ai_temperature | default(0.7) }}
   max_tokens: {{ ai_max_tokens | default(1000) }}
