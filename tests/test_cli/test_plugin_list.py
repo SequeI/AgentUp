@@ -124,7 +124,7 @@ class TestPluginListCommand:
             result = runner.invoke(list_plugins, [])
             assert result.exit_code == 0
             assert "No plugins found" in result.output
-            assert "agentup plugin create" in result.output
+            assert "agentup plugin init" in result.output
 
     def test_list_plugins_table_format(self, runner, mock_plugin_registry):
         """Test listing plugins in table format (default)."""

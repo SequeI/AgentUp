@@ -210,7 +210,7 @@ def list_plugins(verbose: bool, capabilities: bool, format: str, agentup_cfg: bo
             click.secho("No plugins found", fg="yellow")
             click.secho(
                 "\nTo create a plugin: "
-                + click.style("agentup plugin create ", fg="cyan")
+                + click.style("agentup plugin init ", fg="cyan")
                 + click.style("<plugin_name>", fg="blue")
             )
             click.secho(

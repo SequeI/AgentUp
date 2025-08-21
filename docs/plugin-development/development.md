@@ -70,7 +70,7 @@ Let's build a comprehensive weather plugin that demonstrates all major features:
 ### Step 1: Project Setup
 
 ```bash
-agentup plugin create weather-plugin
+agentup plugin init weather-plugin
 cd weather-plugin
 ```
 

@@ -211,7 +211,7 @@ agentup init my-agent
 Plugin templates also get the correct version:
 
 ```bash
-agentup plugin create my-plugin
+agentup plugin init my-plugin
 # Generated files use current AgentUp version automatically
 ```
 

@@ -25,7 +25,7 @@ Let's build a calculator plugin with AI functions:
 ### Step 1: Basic Plugin Setup
 
 ```bash
-agentup plugin create calculator-plugin
+agentup plugin init calculator-plugin
 cd calculator-plugin
 ```
 

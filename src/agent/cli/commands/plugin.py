@@ -1,16 +1,17 @@
 import click
 
 from ...utils.version import get_version
+from ..cli_utils import OrderedGroup
+from .plugin_info import config, info, list_plugins, validate
 
 # Import subcommands from specialized modules
-from .plugin_create import create
-from .plugin_info import config, info, list_plugins, validate
+from .plugin_init import init
 from .plugin_manage import add, reload, remove, sync
 
 # Export all commands and functions
 __all__ = [
     "plugin",
-    "create",
+    "init",
     "add",
     "remove",
     "sync",
@@ -23,14 +24,15 @@ __all__ = [
 ]
 
 
-@click.group("plugin", help="Manage plugins and their configurations.")
+@click.group("plugin", cls=OrderedGroup, help="Manage plugins and their configurations.")
+@click.version_option(version=get_version(), prog_name="agentup")
 def plugin():
     """Plugin management commands."""
     pass
 
 
 # Register all subcommands
-plugin.add_command(create)
+plugin.add_command(init)
 plugin.add_command(add)
 plugin.add_command(remove)
 plugin.add_command(sync)

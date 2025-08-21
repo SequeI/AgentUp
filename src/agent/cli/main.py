@@ -1,28 +1,15 @@
 import logging
 import os
-from collections import OrderedDict
 
 import click
 
 from ..utils.version import get_version
+from .cli_utils import OrderedGroup
 from .commands.deploy import deploy
 from .commands.init import init
 from .commands.plugin import plugin
 from .commands.run import run
 from .commands.validate import validate
-
-
-class OrderedGroup(click.Group):
-    def __init__(self, name=None, commands=None, **attrs):
-        super().__init__(name=name, commands=commands, **attrs)
-        self.commands = OrderedDict()
-
-    def add_command(self, cmd, name=None):
-        name = name or cmd.name
-        self.commands[name] = cmd
-
-    def list_commands(self, ctx):
-        return self.commands.keys()
 
 
 def setup_cli_logging():

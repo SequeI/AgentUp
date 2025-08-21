@@ -20,10 +20,10 @@ Plugins can be created anywhere - you don't need to be inside an agent project:
 
 ```bash
 # Create a new plugin with interactive prompts (run from any directory)
-agentup plugin create
+agentup plugin init
 
 # Or specify details directly
-agentup plugin create weather-plugin --template ai
+agentup plugin init weather-plugin --template ai
 
 # This creates a new directory with your plugin
 cd weather-plugin/

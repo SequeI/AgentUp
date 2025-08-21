@@ -18,7 +18,7 @@ AgentUp plugins using the new decorator-based system should be tested at multipl
 
 ### Basic Test Structure
 
-When you create a plugin with `agentup plugin create`, you get a comprehensive test structure:
+When you create a plugin with `agentup plugin init`, you get a comprehensive test structure:
 
 ```
 my-plugin/
