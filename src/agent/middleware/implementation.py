@@ -173,7 +173,14 @@ class ValkeyCache(CacheBackend):
 
 class RateLimiter:
     def __init__(self, config: RateLimitConfig | None = None):
-        self.config = config or RateLimitConfig()
+        self.config = config or RateLimitConfig(
+            enabled=True,  # Default enabled for direct instantiation
+            requests_per_minute=60,  # 1 per second average
+            burst_limit=120,  # Allow 2-minute burst capacity
+            window_size_seconds=10,  # 10-second detection window
+            key_strategy="function_name",
+            enforcement_mode="strict",
+        )
         self.buckets: dict[str, dict[str, Any]] = defaultdict(dict)
 
     def check_rate_limit(
