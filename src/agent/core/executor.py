@@ -53,10 +53,11 @@ class AgentUpExecutor(AgentExecutor):
         self.agent = agent
         # Check streaming support from agent configuration
         if hasattr(agent, "supports_streaming"):
-            self.supports_streaming = agent.supports_streaming
-        elif hasattr(agent, "capabilities") and agent.capabilities:
+            self.supports_streaming = getattr(agent, "supports_streaming", False)
+        elif hasattr(agent, "capabilities") and getattr(agent, "capabilities", None):
             # Check A2A AgentCard capabilities
-            self.supports_streaming = getattr(agent.capabilities, "streaming", False)
+            capabilities = getattr(agent, "capabilities", None)
+            self.supports_streaming = getattr(capabilities, "streaming", False) if capabilities else False
         else:
             self.supports_streaming = False
 
@@ -120,8 +121,11 @@ class AgentUpExecutor(AgentExecutor):
         task = context.current_task
 
         if not task:
-            task = new_task(context.message)
-            await event_queue.enqueue_event(task)
+            if context.message:
+                task = new_task(context.message)
+                await event_queue.enqueue_event(task)
+            else:
+                raise ServerError(error=InvalidParamsError(data={"reason": "No task or message provided"}))
 
         updater = TaskUpdater(event_queue, task.id, task.context_id)
 
@@ -258,9 +262,17 @@ class AgentUpExecutor(AgentExecutor):
             if not executor:
                 return f"Plugin '{plugin_name}' is not available or not properly configured."
 
-            # Call the capability directly
-            result = await executor(task)
-            return result if isinstance(result, str) else str(result)
+            # Call the capability directly - check if it's async
+            if callable(executor):
+                import inspect
+
+                if inspect.iscoroutinefunction(executor):
+                    result = await executor(task)
+                else:
+                    result = executor(task)
+                return result if isinstance(result, str) else str(result)
+            else:
+                return f"Plugin '{plugin_name}' executor is not callable."
 
         except Exception as e:
             logger.error(f"Error in direct routing to plugin '{plugin_name}': {e}")
@@ -277,12 +289,18 @@ class AgentUpExecutor(AgentExecutor):
         if error:
             raise ServerError(error=InvalidParamsError(data={"reason": error}))
 
-        task = context.task
-        updater = context.updater
+        task = getattr(context, "task", None) or context.current_task
+        updater = getattr(context, "updater", None)
+
+        if not task:
+            raise ServerError(error=InvalidParamsError(data={"reason": "No task available for streaming"}))
+        if not updater:
+            updater = TaskUpdater(event_queue, task.id, task.context_id)
 
         try:
             # Set thread-local auth for executor access
-            set_current_auth_for_executor(context.auth_result)
+            auth_result = getattr(context, "auth_result", None)
+            set_current_auth_for_executor(auth_result)
 
             # Start with working status
             await updater.update_status(
@@ -349,11 +367,11 @@ class AgentUpExecutor(AgentExecutor):
                     )
 
                     update_event = TaskArtifactUpdateEvent(
-                        taskId=task.id,
+                        task_id=task.id,
                         context_id=task.context_id,
                         artifact=artifact,
                         append=True,
-                        lastChunk=False,
+                        last_chunk=False,
                         kind="artifact-update",
                     )
                     await event_queue.enqueue_event(update_event)
@@ -363,14 +381,16 @@ class AgentUpExecutor(AgentExecutor):
             if remaining_chunks > 0:
                 batch_parts = artifact_parts[-remaining_chunks:]
                 artifact = new_artifact(
-                    batch_parts, name=f"{self.agent_name}-stream-final", description="Final streaming batch"
+                    batch_parts,
+                    name=f"{self.agent_name}-stream-final",
+                    description="Final streaming batch",
                 )
                 update_event = TaskArtifactUpdateEvent(
-                    taskId=task.id,
+                    task_id=task.id,
                     context_id=task.context_id,
                     artifact=artifact,
                     append=True,
-                    lastChunk=False,
+                    last_chunk=False,
                     kind="artifact-update",
                 )
                 await event_queue.enqueue_event(update_event)
@@ -433,14 +453,19 @@ class AgentUpExecutor(AgentExecutor):
     def _validate_request(self, context: RequestContext) -> bool:
         return False
 
-    async def cancel(self, request: RequestContext, event_queue: EventQueue) -> Task | None:
-        task = request.current_task
+    async def cancel(self, context: RequestContext, event_queue: EventQueue) -> None:
+        task = context.current_task
 
         if not task:
             raise ServerError(error=InvalidParamsError(data={"reason": "No task to cancel"}))
 
         # Check if task can be canceled
-        if task.status.state in [TaskState.completed, TaskState.failed, TaskState.canceled, TaskState.rejected]:
+        if task.status.state in [
+            TaskState.completed,
+            TaskState.failed,
+            TaskState.canceled,
+            TaskState.rejected,
+        ]:
             raise ServerError(
                 error=UnsupportedOperationError(
                     data={"reason": f"Task in state '{task.status.state}' cannot be canceled"}
@@ -463,9 +488,6 @@ class AgentUpExecutor(AgentExecutor):
                     ),
                     final=True,
                 )
-
-                # Return original task - status already updated via updater
-                return task
 
             except Exception as e:
                 logger.error(f"Error canceling task {task.id}: {e}")
