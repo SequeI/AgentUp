@@ -78,6 +78,8 @@ preventing unauthorized Tools / MCP access, ensuring data protection. Security i
 
 **Asynchronous Task Architecture**: Message-driven task management supports long-running operations with callback-based notifications. Perfect for research agents, data processing workflows, and event-driven automation. State persistence across Redis and other backends ensures reliability at scale.
 
+**Deterministic routing**: Most frameworks place everything in the LLM's execution path, but this is often not optimal. Frequently, the better solution is through deterministic code, aka good old software engineering. For this reason, AgentUp allows for deterministic keyword based routing, where requests can natural language driven, but instead be sent to existing non-LLM services that utilize caching and other efficiency mechanisms.
+
 ## Advanced Architecture with Production Aspirations
 
 AgentUp is designed with production deployment in mind, featuring architecture patterns that will scale as the framework matures. While currently in alpha, the core security and extensibility features already provide a solid foundation for building serious AI agents.
