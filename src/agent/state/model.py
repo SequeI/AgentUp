@@ -207,7 +207,18 @@ class ConversationState(BaseModel):
                 var.ttl = ttl
         else:
             # Create new variable
-            self.variables[key] = StateVariable(key=key, value=value, type_name=var_type, ttl=ttl)
+            self.variables[key] = StateVariable(
+                key=key,
+                value=value,
+                type_name=var_type,
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+                ttl=ttl,
+                version=1,
+                description=None,
+                tags=[],
+                metadata={},
+            )
 
         self.updated_at = datetime.utcnow()
 
@@ -286,7 +297,16 @@ class ConversationState(BaseModel):
 
         # Update summary
         if not self.summary:
-            self.summary = ConversationSummary(total_messages=0, user_messages=0, agent_messages=0)
+            self.summary = ConversationSummary(
+                total_messages=0,
+                user_messages=0,
+                agent_messages=0,
+                total_tokens=0,
+                first_message_at=None,
+                last_message_at=None,
+                topics=[],
+                summary_text=None,
+            )
 
         # Update counts
         self.summary.total_messages += len(to_archive)

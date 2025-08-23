@@ -47,9 +47,8 @@ class StreamingHandler:
             from agent.core.function_executor import FunctionExecutor
             from agent.services.llm.manager import LLMManager
 
-            # Extract user message from A2A task
-            user_message = dispatcher._extract_user_message_full(task)
-            if not user_message:
+            # Validate we have a valid task with messages
+            if not hasattr(task, "history") or not task.history:
                 yield "I didn't receive any message to process."
                 return
 
@@ -59,15 +58,13 @@ class StreamingHandler:
                 yield "LLM service unavailable."
                 return
 
-            # Get conversation context
+            # Prepare LLM conversation directly from A2A task history
             try:
-                context_id = getattr(task, "context_id", task.id)
-                conversation = dispatcher.conversation_manager.get_conversation_history(context_id)
-            except KeyError:
-                conversation = []
-
-            # Prepare LLM conversation
-            messages = await dispatcher.conversation_manager.prepare_llm_conversation(user_message, conversation)
+                messages = dispatcher.conversation_manager.prepare_llm_conversation(task)
+            except Exception as e:
+                logger.error(f"Error preparing conversation for streaming: {e}", exc_info=True)
+                yield f"Error preparing conversation: {str(e)}"
+                return
 
             # Get available functions filtered by user scopes
             if auth_result:
@@ -81,16 +78,10 @@ class StreamingHandler:
             # Stream LLM processing
             if function_schemas:
                 # Use streaming function calling
-                full_response = ""
                 async for chunk in LLMManager.llm_with_functions_streaming(
                     llm, messages, function_schemas, function_executor
                 ):
-                    full_response += chunk
                     yield chunk
-
-                # Update conversation history with complete response
-                user_input = dispatcher._extract_user_message(task)
-                dispatcher.conversation_manager.update_conversation_history(context_id, user_input, full_response)
             else:
                 # Direct streaming response (no functions)
                 if hasattr(llm, "stream_chat_complete"):
@@ -101,22 +92,12 @@ class StreamingHandler:
                         content = LLMManager._extract_message_content(msg)
                         chat_messages.append(ChatMessage(role=msg.get("role", "user"), content=content))
 
-                    full_response = ""
                     async for chunk in llm.stream_chat_complete(chat_messages):
-                        full_response += chunk
                         yield chunk
-
-                    # Update conversation history
-                    user_input = dispatcher._extract_user_message(task)
-                    dispatcher.conversation_manager.update_conversation_history(context_id, user_input, full_response)
                 else:
                     # Graceful fallback - complete response at once
                     response = await LLMManager.llm_direct_response(llm, messages)
                     yield response
-
-                    # Update conversation history
-                    user_input = dispatcher._extract_user_message(task)
-                    dispatcher.conversation_manager.update_conversation_history(context_id, user_input, response)
 
         except Exception as e:
             logger.error(f"Native streaming error: {e}", exc_info=True)
@@ -158,7 +139,7 @@ class StreamingHandler:
             dispatcher = get_function_dispatcher()
 
             # Get existing conversation history using the dispatcher's ConversationManager
-            conversation_history = dispatcher.conversation_manager.get_conversation_history(context_id)
+            conversation_history = await dispatcher.conversation_manager.get_conversation_history(context_id)
 
             # Convert conversation history to A2A Message format for task history
             a2a_history = []
@@ -294,7 +275,8 @@ class StreamingHandler:
                     user_input += part.get("text", "")
 
             if user_input and full_response:
-                dispatcher.conversation_manager.update_conversation_history(context_id, user_input, full_response)
+                logger.info("Updating conversation history", context_id=context_id)
+                await dispatcher.conversation_manager.update_conversation_history(context_id, user_input, full_response)
 
             # Final completion status
             completion_response = {

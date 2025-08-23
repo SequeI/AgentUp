@@ -196,14 +196,7 @@ class AgentUpExecutor(AgentExecutor):
             )
 
     def _extract_user_message(self, task: Task) -> str:
-        """Extract user message text from A2A task history.
-
-        Args:
-            task: A2A Task object
-
-        Returns:
-            User message text or empty string
-        """
+        """Extract user message text from A2A task history."""
         try:
             if not (hasattr(task, "history") and task.history):
                 return ""
@@ -211,11 +204,10 @@ class AgentUpExecutor(AgentExecutor):
             # Get the latest user message from history
             for message in reversed(task.history):
                 if message.role == "user" and message.parts:
-                    for part in message.parts:
-                        # A2A SDK uses Part(root=TextPart(...)) structure
-                        if hasattr(part, "root") and hasattr(part.root, "kind"):
-                            if part.root.kind == "text" and hasattr(part.root, "text"):
-                                return part.root.text
+                    # Use ConversationManager static helper for consistency
+                    from agent.state.conversation import ConversationManager
+
+                    return ConversationManager.extract_text_from_parts(message.parts)
             return ""
         except Exception as e:
             logger.error(f"Error extracting user message: {e}")
