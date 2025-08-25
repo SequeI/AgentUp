@@ -1,5 +1,5 @@
 import json
-import typing as Any
+from typing import Any
 from collections import OrderedDict
 
 import click
@@ -22,7 +22,7 @@ logger = structlog.get_logger(__name__)
 )
 @click.option("--agentup-cfg", is_flag=True, help="Output in agentup.yml format (same as --format agentup-cfg)")
 @click.option("--debug", is_flag=True, help="Show debug logging output")
-def list_plugins(plugin_name: str, verbose: bool, capabilities: bool, format: str, agentup_cfg: bool, debug: bool):
+def list_plugins(plugin_name: str | None, verbose: bool, capabilities: bool, format: str, agentup_cfg: bool, debug: bool):
     """List all available plugins and their capabilities."""
     # Handle --agentup-cfg flag (shortcut for --format agentup-cfg)
     if agentup_cfg:
@@ -66,6 +66,9 @@ def list_plugins(plugin_name: str, verbose: bool, capabilities: bool, format: st
 
             if capabilities and plugin_name:
                 plugin_info = next((p for p in all_available_plugins if p["name"] == plugin_name), None)
+                if not plugin_info:
+                    _print_no_plugins_message(plugin_name)
+                    return
 
                 plugin_data = _format_plugin_data(plugin_info)
                 plugin_data["capabilities"] = _format_capabilities(plugin_name, verbose, debug)
