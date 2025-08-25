@@ -1,6 +1,6 @@
 import json
-from typing import Any
 from collections import OrderedDict
+from typing import Any
 
 import click
 import structlog
@@ -22,7 +22,9 @@ logger = structlog.get_logger(__name__)
 )
 @click.option("--agentup-cfg", is_flag=True, help="Output in agentup.yml format (same as --format agentup-cfg)")
 @click.option("--debug", is_flag=True, help="Show debug logging output")
-def list_plugins(plugin_name: str | None, verbose: bool, capabilities: bool, format: str, agentup_cfg: bool, debug: bool):
+def list_plugins(
+    plugin_name: str | None, verbose: bool, capabilities: bool, format: str, agentup_cfg: bool, debug: bool
+):
     """List all available plugins and their capabilities."""
     # Handle --agentup-cfg flag (shortcut for --format agentup-cfg)
     if agentup_cfg:
