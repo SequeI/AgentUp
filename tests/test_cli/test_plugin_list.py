@@ -237,6 +237,7 @@ class TestPluginListCommand:
         result = runner.invoke(list_plugins, ["--format", "json", "-c", "non_existent_plugin"])
         assert result.exit_code == 0
         output = json.loads(result.output)
+        print(output)
         assert "plugins" in output
         assert len(output["plugins"]) == 0
 

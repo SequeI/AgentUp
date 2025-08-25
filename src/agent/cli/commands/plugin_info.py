@@ -66,13 +66,10 @@ def list_plugins(plugin_name: str | None, verbose: bool, capabilities: bool, for
 
             if capabilities and plugin_name:
                 plugin_info = next((p for p in all_available_plugins if p["name"] == plugin_name), None)
-                if not plugin_info:
-                    _print_no_plugins_message(plugin_name)
-                    return
-
-                plugin_data = _format_plugin_data(plugin_info)
-                plugin_data["capabilities"] = _format_capabilities(plugin_name, verbose, debug)
-                output["plugins"].append(plugin_data)
+                if plugin_info:
+                    plugin_data = _format_plugin_data(plugin_info)
+                    plugin_data["capabilities"] = _format_capabilities(plugin_name, verbose, debug)
+                    output["plugins"].append(plugin_data)
 
             else:
                 # Default: loop through all plugins
